@@ -1,0 +1,4 @@
+*.apk
+base/
+src/bin/
+src/obj/

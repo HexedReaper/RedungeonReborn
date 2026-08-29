@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{659B4ADF-F5CE-43FE-9A54-88F56670E2F9}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <LangVersion>14.0</LangVersion>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <AssemblyName>KnighterAndroid</AssemblyName>
+    <TargetFrameworkIdentifier>MonoAndroid</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Android">
+      <HintPath>base/assemblies/Mono.Android.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityAdsAndroid">
+      <HintPath>base/assemblies/UnityAdsAndroid.dll</HintPath>
+    </Reference>
+    <Reference Include="Plugin.InAppBilling.Abstractions">
+      <HintPath>base/assemblies/Plugin.InAppBilling.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>base/assemblies/System.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.GooglePlayServices.Ads.Lite">
+      <HintPath>base/assemblies/Xamarin.GooglePlayServices.Ads.Lite.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.GooglePlayServices.Analytics.Impl">
+      <HintPath>base/assemblies/Xamarin.GooglePlayServices.Analytics.Impl.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.GooglePlayServices.Games">
+      <HintPath>base/assemblies/Xamarin.GooglePlayServices.Games.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.GooglePlayServices.Base">
+      <HintPath>base/assemblies/Xamarin.GooglePlayServices.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>base/assemblies/System.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>base/assemblies/MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.GooglePlayServices.Basement">
+      <HintPath>base/assemblies/Xamarin.GooglePlayServices.Basement.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.Core.Utils">
+      <HintPath>base/assemblies/Xamarin.Android.Support.Core.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>base/assemblies/System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Plugin.CurrentActivity">
+      <HintPath>base/assemblies/Plugin.CurrentActivity.dll</HintPath>
+    </Reference>
+    <Reference Include="Plugin.InAppBilling">
+      <HintPath>base/assemblies/Plugin.InAppBilling.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.GooglePlayServices.Drive">
+      <HintPath>base/assemblies/Xamarin.GooglePlayServices.Drive.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Knighter/Achievement.cs" />
+    <Compile Include="Knighter/AchievementMeta.cs" />
+    <Compile Include="Knighter/Achievements.cs" />
+    <Compile Include="Knighter/AdMobProxy.cs" />
+    <Compile Include="Knighter/AdsConfig.cs" />
+    <Compile Include="Knighter/AdsManager.cs" />
+    <Compile Include="Knighter/Analytics.cs" />
+    <Compile Include="Knighter/AnalyticsCategory.cs" />
+    <Compile Include="Knighter/Artifacts/Artifact.cs" />
+    <Compile Include="Knighter/Artifacts/ArtifactManager.cs" />
+    <Compile Include="Knighter/AudioManager.cs" />
+    <Compile Include="Knighter/BetweenStatMission.cs" />
+    <Compile Include="Knighter/ButtonColor.cs" />
+    <Compile Include="Knighter/CharacterData.cs" />
+    <Compile Include="Knighter/Cloud.cs" />
+    <Compile Include="Knighter/Component.cs" />
+    <Compile Include="Knighter/ConfusionEffect.cs" />
+    <Compile Include="Knighter/Core.cs" />
+    <Compile Include="Knighter/CrossPromotion.cs" />
+    <Compile Include="Knighter/DarknessEffect.cs" />
+    <Compile Include="Knighter/Debug.cs" />
+    <Compile Include="Knighter/DeltaSyncData.cs" />
+    <Compile Include="Knighter/Entities/Abilities.cs" />
+    <Compile Include="Knighter/Entities/AbilityDesc.cs" />
+    <Compile Include="Knighter/Entities/AbilityKind.cs" />
+    <Compile Include="Knighter/Entities/BallType.cs" />
+    <Compile Include="Knighter/Entities/BarrelEntity.cs" />
+    <Compile Include="Knighter/Entities/BatEntity.cs" />
+    <Compile Include="Knighter/Entities/BlockerEntity.cs" />
+    <Compile Include="Knighter/Entities/BoltEntity.cs" />
+    <Compile Include="Knighter/Entities/BoxEntity.cs" />
+    <Compile Include="Knighter/Entities/BraggChar.cs" />
+    <Compile Include="Knighter/Entities/BraggsParrotEntity.cs" />
+    <Compile Include="Knighter/Entities/ButtonEntity.cs" />
+    <Compile Include="Knighter/Entities/CannonballEntity.cs" />
+    <Compile Include="Knighter/Entities/CannonEntity.cs" />
+    <Compile Include="Knighter/Entities/Character.cs" />
+    <Compile Include="Knighter/Entities/CharDescription.cs" />
+    <Compile Include="Knighter/Entities/CharLevel.cs" />
+    <Compile Include="Knighter/Entities/ChestContents.cs" />
+    <Compile Include="Knighter/Entities/ChestEntity.cs" />
+    <Compile Include="Knighter/Entities/ChestLotteryEntity.cs" />
+    <Compile Include="Knighter/Entities/ChunJieLanternEntity.cs" />
+    <Compile Include="Knighter/Entities/CreepChar.cs" />
+    <Compile Include="Knighter/Entities/CrossbowEntity.cs" />
+    <Compile Include="Knighter/Entities/DoorEntity.cs" />
+    <Compile Include="Knighter/Entities/EffectEntity.cs" />
+    <Compile Include="Knighter/Entities/Entity.cs" />
+    <Compile Include="Knighter/Entities/EntityManager.cs" />
+    <Compile Include="Knighter/Entities/FireballEntity.cs" />
+    <Compile Include="Knighter/Entities/FirewallEntity.cs" />
+    <Compile Include="Knighter/Entities/FloatingTextEntity.cs" />
+    <Compile Include="Knighter/Entities/FollowerEntity.cs" />
+    <Compile Include="Knighter/Entities/FollowerKind.cs" />
+    <Compile Include="Knighter/Entities/FollowerPadEntity.cs" />
+    <Compile Include="Knighter/Entities/FountainEntity.cs" />
+    <Compile Include="Knighter/Entities/FragmentEntity.cs" />
+    <Compile Include="Knighter/Entities/GhostEntity.cs" />
+    <Compile Include="Knighter/Entities/GolemChar.cs" />
+    <Compile Include="Knighter/Entities/GolemMissile.cs" />
+    <Compile Include="Knighter/Entities/GrillEntity.cs" />
+    <Compile Include="Knighter/Entities/IchitakaChar.cs" />
+    <Compile Include="Knighter/Entities/InjuryType.cs" />
+    <Compile Include="Knighter/Entities/IPushableEntity.cs" />
+    <Compile Include="Knighter/Entities/ItemEntity.cs" />
+    <Compile Include="Knighter/Entities/ItemRailEntity.cs" />
+    <Compile Include="Knighter/Entities/ItemType.cs" />
+    <Compile Include="Knighter/Entities/KnightChar.cs" />
+    <Compile Include="Knighter/Entities/MageChar.cs" />
+    <Compile Include="Knighter/Entities/MedusaChar.cs" />
+    <Compile Include="Knighter/Entities/NathanChar.cs" />
+    <Compile Include="Knighter/Entities/NathansCrosshairEntity.cs" />
+    <Compile Include="Knighter/Entities/NathansDroneEntity.cs" />
+    <Compile Include="Knighter/Entities/ObstacleEntity.cs" />
+    <Compile Include="Knighter/Entities/PanicBotChar.cs" />
+    <Compile Include="Knighter/Entities/ParrotCageEntity.cs" />
+    <Compile Include="Knighter/Entities/PathNode.cs" />
+    <Compile Include="Knighter/Entities/PetrifiedEntity.cs" />
+    <Compile Include="Knighter/Entities/PistonCoreEntity.cs" />
+    <Compile Include="Knighter/Entities/PistonEntity.cs" />
+    <Compile Include="Knighter/Entities/PlatformEntity.cs" />
+    <Compile Include="Knighter/Entities/PlayerEntity.cs" />
+    <Compile Include="Knighter/Entities/PortalEntity.cs" />
+    <Compile Include="Knighter/Entities/PotEntity.cs" />
+    <Compile Include="Knighter/Entities/ProjectileEntity.cs" />
+    <Compile Include="Knighter/Entities/PusherEntity.cs" />
+    <Compile Include="Knighter/Entities/RibChar.cs" />
+    <Compile Include="Knighter/Entities/RotobladeEntity.cs" />
+    <Compile Include="Knighter/Entities/SandboxChar.cs" />
+    <Compile Include="Knighter/Entities/SawEntity.cs" />
+    <Compile Include="Knighter/Entities/SawRailEntity.cs" />
+    <Compile Include="Knighter/Entities/SerpentEntity.cs" />
+    <Compile Include="Knighter/Entities/Skill.cs" />
+    <Compile Include="Knighter/Entities/SlimeEntity.cs" />
+    <Compile Include="Knighter/Entities/SoundEmitterEntity.cs" />
+    <Compile Include="Knighter/Entities/SpiderEntity.cs" />
+    <Compile Include="Knighter/Entities/SpikesEntity.cs" />
+    <Compile Include="Knighter/Entities/StatueEntity.cs" />
+    <Compile Include="Knighter/Entities/TeleportEntity.cs" />
+    <Compile Include="Knighter/Entities/TextEntity.cs" />
+    <Compile Include="Knighter/Entities/TorchEntity.cs" />
+    <Compile Include="Knighter/Entities/VampireChar.cs" />
+    <Compile Include="Knighter/Entities/VesnaBeamEntity.cs" />
+    <Compile Include="Knighter/Entities/VesnaChar.cs" />
+    <Compile Include="Knighter/Entities/WallEntity.cs" />
+    <Compile Include="Knighter/Entities/WebEntity.cs" />
+    <Compile Include="Knighter/Entities/WispEntity.cs" />
+    <Compile Include="Knighter/Entities/WispType.cs" />
+    <Compile Include="Knighter/Entities/XmasTreeEntity.cs" />
+    <Compile Include="Knighter/Entities/ZappedEffectEntity.cs" />
+    <Compile Include="Knighter/Entities/ZapperEntity.cs" />
+    <Compile Include="Knighter/Game1.cs" />
+    <Compile Include="Knighter/GameOverAction.cs" />
+    <Compile Include="Knighter/GameOverActionType.cs" />
+    <Compile Include="Knighter/Gameplay/Camera.cs" />
+    <Compile Include="Knighter/Gameplay/Direction.cs" />
+    <Compile Include="Knighter/Gameplay/ElementType.cs" />
+    <Compile Include="Knighter/Gameplay/FloatBox.cs" />
+    <Compile Include="Knighter/Gameplay/HandleBox.cs" />
+    <Compile Include="Knighter/Gameplay/LevelGenerator.cs" />
+    <Compile Include="Knighter/Gameplay/LevelModule.cs" />
+    <Compile Include="Knighter/Gameplay/LevelModules.cs" />
+    <Compile Include="Knighter/Gameplay/LevelModuleType.cs" />
+    <Compile Include="Knighter/Gameplay/LevelObjectKind.cs" />
+    <Compile Include="Knighter/Gameplay/ModuleGroup.cs" />
+    <Compile Include="Knighter/Gameplay/PlayerControlScheme.cs" />
+    <Compile Include="Knighter/Gameplay/PlayerControlSchemeDPad.cs" />
+    <Compile Include="Knighter/Gameplay/PlayerControlSchemeSwipe.cs" />
+    <Compile Include="Knighter/Gameplay/PlayerControlSchemeTouchMap.cs" />
+    <Compile Include="Knighter/Gameplay/StateMachine.cs" />
+    <Compile Include="Knighter/Gameplay/TileDesc.cs" />
+    <Compile Include="Knighter/Gameplay/TileType.cs" />
+    <Compile Include="Knighter/Gameplay/Tween.cs" />
+    <Compile Include="Knighter/Gameplay/TweenBox.cs" />
+    <Compile Include="Knighter/Graphics/Alignment.cs" />
+    <Compile Include="Knighter/Graphics/Alignment2D.cs" />
+    <Compile Include="Knighter/Graphics/Animation.cs" />
+    <Compile Include="Knighter/Graphics/Font.cs" />
+    <Compile Include="Knighter/Graphics/Light.cs" />
+    <Compile Include="Knighter/Graphics/LightManager.cs" />
+    <Compile Include="Knighter/Graphics/Particle.cs" />
+    <Compile Include="Knighter/Graphics/ParticleEmitter.cs" />
+    <Compile Include="Knighter/Graphics/ParticleManager.cs" />
+    <Compile Include="Knighter/Graphics/Renderer.cs" />
+    <Compile Include="Knighter/Graphics/RenderTargets.cs" />
+    <Compile Include="Knighter/Graphics/SignMeta.cs" />
+    <Compile Include="Knighter/Graphics/SignRecognizer.cs" />
+    <Compile Include="Knighter/Graphics/SignRotation.cs" />
+    <Compile Include="Knighter/Graphics/Sprite.cs" />
+    <Compile Include="Knighter/Graphics/SpriteFlip.cs" />
+    <Compile Include="Knighter/Graphics/SpriteFont.cs" />
+    <Compile Include="Knighter/Graphics/SpriteFonts.cs" />
+    <Compile Include="Knighter/Graphics/SpriteGlyph.cs" />
+    <Compile Include="Knighter/Graphics/SpriteManager.cs" />
+    <Compile Include="Knighter/Graphics/SpriteName.cs" />
+    <Compile Include="Knighter/Graphics/SpriteOrigin.cs" />
+    <Compile Include="Knighter/Graphics/TextDecoration.cs" />
+    <Compile Include="Knighter/Graphics/TextProfile.cs" />
+    <Compile Include="Knighter/Helpers/BagOf.cs" />
+    <Compile Include="Knighter/Helpers/BoolBox.cs" />
+    <Compile Include="Knighter/Helpers/DateTimeHelper.cs" />
+    <Compile Include="Knighter/Helpers/Extensions.cs" />
+    <Compile Include="Knighter/Helpers/FrameCounter.cs" />
+    <Compile Include="Knighter/Helpers/JsonArray.cs" />
+    <Compile Include="Knighter/Helpers/JsonBase.cs" />
+    <Compile Include="Knighter/Helpers/JsonBoolean.cs" />
+    <Compile Include="Knighter/Helpers/JsonField.cs" />
+    <Compile Include="Knighter/Helpers/JsonNull.cs" />
+    <Compile Include="Knighter/Helpers/JsonNumber.cs" />
+    <Compile Include="Knighter/Helpers/JsonObject.cs" />
+    <Compile Include="Knighter/Helpers/JsonReader.cs" />
+    <Compile Include="Knighter/Helpers/JsonText.cs" />
+    <Compile Include="Knighter/Helpers/ObjectPool.cs" />
+    <Compile Include="Knighter/Helpers/Pair.cs" />
+    <Compile Include="Knighter/Helpers/PreserveAttribute.cs" />
+    <Compile Include="Knighter/Helpers/RectangleF.cs" />
+    <Compile Include="Knighter/Helpers/SciHelper.cs" />
+    <Compile Include="Knighter/Helpers/Shuffler.cs" />
+    <Compile Include="Knighter/Holiday.cs" />
+    <Compile Include="Knighter/IAdProxy.cs" />
+    <Compile Include="Knighter/IAnalytics.cs" />
+    <Compile Include="Knighter/Iap.cs" />
+    <Compile Include="Knighter/IceEffect.cs" />
+    <Compile Include="Knighter/IScores.cs" />
+    <Compile Include="Knighter/IStorage.cs" />
+    <Compile Include="Knighter/IStore.cs" />
+    <Compile Include="Knighter/ISystemCalls.cs" />
+    <Compile Include="Knighter/Localization/Language.cs" />
+    <Compile Include="Knighter/Localization/Locale.cs" />
+    <Compile Include="Knighter/Localization/LocaleManager.cs" />
+    <Compile Include="Knighter/Localization/SId.cs" />
+    <Compile Include="Knighter/Messages/ButtonTriggerMessage.cs" />
+    <Compile Include="Knighter/Messages/CoreEvent.cs" />
+    <Compile Include="Knighter/Messages/CoreEventMessage.cs" />
+    <Compile Include="Knighter/Messages/GameCenterEvent.cs" />
+    <Compile Include="Knighter/Messages/GameCenterMessage.cs" />
+    <Compile Include="Knighter/Messages/Message.cs" />
+    <Compile Include="Knighter/Messages/MessageManager.cs" />
+    <Compile Include="Knighter/Messages/MessageType.cs" />
+    <Compile Include="Knighter/Messages/PlaySoundMessage.cs" />
+    <Compile Include="Knighter/Messages/PlayWorldSoundMessage.cs" />
+    <Compile Include="Knighter/Messages/PopStateMessage.cs" />
+    <Compile Include="Knighter/Messages/PushStateMessage.cs" />
+    <Compile Include="Knighter/Messages/ReceivedProductsMessage.cs" />
+    <Compile Include="Knighter/Messages/RemoveEntityMessage.cs" />
+    <Compile Include="Knighter/Messages/ScreenshotMessage.cs" />
+    <Compile Include="Knighter/Messages/SpawnEntityMessage.cs" />
+    <Compile Include="Knighter/Messages/WhenToTakeScreenshot.cs" />
+    <Compile Include="Knighter/Mission.cs" />
+    <Compile Include="Knighter/MissionAction.cs" />
+    <Compile Include="Knighter/MissionManager.cs" />
+    <Compile Include="Knighter/MissionMeta.cs" />
+    <Compile Include="Knighter/MusicPlayer.cs" />
+    <Compile Include="Knighter/MyAdListener.cs" />
+    <Compile Include="Knighter/OptionsData.cs" />
+    <Compile Include="Knighter/PoisonEffect.cs" />
+    <Compile Include="Knighter/PostEffectManager.cs" />
+    <Compile Include="Knighter/PostEffectType.cs" />
+    <Compile Include="Knighter/ProfileData.cs" />
+    <Compile Include="Knighter/RectSector.cs" />
+    <Compile Include="Knighter/Scores.cs" />
+    <Compile Include="Knighter/Screenshot.cs" />
+    <Compile Include="Knighter/Settings.cs" />
+    <Compile Include="Knighter/Shader.cs" />
+    <Compile Include="Knighter/Shaders/DefaultShader.cs" />
+    <Compile Include="Knighter/Shaders/OverlayShader.cs" />
+    <Compile Include="Knighter/Shaders/PostEffectShader.cs" />
+    <Compile Include="Knighter/Sharing.cs" />
+    <Compile Include="Knighter/SoundName.cs" />
+    <Compile Include="Knighter/SpellEffect.cs" />
+    <Compile Include="Knighter/SpellType.cs" />
+    <Compile Include="Knighter/Stat.cs" />
+    <Compile Include="Knighter/States/AbilitiesHud.cs" />
+    <Compile Include="Knighter/States/ArtifactsState.cs" />
+    <Compile Include="Knighter/States/CloudDialogState.cs" />
+    <Compile Include="Knighter/States/ContinueState.cs" />
+    <Compile Include="Knighter/States/ControlsSelectorState.cs" />
+    <Compile Include="Knighter/States/CreditsState.cs" />
+    <Compile Include="Knighter/States/DodgeState.cs" />
+    <Compile Include="Knighter/States/FactsState.cs" />
+    <Compile Include="Knighter/States/GameHud.cs" />
+    <Compile Include="Knighter/States/GetCoinsState.cs" />
+    <Compile Include="Knighter/States/LanguageSelectorState.cs" />
+    <Compile Include="Knighter/States/LogoState.cs" />
+    <Compile Include="Knighter/States/MenuState.cs" />
+    <Compile Include="Knighter/States/NewCharState.cs" />
+    <Compile Include="Knighter/States/NitromeState.cs" />
+    <Compile Include="Knighter/States/OptionsState.cs" />
+    <Compile Include="Knighter/States/PauseState.cs" />
+    <Compile Include="Knighter/States/PlayState.cs" />
+    <Compile Include="Knighter/States/PopupState.cs" />
+    <Compile Include="Knighter/States/PPanicState.cs" />
+    <Compile Include="Knighter/States/PromoState.cs" />
+    <Compile Include="Knighter/States/ScreenshotState.cs" />
+    <Compile Include="Knighter/States/SessionData.cs" />
+    <Compile Include="Knighter/States/ShopState.cs" />
+    <Compile Include="Knighter/States/SignCard.cs" />
+    <Compile Include="Knighter/States/State.cs" />
+    <Compile Include="Knighter/States/SubMenuState.cs" />
+    <Compile Include="Knighter/States/UpgradeState.cs" />
+    <Compile Include="Knighter/States/WaitState.cs" />
+    <Compile Include="Knighter/StatMission.cs" />
+    <Compile Include="Knighter/Storage.cs" />
+    <Compile Include="Knighter/Store.cs" />
+    <Compile Include="Knighter/SystemCalls.cs" />
+    <Compile Include="Knighter/Tiles/DungeonTile.cs" />
+    <Compile Include="Knighter/Tiles/Tile.cs" />
+    <Compile Include="Knighter/Tiles/TileMap.cs" />
+    <Compile Include="Knighter/Timer.cs" />
+    <Compile Include="Knighter/TimerManager.cs" />
+    <Compile Include="Knighter/TouchMenu.cs" />
+    <Compile Include="Knighter/UnityAdsListener.cs" />
+    <Compile Include="Knighter/UnityAdsProxy.cs" />
+    <Compile Include="Knighter/WatchAddStatus.cs" />
+    <Compile Include="KnighterAndroid/GooglePlayHelper.cs" />
+    <Compile Include="KnighterAndroid/MainActivity.cs" />
+    <Compile Include="KnighterAndroid/Resource.cs" />
+    <Compile Include="KnighterAndroid/SplashActivity.cs" />
+    <Compile Include="Properties/AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
