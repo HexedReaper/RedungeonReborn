@@ -104,7 +104,7 @@ public class VesnaChar : PlayerEntity
 			{
 				base.playState.Camera.ZoomBox.Set("sudden sunrise", 0.8f, inWorld: true, 0.07f, 0.02f);
 			}
-			_ = LightDuration;
+			var _discard = LightDuration;
 			waitingForDarkness = base.playState.Terminator >= base.WorldPosition.Y + 40f && !waitIsOver;
 			LightDuration--;
 			if (LightDuration > 20)

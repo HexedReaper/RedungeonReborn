@@ -77,8 +77,8 @@ public class PlayerControlSchemeTouchMap : PlayerControlScheme
 		if (!base.core.TakingScreenshot)
 		{
 			DrawSkillButton(touchMenu[Button.Action].Rectangle.Center, touchMenu[Button.Action].IsDown);
-			_ = base.core.TicksInState;
-			_ = 120;
+			var _discard = base.core.TicksInState;
+            _discard = 120;
 			if (swiping)
 			{
 				base.core.Renderer["fg"].DrawDotS(origin, Color.Yellow * 0.5f, 8f);

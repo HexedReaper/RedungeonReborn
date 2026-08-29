@@ -139,7 +139,7 @@ public class AbilitiesHud : Component
 			{
 				dropToken = true;
 			}
-			_ = CurrentLevel;
+			var _discard = CurrentLevel;
 			CurrentLevel = newLevel;
 			Hidden = CurrentLevel == 0;
 		}

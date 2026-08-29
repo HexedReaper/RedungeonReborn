@@ -722,7 +722,7 @@ public class FactsState : State
 			base.core.Renderer["fg", l, false].DrawSpriteS(_(SpriteName.facts_achievement_bg), new Vector2(s.Left + 7f, s.Top + py - 0.5f), achievementMeta.ColorBG);
 			base.core.Renderer["fg", l, false].DrawSpriteS(_(SpriteName.facts_achievement_glow), new Vector2(s.Left + 6f, s.Top + py - 1f), achievementMeta.ColorFG);
 			base.core.Renderer["fg", l, false].DrawSpriteS(_(SpriteName.facts_achievement_frame), new Vector2(s.Left + 6f, s.Top + py - 1f), achievementMeta.ColorFrame);
-			_ = 3f * (py - s.Height * 0.5f) / (s.Height * 0.5f);
+			var _discard = 3f * (py - s.Height * 0.5f) / (s.Height * 0.5f);
 			Vector2 vector = new Vector2(achievementMeta.IconDx + Component._sin((float)(base.ticks + 50 * (int)a) * 0.035f), achievementMeta.IconDy + Component._cos((float)(base.ticks + 340 * (int)a) * 0.035f));
 			base.core.Renderer["fg", l, false].DrawSpriteS(_(achievementMeta.Icon), new Vector2(s.Left + 6f + 20f, s.Top + py + 20f) + vector * 0.2f, null, rotation: Component._sin((float)(base.ticks + 50 * (int)a) * 0.05f) * 0.1f, scale: Vector2.One * (1.1f + Component._cos((float)(base.ticks + 50 * (int)a) * 0.02f) * 0.1f), flip: SpriteFlip.None, origin: SpriteOrigin.Center);
 			Renderer renderer = base.core.Renderer["fg", l, false];

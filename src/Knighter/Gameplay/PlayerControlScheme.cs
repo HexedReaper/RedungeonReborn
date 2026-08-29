@@ -138,7 +138,7 @@ public abstract class PlayerControlScheme : Component
 	protected void TapSkillButton()
 	{
 		Skill activeSkill = playState.Hud.AbilitiesHud.ActiveSkill;
-		_ = Abilities.SkillDesc[activeSkill];
+		var _discard = Abilities.SkillDesc[activeSkill];
 		if (playState.Hud.AbilitiesHud.HasActiveSkill && playState.Player.Abilities.SkillCharge[activeSkill].Equals(1f))
 		{
 			playState.Player.TryTriggerAbility();

@@ -21,8 +21,10 @@ public class WebEntity : Entity
 
 	private SpriteFlip flip;
 
-	private Stack<Vector2> pattern;
+    private Stack<Vector2> pattern;
 
+    private Vector2[] initialPattern;
+	
 	private PlayerEntity capturedPlayer;
 
 	private int arrowTimer;
@@ -106,11 +108,12 @@ public class WebEntity : Entity
 			Difficulty = ((distance < 80) ? 2 : 3);
 		}
 		pattern = new Stack<Vector2>();
-		for (int i = 0; i < Difficulty; i++)
-		{
-			int num = Component._rnd(0, 3);
-			pattern.Push(new Vector2((num > 0) ? (num - 2) : 0, (num < 3) ? (num - 1) : 0));
-		}
+        for (int i = 0; i < Difficulty; i++)
+        {
+            int num = Component._rnd(0, 3);
+            pattern.Push(new Vector2((num > 0) ? (num - 2) : 0, (num < 3) ? (num - 1) : 0));
+        }
+        initialPattern = pattern.ToArray();
 	}
 
 	public override void Update()
@@ -233,19 +236,35 @@ public class WebEntity : Entity
 	}
 
 	public void Pull(Vector2 direction)
-	{
-		if (pullTimer < 0)
-		{
-			Vector2 v = pattern.Peek();
-			SendMessage(new PlayWorldSoundMessage(bagOfSounds.DrawDifferent(), base.WorldCenter));
-			if (v.DirectionId() == direction.DirectionId())
-			{
-				pullTimer = 0;
-				return;
-			}
-			errorTimer = 0;
-			errorVector = direction;
-			flawless = false;
-		}
-	}
+    {
+        if (pullTimer < 0)
+        {
+            Vector2 v = pattern.Peek();
+            SendMessage(new PlayWorldSoundMessage(bagOfSounds.DrawDifferent(), base.WorldCenter));
+            if (v.DirectionId() == direction.DirectionId())
+            {
+                pullTimer = 0;
+                return;
+            }
+            errorTimer = 0;
+            errorVector = direction;
+            flawless = false;
+            if (base.core.OptionsData.HardcoreWebs)
+            {
+                RestartPattern();
+            }
+        }
+    }
+
+    private void RestartPattern()
+    {
+        pattern.Clear();
+        for (int num = initialPattern.Length - 1; num >= 0; num--)
+        {
+            pattern.Push(initialPattern[num]);
+        }
+        arrowTimer = 0;
+    }
+
+
 }

@@ -73,7 +73,7 @@ public class CreditsState : State
 		int width = _(SpriteName.facts_scroll_edge).Width;
 		scroll = new RectangleF((float)(base.core.Renderer.ScreenWidth - width) * 0.5f, 28 + base.topSafeArea, width, base.core.Renderer.ScreenHeight - 28 - base.topSafeArea - 61);
 		int num = base.core.Renderer.ScreenHeight - 40;
-		_ = (base.core.Renderer.ScreenWidth - 20) / 4;
+		var _discard = (base.core.Renderer.ScreenWidth - 20) / 4;
 		touchMenu.SetupButton(Button.Back, new RectangleF(scroll.Center.X - 35f, num, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
 		SendMessage(new PlaySoundMessage(SoundName.trans_2));
 		pageH = 50f;
@@ -205,7 +205,7 @@ public class CreditsState : State
 						buttonPressed = false;
 						if (swipeTypeDetermined)
 						{
-							_ = swipeIsVertical;
+							var _discard = swipeIsVertical;
 						}
 					}
 					break;

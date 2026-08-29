@@ -10,7 +10,6 @@ using Plugin.InAppBilling;
 
 namespace KnighterAndroid;
 
-[Activity(Label = "@string/app_name", Icon = "@mipmap/icon", Theme = "@style/Theme.Main", AlwaysRetainTaskState = true, LaunchMode = LaunchMode.SingleTask, ScreenOrientation = ScreenOrientation.Portrait, ConfigurationChanges = (ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden | ConfigChanges.Orientation | ConfigChanges.ScreenLayout | ConfigChanges.ScreenSize))]
 public class MainActivity : AndroidGameActivity
 {
 	private const string PublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApkL4oi0mANvYlhnBdPnOtBmuGwPnvlsK+QCn3pYQF9bNqoptwvE0BVbkZpWe/Q0nXcEw+rmps40iiulUa1akRTTHmQ89m7M/jzwH2LMoJqvPuWDSyYOhbOUxoNm3jQGs8WsLB9HGSyjt7IGWMRFAJXmFAtWJXbOlwEK2nDWEWircbBpYZvp95R0oH1vkZlqGb+42X/4YcpYhSb8HfeMvVBGIqpAZSKaxxeukEGQ4uFYV6CTLWD35j13wrcR2y86hLg6wPGNzuZ9pzzGmV2DXZ7Gs6/SJ6bQrjk2EGeiM/+1hwFLZU3Fa2ucNGbkJl5tmsOJWH/0R/FA/ggD31fTk3wIDAQAB";

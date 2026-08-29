@@ -190,7 +190,7 @@ public class ObstacleEntity : Entity
 			{
 				base.core.Renderer[base.Z].DrawSpriteW(fireGlow, base.WorldCenter + firePos + new Vector2((float)Math.Sin((float)base.worldTicks / 4f) * 0.5f, 3f + (float)Math.Sin((float)base.worldTicks / 8f) * 0.3f), Color.SkyBlue * (0.75f + 0.25f * (float)Math.Sin((float)base.worldTicks / 5f)), Vector2.One * fireScale, 0f, SpriteFlip.None, SpriteOrigin.Center);
 				base.core.Renderer[base.Z].DrawSpriteW(fire.GetCurrentFrame(), base.WorldCenter + firePos, null, Vector2.One * fireScale, 0f, SpriteFlip.None, SpriteOrigin.Center);
-				_ = fireScale;
+				var _discard = fireScale;
 			}
 		}
 		base.Draw();

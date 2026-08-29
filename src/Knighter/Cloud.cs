@@ -83,7 +83,7 @@ public class Cloud : Component
 				{
 					string conflictId = result.ConflictId;
 					ISnapshot snapshot = result.Snapshot;
-					_ = result.ConflictingSnapshot;
+					var _discard = result.ConflictingSnapshot;
 					result = GamesClass.Snapshots.ResolveConflict(client, conflictId, snapshot).AsAsync<ISnapshotsOpenSnapshotResult>().Result;
 					break;
 				}

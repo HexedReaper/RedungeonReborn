@@ -237,7 +237,7 @@ public class ZapperEntity : Entity
 			FindZapper(0, 1);
 			text += "d";
 		}
-		_ = zapping;
+		var _discard = zapping;
 		zapping = targets.Count > 0 || incoming;
 		incoming = false;
 		if (!IsBroken && lastSet != text)

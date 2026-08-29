@@ -666,8 +666,8 @@ public class PlayState : State
 			p.Aux.X = ((num >= 15) ? ((num < 15) ? 1 : 2) : 0);
 			p.Aux.Y = Component._rnd(120, 240);
 			float num2 = 60f + p.Aux.X * 15f;
-			_ = smoothPlayerPos;
-			_ = Terminator;
+			var _discard = smoothPlayerPos;
+            var _discard2 = Terminator;
 			p.Offset = new Vector2(Component._rnd(0f - num2, num2), (num2 > 0f) ? (-5f + Component._rnd(p.Aux.X * 10f, 20f + p.Aux.X * 25f)) : (-5f + Component._rnd(-20f + p.Aux.X * 25f, 20f + p.Aux.X * 25f)));
 			p.Position = p.Offset;
 		}).OnUpdate(delegate(Particle p)

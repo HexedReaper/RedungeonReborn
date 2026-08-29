@@ -438,7 +438,7 @@ public class MedusaChar : PlayerEntity
 				.OnDraw(delegate(Particle p)
 				{
 					float num = Component._m((float)p.Age / 30f, 0.5f) + 0.5f;
-					_ = (float)p.Age / 90f;
+					var _discard = (float)p.Age / 90f;
 					base.core.Renderer["fg", -5, false].DrawSpriteW(_("medusa_snake_" + ((int)((float)p.Age * 0.2f + p.Aux.Y) % 4 + 1)), p.Position, null, rotation: 0f - (float)Math.Atan2(p.Velocity.X, p.Velocity.Y) + (float)Math.PI, scale: Vector2.One * num, flip: SpriteFlip.None, origin: SpriteOrigin.Center);
 				})
 				.Burst(15);

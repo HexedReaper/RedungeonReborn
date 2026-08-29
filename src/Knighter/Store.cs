@@ -103,7 +103,7 @@ public class Store : Component, IStore
 		IInAppBilling billing = CrossInAppBilling.Current;
 		try
 		{
-			_ = 1;
+			var _discard = 1;
 			try
 			{
 				if (await billing.ConnectAsync())
@@ -130,7 +130,7 @@ public class Store : Component, IStore
 		IInAppBilling billing = CrossInAppBilling.Current;
 		try
 		{
-			_ = 1;
+			var _discard = 1;
 			try
 			{
 				if (await billing.ConnectAsync())
@@ -167,7 +167,7 @@ public class Store : Component, IStore
 		IInAppBilling billing = CrossInAppBilling.Current;
 		try
 		{
-			_ = 2;
+			var _discard = 2;
 			try
 			{
 				if (!(await billing.ConnectAsync()))

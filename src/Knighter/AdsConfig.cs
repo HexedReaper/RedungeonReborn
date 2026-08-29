@@ -54,7 +54,7 @@ public class AdsConfig : Component
 		if (Downloaded)
 		{
 			Parsed = ParseXmlString(xmlString);
-			_ = Parsed;
+			var _discard = Parsed;
 		}
 	}
 

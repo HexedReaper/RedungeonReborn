@@ -81,7 +81,7 @@ public class DoorEntity : Entity
 
 	public override void CollideWith(Entity other)
 	{
-		_ = other is PlayerEntity;
+		var _discard = other is PlayerEntity;
 		base.CollideWith(other);
 	}
 }

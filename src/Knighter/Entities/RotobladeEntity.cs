@@ -287,7 +287,7 @@ public class RotobladeEntity : Entity
 			{
 				sprite = swordSprite0;
 			}
-			_ = blurAngle.HasValue;
+			var _discard = blurAngle.HasValue;
 			base.core.Renderer[base.Z].DrawSpriteW(sprite, center.Shift(0f, -5f), null, null, angle, SpriteFlip.None, SpriteOrigin.CenterLeft);
 			base.core.Renderer["bg", 2, false].DrawSpriteW(sprite, center.Shift(0f, 0f), Color.Black * 0.2f, null, angle, SpriteFlip.None, SpriteOrigin.CenterLeft);
 		}

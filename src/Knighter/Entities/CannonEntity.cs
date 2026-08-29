@@ -352,7 +352,7 @@ public class CannonEntity : Entity
 		{
 			num -= 2;
 		}
-		_ = baseSprites[num];
+		var _discard = baseSprites[num];
 		if (!hasCharge)
 		{
 			base.core.Renderer[base.Z].DrawSpriteW(_(SpriteName.panicbot_charge_icon), base.WorldCenter.Shift(0f, -22f + 2f * Component._sin((float)base.worldTicks * 0.1f)), Color.Red * (0.9f - Component._rnd(0f, 0.3f)), rotation: 0.3f + 0.1f * Component._cos((float)base.worldTicks * 0.1f), scale: Vector2.One * (0.9f + 0.1f * Component._sin((float)base.worldTicks * 0.1f)), flip: SpriteFlip.None, origin: SpriteOrigin.Center);

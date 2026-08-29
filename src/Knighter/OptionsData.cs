@@ -17,6 +17,7 @@ public class OptionsData : Component
 	public bool LeftHandedMode;
 
 	public bool SeeThroughMode;
+	public bool HardcoreWebs;
 
 	public OptionsData()
 	{
@@ -28,6 +29,7 @@ public class OptionsData : Component
 		TapToStep = true;
 		LeftHandedMode = false;
 		SeeThroughMode = false;
+		HardcoreWebs = false;
 	}
 
 	public void LoadFromStorage()
@@ -40,6 +42,7 @@ public class OptionsData : Component
 		base.core.Storage.TryGetBool("tap-to-step", ref TapToStep);
 		base.core.Storage.TryGetBool("left-handed", ref LeftHandedMode);
 		base.core.Storage.TryGetBool("see-through", ref SeeThroughMode);
+        base.core.Storage.TryGetBool("hardcore-webs", ref HardcoreWebs);
 	}
 
 	public void SaveIntoStorage()
@@ -51,7 +54,8 @@ public class OptionsData : Component
 		base.core.Storage.SetBool("hold-to-run", HoldToRun);
 		base.core.Storage.SetBool("tap-to-step", TapToStep);
 		base.core.Storage.SetBool("left-handed", LeftHandedMode);
-		base.core.Storage.SetBool("see-through", SeeThroughMode);
-		base.core.Storage.Save();
+        base.core.Storage.SetBool("see-through", SeeThroughMode);
+        base.core.Storage.SetBool("hardcore-webs", HardcoreWebs);
+        base.core.Storage.Save();
 	}
 }
