@@ -227,9 +227,10 @@ public class BraggChar : PlayerEntity
 
 	private void DrawCustomHUD()
     {
-        if (base.core.OptionsData.BraggAmmo && base.core.GetCurrentState() is PlayState)
+        if (base.core.OptionsData.BraggAmmo && base.core.GetCurrentState() is PlayState && base.playState.PlayerControl != null)
         {
-            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo, new Vector2(base.core.Renderer.ScreenWidth - 30f, base.core.Renderer.ScreenHeight - 106f), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
+            Vector2 center = base.playState.PlayerControl.SkillButtonCenter();
+            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
         }
     }
 
