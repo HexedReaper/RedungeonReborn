@@ -130,7 +130,7 @@ public class LevelGenerator : Component
 		default:
 		{
 			List<LevelModule> list = base.core.LevelModules[LevelModuleType.Starting].FindAll((LevelModule m) => m.Group == 1);
-			FirstModule = list[Component._rnd(0, list.Count - 1)];
+			FirstModule = list[DailyRun.Next(2, 0, 0, list.Count - 1)];
 			break;
 		}
 		}
@@ -158,10 +158,10 @@ public class LevelGenerator : Component
 	}
 
 	private void SetNextMilestone()
-	{
-		currentMilestone++;
-		nextMilestoneY = currentY - Component._rnd(75, 350);
-	}
+    {
+        currentMilestone++;
+        nextMilestoneY = currentY - DailyRun.Next(1, currentMilestone, 75, 350);
+    }
 
 	public override void Unload()
 	{
@@ -182,8 +182,12 @@ public class LevelGenerator : Component
 	}
 
 	private int GetModuleDifficulty()
-	{
-		int result = 1;
+    {
+        if (DailyRun.Active)
+        {
+            return DailyDifficulty();
+        }
+        int result = 1;
 		if (SciHelper.ChanceRoll(0.35f))
 		{
 			return result;
@@ -223,6 +227,45 @@ public class LevelGenerator : Component
 		return result;
 	}
 
+	private int DailyDifficulty()
+    {
+        int idx = generatedModules.Count;
+        int result = 1;
+        if (!DailyRun.Chance(4, idx * 10, 0.35f))
+        {
+            float num = Component._M(Component._m((float)(distance + 50) / 200f, 1f), 0f);
+            if (DailyRun.Chance(4, idx * 10 + 1, num * (num * num)))
+            {
+                result = 2;
+            }
+            if (!DailyRun.Chance(4, idx * 10 + 2, 0.35f))
+            {
+                float num2 = Component._M(Component._m((float)(distance + 50) / 300f, 1f), 0f);
+                if (DailyRun.Chance(4, idx * 10 + 3, num2 * (num2 * num2)))
+                {
+                    result = 3;
+                }
+                if (!DailyRun.Chance(4, idx * 10 + 4, 0.3f))
+                {
+                    float num3 = Component._M(Component._m((float)(distance - 30) / 300f, 1f), 0f);
+                    if (DailyRun.Chance(4, idx * 10 + 5, num3 * (num3 * num3)))
+                    {
+                        result = 4;
+                    }
+                    if (!DailyRun.Chance(4, idx * 10 + 6, 0.8f))
+                    {
+                        float num4 = Component._M(Component._m((float)(distance - 100) / 300f, 1f), 0f);
+                        if (DailyRun.Chance(4, idx * 10 + 7, num4 * (num4 * num4)))
+                        {
+                            result = 5;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
 	private void ProgressLevel()
 	{
 		if (distance > lastDistance)
@@ -240,16 +283,16 @@ public class LevelGenerator : Component
 		{
 			ProgressLevel();
 			int difficulty = GetModuleDifficulty();
-			flag2 = SpawnModule(BagOfModules.Draw((LevelModule m) => m.Group == difficulty), LevelModuleType.Corridor);
+			flag2 = SpawnModule(DrawCorridorModule((LevelModule m) => m.Group == difficulty), LevelModuleType.Corridor);
 			if (currentY <= nextMilestoneY)
 			{
-				SpawnModule(BagOfModules.Draw((LevelModule m) => m.Group == 30), LevelModuleType.Corridor);
+				SpawnModule(DrawCorridorModule((LevelModule m) => m.Group == 30), LevelModuleType.Corridor);
 				SetNextMilestone();
 			}
 			if (base.core.ProfileData.Character == Character.PanicBot && generatedModules.Count % 10 == 0)
-			{
-				SpawnModule(BagOfModules.Draw((LevelModule m) => m.Group == 26), LevelModuleType.Corridor);
-			}
+            {
+                SpawnModule(DrawCorridorModule((LevelModule m) => m.Group == 26), LevelModuleType.Corridor);
+            }
 			if (base.core.ProfileData.Character == Character.Bragg)
 			{
 				if ((float)skullKeysSpawned >= (float)nextSkullLock * ((skullChestsLevel == 1) ? 1f : ((skullChestsLevel == 2) ? 0.75f : 0.5f)))
@@ -258,7 +301,7 @@ public class LevelGenerator : Component
 					skullKeysSpawned = 0;
 					skullChestsSpawned++;
 					skullChestsLevel = ((skullKeysSpawned > 5) ? 3 : ((skullChestsSpawned <= 2) ? 1 : 2));
-					SpawnModule(BagOfModules.Draw((LevelModule m) => m.Group == difficulty && m.HasElement(ElementType.Chest)), LevelModuleType.Corridor);
+					SpawnModule(DrawCorridorModule((LevelModule m) => m.Group == difficulty && m.HasElement(ElementType.Chest)), LevelModuleType.Corridor);
 				}
 				if (base.core.ProfileData.CurrentCharLevel > 1)
 				{
@@ -295,6 +338,16 @@ public class LevelGenerator : Component
 		}
 	}
 
+	private LevelModule DrawCorridorModule(Func<LevelModule, bool> condition)
+    {
+        List<LevelModule> list = BagOfModules.Matching(condition);
+        if (list.Count == 0)
+        {
+            return null;
+        }
+        return list[DailyRun.Next(3, generatedModules.Count, 0, list.Count - 1)];
+    }
+
 	private void ReleaseGeneratedModule(int index)
 	{
 		GeneratedModule generatedModule = generatedModules[index];
@@ -316,7 +369,7 @@ public class LevelGenerator : Component
 		{
 			return false;
 		}
-		bool flag = forceFlipped ?? SciHelper.ChanceRoll();
+		bool flag = forceFlipped ?? (DailyRun.Active ? DailyRun.Next(5, generatedModules.Count, 0, 1) == 1 : SciHelper.ChanceRoll());
 		int num = ((!flag) ? (currentX - module.EnterX) : (currentX - (module.Width - module.EnterX - 1)));
 		int num2 = currentY - module.Height + 1;
 		CurrentModule = new GeneratedModule();

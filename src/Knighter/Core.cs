@@ -447,8 +447,16 @@ public sealed class Core : Component
 	private void Reset(bool start = false, SessionData session = null)
 	{
 		bool num = GetCurrentState() is LogoState;
-		ClearStates();
-		CurrentPlayState = new PlayState(startingFromShop);
+        ClearStates();
+        if (core.OptionsData.DailyRunEnabled)
+        {
+            DailyRun.Begin(DailyRun.TodaysSeed());
+        }
+        else
+        {
+            DailyRun.End();
+        }
+        CurrentPlayState = new PlayState(startingFromShop);
 		PushState(CurrentPlayState);
 		startingFromShop = false;
 		if (!start)
@@ -556,8 +564,16 @@ public sealed class Core : Component
 			PushState(new ShopState());
 			break;
 		case CoreEvent.ResetAndStartGame:
-			ClearStates();
-			CurrentPlayState = new PlayState(startingFromShop);
+            ClearStates();
+            if (core.OptionsData.DailyRunEnabled)
+            {
+                DailyRun.Begin(DailyRun.TodaysSeed());
+            }
+            else
+            {
+                DailyRun.End();
+            }
+            CurrentPlayState = new PlayState(startingFromShop);
 			startingFromShop = false;
 			PushState(CurrentPlayState);
 			CurrentPlayState.StartPlaying();

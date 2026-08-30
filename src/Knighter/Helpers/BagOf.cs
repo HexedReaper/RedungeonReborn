@@ -50,6 +50,22 @@ public class BagOf<T>
 		return DrawFrom(contents.Where((Pair<T, int> item) => condition(item.A)).ToList());
 	}
 
+	public List<T> Matching(Func<T, bool> condition)
+    {
+        List<T> list = new List<T>();
+        foreach (Pair<T, int> content in contents)
+        {
+            if (condition(content.A))
+            {
+                for (int i = 0; i < content.B; i++)
+                {
+                    list.Add(content.A);
+                }
+            }
+        }
+        return list;
+    }
+
 	public T DrawAndRemove()
 	{
 		T item = Draw();

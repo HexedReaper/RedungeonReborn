@@ -24,6 +24,7 @@ public class OptionsData : Component
 	public bool UnfriendBats;
 	public bool FastWings;
 	public bool AchievementToasts;
+	public bool DailyRunEnabled;
 
 	public OptionsData()
 	{
@@ -42,6 +43,7 @@ public class OptionsData : Component
 		UnfriendBats = false;
 		FastWings = false;
 		AchievementToasts = true;
+		DailyRunEnabled = false;
 	}
 
 	public void LoadFromStorage()
@@ -61,6 +63,7 @@ public class OptionsData : Component
 		base.core.Storage.TryGetBool("unfriend-bats", ref UnfriendBats);
 		base.core.Storage.TryGetBool("fast-wings", ref FastWings);
 		base.core.Storage.TryGetBool("achievement-toasts", ref AchievementToasts);
+		base.core.Storage.TryGetBool("daily-run", ref DailyRunEnabled);
 	}
 
 	public void SaveIntoStorage()
@@ -80,6 +83,7 @@ public class OptionsData : Component
 		base.core.Storage.SetBool("unfriend-bats", UnfriendBats);
 		base.core.Storage.SetBool("fast-wings", FastWings);
 		base.core.Storage.SetBool("achievement-toasts", AchievementToasts);
+		base.core.Storage.SetBool("daily-run", DailyRunEnabled);
         base.core.Storage.Save();
 	}
 }
