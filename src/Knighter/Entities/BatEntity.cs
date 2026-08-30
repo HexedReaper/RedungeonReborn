@@ -33,9 +33,10 @@ public class BatEntity : Entity
 	private int fleeDelay = 70;
 
 	private int fleeTimeout = 200;
-
+	
 	private bool avoidPlayer;
 
+    private bool unfriended;
 	private float avoid;
 
 	private float avoidTarget;
@@ -124,16 +125,24 @@ public class BatEntity : Entity
 		}
 		animation.Update();
 		if (!Fleeing)
-		{
-			if (Moving)
-			{
-				float num = ((xR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * xS) / (float)(10 * xR)) * (float)xD));
-				float num2 = ((yR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * yS) / (float)(10 * yR)) * (float)yD));
-				x = spawn.X + num;
-				y = spawn.Y + num2;
-				UpdateTiles();
-			}
-		}
+        {
+            unfriended = (base.core.OptionsData.UnfriendBats && base.core.CurrentPlayState != null && base.core.CurrentPlayState.Player is VampireChar);
+            if (unfriended)
+            {
+                Vector2 target = base.core.CurrentPlayState.Player.WorldCoordinates;
+                x += (target.X - x) * 0.03f;
+                y += (target.Y - y) * 0.03f;
+                UpdateTiles();
+            }
+            else if (Moving)
+            {
+                float num = ((xR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * xS) / (float)(10 * xR)) * (float)xD));
+                float num2 = ((yR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * yS) / (float)(10 * yR)) * (float)yD));
+                x = spawn.X + num;
+                y = spawn.Y + num2;
+                UpdateTiles();
+            }
+        }
 		else
 		{
 			fleeDelay--;
@@ -156,7 +165,8 @@ public class BatEntity : Entity
 	{
 		avoidTarget = (avoidPlayer ? (900f - Component._m((base.core.CurrentPlayState.Player.WorldCenter - base.WorldCenter).LengthSquared(), 900f)) : 0f);
 		Sprite currentFrame = animation.GetCurrentFrame();
-		base.core.Renderer[base.Z + 3].DrawSpriteW(currentFrame, base.WorldCenter.Shift(-10.5f, -12f - avoid * 0.03f), null, new Vector2((!Fleeing) ? 1f : (1f + 0.6f * (float)fleeDelay / 70f)));
+		Color? tint = (unfriended ? default(Color).FromRgb(16732240) : (Color?)null);
+        base.core.Renderer[base.Z + 3].DrawSpriteW(currentFrame, base.WorldCenter.Shift(-10.5f, -12f - avoid * 0.03f), tint, new Vector2((!Fleeing) ? 1f : (1f + 0.6f * (float)fleeDelay / 70f)));
 		base.core.Renderer["bg", base.Z + 32, false].DrawSpriteW(currentFrame, base.WorldCenter.Shift(-10.5f, 0f), Color.Black * 0.2f, new Vector2(1f, 0.8f), 0f, SpriteFlip.Vertical);
 		base.Draw();
 	}
