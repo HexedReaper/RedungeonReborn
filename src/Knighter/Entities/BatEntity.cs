@@ -228,7 +228,7 @@ public class BatEntity : Entity
 
 	public override void CollideWith(Entity other)
 	{
-		if (base.Age >= 10 && !Fleeing)
+		if (base.Age >= 10 && !Fleeing && !IsBroken)
 		{
 			if (other is PlayerEntity playerEntity && (!avoidPlayer || unfriended))
             {

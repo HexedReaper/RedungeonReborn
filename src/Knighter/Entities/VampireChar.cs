@@ -292,6 +292,10 @@ public class VampireChar : PlayerEntity
         {
             if (base.core.OptionsData.UnfriendBats && injuryType == InjuryType.Bat)
             {
+                if (base.core.OptionsData.VampirePredator)
+                {
+                    return true;
+                }
                 return base.TryResist(injuryType, offender);
             }
             if (base.core.OptionsData.VampirePredator && offender is StatueEntity statue && !statue.Unbreakable)
