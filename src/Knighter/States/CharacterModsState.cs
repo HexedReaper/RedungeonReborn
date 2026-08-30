@@ -32,16 +32,16 @@ public class CharacterModsState : State
         base.TransDuration = 30;
         ShowCoins = false;
         IsOverlay = true;
-        menuRect = new RectangleF((float)(base.core.Renderer.ScreenWidth - 148) * 0.5f, (float)(base.core.Renderer.ScreenHeight - 296f) * 0.5f, 148f, 296f);
+        menuRect = new RectangleF((float)(base.core.Renderer.ScreenWidth - 148) * 0.5f, (float)(base.core.Renderer.ScreenHeight - 233) * 0.5f, 148f, 233f);
         touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 10000);
         touchMenu.OnToggle = OnToggle;
         float left = menuRect.Left + 12f;
-        touchMenu.SetupToggle(Button.ToggleThrust, new Vector2(left, menuRect.Top + 94f), base.core.OptionsData.DirectionalThrust, 120);
-        touchMenu.SetupToggle(Button.ToggleBraggAmmo, new Vector2(left, menuRect.Top + 130f), base.core.OptionsData.BraggAmmo, 120);
-        touchMenu.SetupToggle(Button.TogglePredator, new Vector2(left, menuRect.Top + 166f), base.core.OptionsData.VampirePredator, 120);
-        touchMenu.SetupToggle(Button.ToggleUnfriendBats, new Vector2(left, menuRect.Top + 186f), base.core.OptionsData.UnfriendBats, 120);
-        touchMenu.SetupToggle(Button.ToggleHardcoreWebs, new Vector2(left, menuRect.Top + 222f), base.core.OptionsData.HardcoreWebs, 120);
-        touchMenu.SetupToggle(Button.ToggleAchievementToasts, new Vector2(left, menuRect.Top + 242f), base.core.OptionsData.AchievementToasts, 120);
+        touchMenu.SetupToggle(Button.ToggleThrust, new Vector2(left, menuRect.Top + 86f), base.core.OptionsData.DirectionalThrust, 120);
+        touchMenu.SetupToggle(Button.ToggleBraggAmmo, new Vector2(left, menuRect.Top + 108f), base.core.OptionsData.BraggAmmo, 120);
+        touchMenu.SetupToggle(Button.TogglePredator, new Vector2(left, menuRect.Top + 130f), base.core.OptionsData.VampirePredator, 120);
+        touchMenu.SetupToggle(Button.ToggleUnfriendBats, new Vector2(left, menuRect.Top + 150f), base.core.OptionsData.UnfriendBats, 120);
+        touchMenu.SetupToggle(Button.ToggleHardcoreWebs, new Vector2(left, menuRect.Top + 172f), base.core.OptionsData.HardcoreWebs, 120);
+        touchMenu.SetupToggle(Button.ToggleAchievementToasts, new Vector2(left, menuRect.Top + 192f), base.core.OptionsData.AchievementToasts, 120);
         touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
@@ -110,17 +110,12 @@ public class CharacterModsState : State
             Font = Font.Thin,
             Scale = 0.75f
         };
-        TextProfile headerProfile = textProfile.Alter(default(Color).FromRgb(9462096));
-        base.core.Renderer["fg", 9000, false].DrawTextS("GYLBARD", menuRect.TopLeft.Shift(12f, 80f + num2), headerProfile);
-        base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.ToggleThrust].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("BRAGG", menuRect.TopLeft.Shift(12f, 116f + num2), headerProfile);
-        base.core.Renderer["fg", 9000, false].DrawTextS("ammo (3 / 10m)", touchMenu[Button.ToggleBraggAmmo].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleBraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("VAMPIRE", menuRect.TopLeft.Shift(12f, 152f + num2), headerProfile);
-        base.core.Renderer["fg", 9000, false].DrawTextS("predator dives", touchMenu[Button.TogglePredator].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.TogglePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("unfriend bats", touchMenu[Button.ToggleUnfriendBats].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleUnfriendBats].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("OTHER", menuRect.TopLeft.Shift(12f, 208f + num2), headerProfile);
-        base.core.Renderer["fg", 9000, false].DrawTextS("hardcore webs", touchMenu[Button.ToggleHardcoreWebs].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleHardcoreWebs].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("achievement toasts", touchMenu[Button.ToggleAchievementToasts].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleAchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("gylbard: directional thrust", touchMenu[Button.ToggleThrust].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("bragg: ammo (3 / 10m)", touchMenu[Button.ToggleBraggAmmo].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleBraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("vamp: predator dives", touchMenu[Button.TogglePredator].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.TogglePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("vamp: unfriend bats", touchMenu[Button.ToggleUnfriendBats].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleUnfriendBats].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("other: hardcore webs", touchMenu[Button.ToggleHardcoreWebs].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleHardcoreWebs].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("other: ach. toasts", touchMenu[Button.ToggleAchievementToasts].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleAchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         touchMenu.Draw();
         base.Draw();
     }

@@ -566,8 +566,12 @@ public class FactsState : State
 		unlockedAchievements = 0;
 		totalAchievements = 0;
 		foreach (Achievement value2 in Enum.GetValues(typeof(Achievement)))
-		{
-			totalAchievements++;
+        {
+            if (Achievements.IsMod(value2))
+            {
+                continue;
+            }
+            totalAchievements++;
 			if ((Achievements.IsIncremental(value2) && base.core.Achievments.GetProgress(value2) >= Achievements.Targets[value2]) || (!Achievements.IsIncremental(value2) && base.core.Achievments.GetProgress(value2) > 0))
 			{
 				unlockedAchievements++;
@@ -678,7 +682,11 @@ public class FactsState : State
 	}
 
 	private void _achievement(Achievement a)
-	{
+    {
+        if (Achievements.IsMod(a))
+        {
+            return;
+        }
 		int num = 37;
 		if (!(py > (float)(-num)) || !(py < s.Height))
 		{

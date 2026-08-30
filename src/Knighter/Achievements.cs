@@ -536,6 +536,11 @@ public class Achievements : Component
         }
     }
 
+	public static bool IsMod(Achievement achievement)
+    {
+        return ModMetas.ContainsKey(achievement);
+    }
+
 	public void Unlock(Achievement achievement)
     {
         if (!base.core.ProfileData.IsAchievementUnlocked(achievement))
