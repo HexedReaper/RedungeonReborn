@@ -9,6 +9,8 @@ public static class DailyRun
 {
     public static bool Active;
 
+    public static Screenshot LastScreenshot;
+
     private static int seed;
 
     public static void Begin(int s)

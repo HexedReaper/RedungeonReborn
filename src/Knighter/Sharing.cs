@@ -32,16 +32,14 @@ public class Sharing : Component
     {
         string charName = __(CharDescription.Get[(Character)character].Name);
         string text = string.Format("Redungeon Daily {0}\n{1} · {2}\n{3}m · {4} coins\nverify: {5}", DailyRun.TodayKey(), charName, mods, distance, coins, seed.ToString("X8"));
-        Screenshot gameplayScreenshot = base.core.GameplayScreenshot;
-        if (gameplayScreenshot != null)
+        Screenshot screenshot = (DailyRun.LastScreenshot ?? base.core.GameplayScreenshot);
+        if (screenshot != null)
         {
-            base.core.SystemCalls.ShowSharingMenu(text, gameplayScreenshot);
+            base.core.SystemCalls.ShowSharingMenu(text, screenshot);
+            return;
         }
-        else
-        {
-            string text2 = Uri.EscapeDataString(text);
-            base.core.SystemCalls.OpenUrl(string.Format("https://twitter.com/intent/tweet?text={0}", text2));
-        }
+        string text2 = text.Replace("·", "-").Replace("\n", "%0A").Replace(" ", "%20");
+        base.core.SystemCalls.OpenUrl(string.Format("https://twitter.com/intent/tweet?text={0}", text2));
     }
 
     public void GoToNitromePage()
