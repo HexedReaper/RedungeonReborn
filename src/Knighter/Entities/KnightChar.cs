@@ -15,6 +15,8 @@ public class KnightChar : PlayerEntity
 
 	private const int attackDuration = 40;
 
+	private Vector2 attackDirection = new Vector2(0f, -1f);
+
 	[Preserve]
 	public KnightChar(int x, int y)
 		: base(x, y)
@@ -114,8 +116,16 @@ public class KnightChar : PlayerEntity
 	public override void TryTriggerAbility()
 	{
 		if (!base.Falling)
-		{
-			Abilities.SkillCharge[Skill.Thrust] = 0f;
+        {
+            if (base.core.OptionsData.DirectionalThrust)
+            {
+                attackDirection = FacingDirection.Clone();
+            }
+            else
+            {
+                attackDirection = new Vector2(0f, -1f);
+            }
+            Abilities.SkillCharge[Skill.Thrust] = 0f;
 			attackTimer = 0;
 			base.playState.Camera.Shake("thrust");
 			if (base.HoldingWeb != null)
@@ -157,7 +167,7 @@ public class KnightChar : PlayerEntity
 			}
 			if (attackTimer < 10)
 			{
-				List<Entity> list = base.core.CurrentPlayState.EntityManager.FindEntities((Entity e) => !e.IsBroken && (e is RotobladeEntity || e is SpikesEntity || e is CrossbowEntity || e is SawEntity || e is PistonEntity || e is PistonCoreEntity || e is BatEntity || e is SlimeEntity || e is PotEntity || e is ZapperEntity || e is ObstacleEntity || e is ChestEntity || e is StatueEntity || e is StatueEntity.StatueHitbox || e is FollowerEntity || e is FirewallEntity || e is CannonEntity || e is WispEntity || (e is SerpentEntity && !(e as SerpentEntity).IsChineseDragon)) && (e.OccupiedTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(0f, -1f)]) || e.OccupiedTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(0f, -2f)]) || e.OccupiedTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(0f, -3f)]) || e.OccupiedWorldTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(0f, -1f)]) || e.OccupiedWorldTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(0f, -2f)]) || e.OccupiedWorldTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(0f, -3f)])));
+				List<Entity> list = base.core.CurrentPlayState.EntityManager.FindEntities((Entity e) => !e.IsBroken && (e is RotobladeEntity || e is SpikesEntity || e is CrossbowEntity || e is SawEntity || e is PistonEntity || e is PistonCoreEntity || e is BatEntity || e is SlimeEntity || e is PotEntity || e is ZapperEntity || e is ObstacleEntity || e is ChestEntity || e is StatueEntity || e is StatueEntity.StatueHitbox || e is FollowerEntity || e is FirewallEntity || e is CannonEntity || e is WispEntity || (e is SerpentEntity && !(e as SerpentEntity).IsChineseDragon)) && (e.OccupiedTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(attackDirection.X, attackDirection.Y)]) || e.OccupiedTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(attackDirection.X * 2f, attackDirection.Y * 2f)]) || e.OccupiedTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(attackDirection.X * 3f, attackDirection.Y * 3f)]) || e.OccupiedWorldTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(attackDirection.X, attackDirection.Y)]) || e.OccupiedWorldTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(attackDirection.X * 2f, attackDirection.Y * 2f)]) || e.OccupiedWorldTiles.Contains(base.levelMap[base.WorldCoordinates.Shift(attackDirection.X * 3f, attackDirection.Y * 3f)])));
 				int num = 0;
 				foreach (Entity item in list)
 				{
@@ -177,10 +187,10 @@ public class KnightChar : PlayerEntity
 				}
 			}
 			if (attackTimer == 40)
-			{
-				attackTimer = -1;
-				FacingDirection = new Vector2(0f, -1f);
-			}
+            {
+                attackTimer = -1;
+                FacingDirection = attackDirection.Clone();
+            }
 		}
 		base.Update();
 	}
