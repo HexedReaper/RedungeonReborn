@@ -126,7 +126,7 @@ public class BatEntity : Entity
 		animation.Update();
 		if (!Fleeing)
         {
-            unfriended = (base.core.OptionsData.UnfriendBats && base.core.CurrentPlayState != null && base.core.CurrentPlayState.Player is VampireChar);
+            unfriended = (base.core.OptionsData.UnfriendBats && base.core.CurrentPlayState != null && base.core.CurrentPlayState.Player is VampireChar && !base.core.CurrentPlayState.Player.Dead);
             if (unfriended)
             {
                 if (loveEmitter != null)
@@ -135,9 +135,14 @@ public class BatEntity : Entity
                     loveEmitter = null;
                 }
                 Vector2 target = base.core.CurrentPlayState.Player.WorldCoordinates;
-                x += (target.X - x) * 0.04f;
-                y += (target.Y - y) * 0.04f;
-                UpdateTiles();
+                Vector2 offset = target - new Vector2(x, y);
+                if (offset.LengthSquared() < 16f)
+                {
+                    offset.Normalize();
+                    x += offset.X * 0.05f;
+                    y += offset.Y * 0.05f;
+                    UpdateTiles();
+                }
             }
             else if (Moving)
             {
