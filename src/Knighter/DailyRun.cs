@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Knighter.Entities;
 using Knighter.Helpers;
 
 namespace Knighter;
@@ -30,6 +31,19 @@ public static class DailyRun
             hash = hash * 31 + c;
         }
         return hash;
+    }
+
+    public static int SessionSeed(Character character, OptionsData options)
+    {
+        int h = TodaysSeed();
+        h = h * 31 + (int)character;
+        h = h * 31 + (options.HardcoreWebs ? 1 : 0);
+        h = h * 31 + (options.DirectionalThrust ? 1 : 0);
+        h = h * 31 + (options.BraggAmmo ? 1 : 0);
+        h = h * 31 + (options.VampirePredator ? 1 : 0);
+        h = h * 31 + (options.UnfriendBats ? 1 : 0);
+        h = h * 31 + (options.FastWings ? 1 : 0);
+        return h;
     }
 
     public static int Next(int channel, int index, int from, int to)

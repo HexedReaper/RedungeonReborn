@@ -450,7 +450,7 @@ public sealed class Core : Component
         ClearStates();
         if (core.OptionsData.DailyRunEnabled)
         {
-            DailyRun.Begin(DailyRun.TodaysSeed());
+            DailyRun.Begin(DailyRun.SessionSeed(core.ProfileData.Character, core.OptionsData));
         }
         else
         {
@@ -567,7 +567,7 @@ public sealed class Core : Component
             ClearStates();
             if (core.OptionsData.DailyRunEnabled)
             {
-                DailyRun.Begin(DailyRun.TodaysSeed());
+                DailyRun.Begin(DailyRun.SessionSeed(core.ProfileData.Character, core.OptionsData));
             }
             else
             {
