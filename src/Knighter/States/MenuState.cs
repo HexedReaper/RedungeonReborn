@@ -283,6 +283,10 @@ public class MenuState : State
 		int num = base.core.Renderer.ScreenHeight - 40;
 		float width = (float)(base.core.Renderer.ScreenWidth - 22) / 4f;
 		touchMenu.SetupButton(Button.Shop, GameOver ? new RectangleF(10f, num, width, 30f) : new RectangleF(base.core.Renderer.ScreenCenter.X - 25f, num, 50f, 30f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "", null, icon: false, iconIsPicture: false, blink: false, null, null, labelAnim: base.core.CurrentCharDesc.AnimSequence, labelAnimSpeed: base.core.CurrentCharDesc.AnimSpeed * base.core.CurrentCharDesc.ButtonAnimSpeedFactor, yShift: (base.core.ProfileData.Character == Character.Creep) ? (-9.5f) : (-6f), xShift: 0f, fontSize: 1f, drawShadow: true);
+        if (GameOver)
+        {
+            touchMenu.SetupButton(Button.Daily, new RectangleF(0f, 0f, 50f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "DAILY", null, icon: false, iconIsPicture: false);
+        }
 		UpdateTransition();
 		UpdateGameOverActionAfterReturn();
 		if (GameOver)

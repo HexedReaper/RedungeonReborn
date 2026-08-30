@@ -542,6 +542,7 @@ public sealed class Core : Component
 			ProfileData.LastDistance = session.Distance;
             if (DailyRun.Active)
             {
+                DailyRun.LastScreenshot = GameplayScreenshot;
                 if (ProfileData.DailyBestDate != DailyRun.TodayKey())
                 {
                     ProfileData.DailyBestDate = DailyRun.TodayKey();
@@ -549,7 +550,6 @@ public sealed class Core : Component
                 }
                 ProfileData.DailyBestDistance = Math.Max(ProfileData.DailyBestDistance, session.Distance);
                 ProfileData.DailyLastDistance = session.Distance;
-                DailyRun.LastScreenshot = GameplayScreenshot;
                 ProfileData.DailyLastCoins = session.CollectedCoins;
                 ProfileData.DailyLastSeed = DailyRun.SessionSeed(ProfileData.Character, base.core.OptionsData);
                 ProfileData.DailyLastCharacter = (int)ProfileData.Character;
