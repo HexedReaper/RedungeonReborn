@@ -2,3 +2,5 @@
 base/
 src/bin/
 src/obj/
+build/
+crash.log

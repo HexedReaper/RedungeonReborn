@@ -287,7 +287,7 @@ public class OptionsState : State
 		touchMenu[Button.PlaySounds].LabelSprite = (base.core.OptionsData.PlaySounds ? _(SpriteName.icon_sound_on) : _(SpriteName.icon_sound_off));
         touchMenu[Button.PlayMusic].LabelSprite = (base.core.OptionsData.PlayMusic ? _(SpriteName.icon_music_on) : _(SpriteName.icon_music_off));
         touchMenu[Button.HardcoreWebs].LabelSprite = (base.core.OptionsData.HardcoreWebs ? _(SpriteName.spider_web_cover) : _(SpriteName.spider_web_1));
-		touchMenu[Button.CharacterMods].LabelSprite = _(SpriteName.knight_portrait);
+		touchMenu[Button.CharacterMods].LabelSprite = _(SpriteName.knight_sword_big);
 	}
 
 	public override void OnBackButtonPressed()
