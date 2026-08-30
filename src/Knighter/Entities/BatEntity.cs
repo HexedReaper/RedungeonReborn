@@ -139,9 +139,14 @@ public class BatEntity : Entity
                 if (offset.LengthSquared() < 9f)
                 {
                     offset.Normalize();
-                    x += offset.X * 0.035f;
-                    y += offset.Y * 0.035f;
-                    UpdateTiles();
+                    Vector2 next = new Vector2(x, y) + offset * 0.035f;
+                    var tile = levelMap[next];
+                    if (tile != null && tile.IsPassableFor(this))
+                    {
+                        x = next.X;
+                        y = next.Y;
+                        UpdateTiles();
+                    }
                 }
             }
             else if (Moving)
