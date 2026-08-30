@@ -18,6 +18,7 @@ public class CharacterModsState : State
         HeaderVampire,
         TogglePredator,
         ToggleUnfriendBats,
+        ToggleFastWings,
         HeaderOther,
         ToggleHardcoreWebs,
         ToggleAchievementToasts,
@@ -50,6 +51,7 @@ public class CharacterModsState : State
         touchMenu.SetupButton(Button.HeaderVampire, new RectangleF(menuRect.Left + 8f, menuRect.Top, menuRect.Width - 16f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Vampire +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.TogglePredator, new Vector2(left, menuRect.Top), base.core.OptionsData.VampirePredator, 120);
         touchMenu.SetupToggle(Button.ToggleUnfriendBats, new Vector2(left, menuRect.Top), base.core.OptionsData.UnfriendBats, 120);
+        touchMenu.SetupToggle(Button.ToggleFastWings, new Vector2(left, menuRect.Top + 160f), base.core.OptionsData.FastWings, 120);
         touchMenu.SetupButton(Button.HeaderOther, new RectangleF(menuRect.Left + 8f, menuRect.Top, menuRect.Width - 16f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Other +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.ToggleHardcoreWebs, new Vector2(left, menuRect.Top), base.core.OptionsData.HardcoreWebs, 120);
         touchMenu.SetupToggle(Button.ToggleAchievementToasts, new Vector2(left, menuRect.Top), base.core.OptionsData.AchievementToasts, 120);
@@ -139,6 +141,7 @@ public class CharacterModsState : State
         touchMenu[Button.HeaderVampire].Rectangle.Shift(0f, y);
         touchMenu[Button.TogglePredator].Rectangle.Shift(0f, y);
         touchMenu[Button.ToggleUnfriendBats].Rectangle.Shift(0f, y);
+        touchMenu[Button.ToggleFastWings].Rectangle.Shift(0f, y);
         touchMenu[Button.HeaderOther].Rectangle.Shift(0f, y);
         touchMenu[Button.ToggleHardcoreWebs].Rectangle.Shift(0f, y);
         touchMenu[Button.ToggleAchievementToasts].Rectangle.Shift(0f, y);
@@ -225,6 +228,12 @@ public class CharacterModsState : State
             base.core.OptionsData.UnfriendBats = newValue;
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.kazhan_flap_1));
+        }
+        if (button == Button.ToggleFastWings)
+        {
+            base.core.OptionsData.FastWings = newValue;
+            base.core.SaveOptions();
+            SendMessage(new PlaySoundMessage(SoundName.kazhan_flap_2));
         }
         if (button == Button.ToggleHardcoreWebs)
         {

@@ -136,7 +136,7 @@ public class BatEntity : Entity
                 }
                 Vector2 target = base.core.CurrentPlayState.Player.WorldCoordinates;
                 Vector2 offset = target - new Vector2(x, y);
-                if (offset.LengthSquared() < 9f)
+                if (offset.LengthSquared() < 9f && IsLeadHunter())
                 {
                     offset.Normalize();
                     Vector2 next = new Vector2(x, y) + offset * 0.035f;
@@ -175,6 +175,19 @@ public class BatEntity : Entity
 		avoid += (avoidTarget - avoid) * 0.1f;
 		base.Update();
 	}
+	private bool IsLeadHunter()
+    {
+        List<Entity> list = base.core.CurrentPlayState.EntityManager.GetEntitiesInRadius(new Vector2(x, y), 12f).FindAll((Entity e) => e is BatEntity && !e.IsBroken && !(e as BatEntity).Fleeing);
+        float myDist = (base.core.CurrentPlayState.Player.WorldCenter - new Vector2(x, y)).LengthSquared();
+        foreach (Entity item in list)
+        {
+            if (item != this && (item.WorldCenter - base.core.CurrentPlayState.Player.WorldCenter).LengthSquared() < myDist)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
 	public override void Draw()
 	{

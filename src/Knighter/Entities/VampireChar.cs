@@ -370,6 +370,20 @@ public class VampireChar : PlayerEntity
         }
     }
 
+	protected override void UpdateAbilities()
+    {
+        float before = Abilities.SkillCharge[Skill.Flight];
+        base.UpdateAbilities();
+        if (base.core.OptionsData.FastWings)
+        {
+            float gained = Abilities.SkillCharge[Skill.Flight] - before;
+            if (gained > 0f)
+            {
+                Abilities.SkillCharge[Skill.Flight] = Component._m(1f, Abilities.SkillCharge[Skill.Flight] + gained * 0.5f);
+            }
+        }
+    }
+
 	protected override bool TryResistFall()
 	{
 		bool flag = false;

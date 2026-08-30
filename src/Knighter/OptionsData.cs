@@ -22,6 +22,7 @@ public class OptionsData : Component
 	public bool BraggAmmo;
 	public bool VampirePredator;
 	public bool UnfriendBats;
+	public bool FastWings;
 	public bool AchievementToasts;
 
 	public OptionsData()
@@ -39,6 +40,7 @@ public class OptionsData : Component
 		BraggAmmo = false;
 		VampirePredator = false;
 		UnfriendBats = false;
+		FastWings = false;
 		AchievementToasts = true;
 	}
 
@@ -57,6 +59,7 @@ public class OptionsData : Component
 		base.core.Storage.TryGetBool("bragg-ammo", ref BraggAmmo);
 		base.core.Storage.TryGetBool("vampire-predator", ref VampirePredator);
 		base.core.Storage.TryGetBool("unfriend-bats", ref UnfriendBats);
+		base.core.Storage.TryGetBool("fast-wings", ref FastWings);
 		base.core.Storage.TryGetBool("achievement-toasts", ref AchievementToasts);
 	}
 
@@ -75,6 +78,7 @@ public class OptionsData : Component
 		base.core.Storage.SetBool("bragg-ammo", BraggAmmo);
 		base.core.Storage.SetBool("vampire-predator", VampirePredator);
 		base.core.Storage.SetBool("unfriend-bats", UnfriendBats);
+		base.core.Storage.SetBool("fast-wings", FastWings);
 		base.core.Storage.SetBool("achievement-toasts", AchievementToasts);
         base.core.Storage.Save();
 	}
