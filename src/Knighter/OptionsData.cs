@@ -20,6 +20,7 @@ public class OptionsData : Component
 	public bool HardcoreWebs;
 	public bool DirectionalThrust;
 	public bool BraggAmmo;
+	public bool VampirePredator;
 
 	public OptionsData()
 	{
@@ -34,6 +35,7 @@ public class OptionsData : Component
 		HardcoreWebs = false;
 		DirectionalThrust = false;
 		BraggAmmo = false;
+		VampirePredator = false;
 	}
 
 	public void LoadFromStorage()
@@ -49,6 +51,7 @@ public class OptionsData : Component
         base.core.Storage.TryGetBool("hardcore-webs", ref HardcoreWebs);
 		base.core.Storage.TryGetBool("directional-thrust", ref DirectionalThrust);
 		base.core.Storage.TryGetBool("bragg-ammo", ref BraggAmmo);
+		base.core.Storage.TryGetBool("vampire-predator", ref VampirePredator);
 	}
 
 	public void SaveIntoStorage()
@@ -64,6 +67,7 @@ public class OptionsData : Component
         base.core.Storage.SetBool("hardcore-webs", HardcoreWebs);
 		base.core.Storage.SetBool("directional-thrust", DirectionalThrust);
 		base.core.Storage.SetBool("bragg-ammo", BraggAmmo);
+		base.core.Storage.SetBool("vampire-predator", VampirePredator);
         base.core.Storage.Save();
 	}
 }

@@ -30,6 +30,8 @@ public class VampireChar : PlayerEntity
 
 	private int sinceLastSound = 60;
 
+	private int predatorKills;
+
 	public bool FlightActive { get; private set; }
 
 	[Preserve]
@@ -296,6 +298,34 @@ public class VampireChar : PlayerEntity
 		}
 		return base.TryResist(injuryType, offender);
 	}
+
+	public override void CollideWith(Entity other)
+    {
+        if (base.core.OptionsData.VampirePredator && FlightActive && !Dead && !reviving && !other.IsBroken && (
+            other is RotobladeEntity || other is SpikesEntity || other is CrossbowEntity || other is SawEntity ||
+            other is PistonEntity || other is PistonCoreEntity || other is BatEntity || other is SlimeEntity ||
+            other is ZapperEntity || other is FollowerEntity || other is FirewallEntity || other is CannonEntity ||
+            other is WispEntity || (other is SerpentEntity && !(other as SerpentEntity).IsChineseDragon)))
+        {
+            other.Break(this);
+            if (other.IsBroken)
+            {
+                if (predatorKills < 15)
+                {
+                    predatorKills++;
+                }
+                SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, predatorKills + "/15", default(Color).FromRgb(14045110), 1f, 30), CurrentPlatform));
+                if (predatorKills >= 15 && Abilities.SkillLevel[Skill.TurnIntoBat] < 2)
+                {
+                    predatorKills = 0;
+                    Abilities.SkillLevel[Skill.TurnIntoBat]++;
+                    base.playState.Hud.ShowAlert("bat-restore", __(Abilities.SkillDesc[Skill.TurnIntoBat].Name), default(Color).FromRgb(14045110), 90, Abilities.SkillDesc[Skill.TurnIntoBat].HudMainIcon);
+                    SendMessage(new PlaySoundMessage(SoundName.kazhan_turn));
+                }
+            }
+        }
+        base.CollideWith(other);
+    }
 
 	protected override bool TryResistFall()
 	{

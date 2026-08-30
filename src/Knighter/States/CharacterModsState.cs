@@ -12,6 +12,7 @@ public class CharacterModsState : State
     {
         DirectionalThrust,
         BraggAmmo,
+        VampirePredator,
         Back
     }
 
@@ -33,6 +34,7 @@ public class CharacterModsState : State
         touchMenu.OnToggle = OnToggle;
         touchMenu.SetupToggle(Button.DirectionalThrust, menuRect.TopLeft.Shift(12f, 90f), base.core.OptionsData.DirectionalThrust, 120);
         touchMenu.SetupToggle(Button.BraggAmmo, menuRect.TopLeft.Shift(12f, 111f), base.core.OptionsData.BraggAmmo, 120);
+        touchMenu.SetupToggle(Button.VampirePredator, menuRect.TopLeft.Shift(12f, 132f), base.core.OptionsData.VampirePredator, 120);
         touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
@@ -60,6 +62,8 @@ public class CharacterModsState : State
     {
         float y = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
         touchMenu[Button.DirectionalThrust].Rectangle.Shift(0f, y);
+        touchMenu[Button.BraggAmmo].Rectangle.Shift(0f, y);
+        touchMenu[Button.VampirePredator].Rectangle.Shift(0f, y);
         touchMenu[Button.Back].Rectangle.Shift(0f, y);
         base.UpdateTransition();
     }
@@ -98,6 +102,7 @@ public class CharacterModsState : State
         };
         base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.DirectionalThrust].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.DirectionalThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         base.core.Renderer["fg", 9000, false].DrawTextS("bragg ammo (3 / 30m)", touchMenu[Button.BraggAmmo].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.BraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("vampire: predator dives", touchMenu[Button.VampirePredator].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.VampirePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         touchMenu.Draw();
         base.Draw();
     }
@@ -115,6 +120,12 @@ public class CharacterModsState : State
             base.core.OptionsData.BraggAmmo = newValue;
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.bragg_gun_cock));
+        }
+        if (button == Button.VampirePredator)
+        {
+            base.core.OptionsData.VampirePredator = newValue;
+            base.core.SaveOptions();
+            SendMessage(new PlaySoundMessage(SoundName.kazhan_turn));
         }
     }
     

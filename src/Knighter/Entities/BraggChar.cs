@@ -161,6 +161,7 @@ public class BraggChar : PlayerEntity
 	public override void Update()
 	{
 		base.playState.Hud.AbilitiesHud.skillPanels[Skill.TreasureHunt].Text = "× " + Keys;
+        base.playState.Hud.AbilitiesHud.skillPanels[Skill.Gunshot].Text = (base.core.OptionsData.BraggAmmo ? ("× " + ammo) : "");
         if (base.core.OptionsData.BraggAmmo && ammo < 3)
         {
             if (!climbStarted)
@@ -273,7 +274,14 @@ public class BraggChar : PlayerEntity
         float num = Abilities.SkillCharge[Skill.Gunshot];
         if (base.core.OptionsData.BraggAmmo)
         {
-            Abilities.SkillCharge[Skill.Gunshot] = (float)ammo / 3f;
+            if (ammo > 0)
+            {
+                Abilities.SkillCharge[Skill.Gunshot] = 1f;
+            }
+            else
+            {
+                Abilities.SkillCharge[Skill.Gunshot] = Component._m(climbProgress / 30f, 1f);
+            }
         }
         else
         {
