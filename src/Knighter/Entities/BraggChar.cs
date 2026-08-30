@@ -161,7 +161,6 @@ public class BraggChar : PlayerEntity
 	public override void Update()
 	{
 		base.playState.Hud.AbilitiesHud.skillPanels[Skill.TreasureHunt].Text = "× " + Keys;
-        base.playState.Hud.AbilitiesHud.skillPanels[Skill.Gunshot].Text = (base.core.OptionsData.BraggAmmo ? ("× " + ammo) : "");
         if (base.core.OptionsData.BraggAmmo)
         {
             if (!climbStarted)
@@ -226,8 +225,12 @@ public class BraggChar : PlayerEntity
 	}
 
 	private void DrawCustomHUD()
-	{
-	}
+    {
+        if (base.core.OptionsData.BraggAmmo)
+        {
+            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo, new Vector2(base.core.Renderer.ScreenCenter.X, 46f), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
+        }
+    }
 
 	public override bool SpawnFragments(bool bolt = false)
 	{
