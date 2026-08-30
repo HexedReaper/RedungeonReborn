@@ -257,10 +257,18 @@ public class Achievements : Component
 
 	private readonly Dictionary<Achievement, int> previousPercentComplete;
 
+    private List<Achievement> toastQueue;
+
+    private Dictionary<Achievement, int> lastMilestone;
+
+    private int toastCooldown;
+
 	public Achievements()
-	{
-		previousPercentComplete = new Dictionary<Achievement, int>();
-	}
+    {
+        previousPercentComplete = new Dictionary<Achievement, int>();
+        toastQueue = new List<Achievement>();
+        lastMilestone = new Dictionary<Achievement, int>();
+    }
 
 	public override void Load()
 	{
@@ -269,6 +277,7 @@ public class Achievements : Component
 			if (IsIncremental(value))
 			{
 				previousPercentComplete[value] = GetProgress(value) * 100 / Targets[value];
+                lastMilestone[value] = previousPercentComplete[value] / 25 * 25;
 			}
 		}
 		base.Load();
@@ -317,44 +326,93 @@ public class Achievements : Component
 	}
 
 	public override void Update()
-	{
-		if (base.ticks % 100 != 0)
-		{
-			return;
-		}
-		List<Achievement> list = new List<Achievement>();
-		foreach (Achievement value in Enum.GetValues(typeof(Achievement)))
-		{
-			if (IsIncremental(value) && !base.core.ProfileData.IsAchievementUnlocked(value))
-			{
-				int progress = GetProgress(value);
-				int num = Targets[value];
-				int num2 = 100 * progress / num;
-				if (num2 > previousPercentComplete[value])
-				{
-					list.Add(value);
-					previousPercentComplete[value] = num2;
-				}
-				if (progress >= num)
-				{
-					base.core.ProfileData.UnlockAchievement(value);
-				}
-			}
-		}
-		if (list.Count > 0)
-		{
-			base.core.Scores.ReportAchievmentsProgress(list);
-		}
-	}
+    {
+        if (toastCooldown > 0)
+        {
+            toastCooldown--;
+        }
+        if (toastQueue.Count > 0 && toastCooldown == 0 && base.core.OptionsData.AchievementToasts && base.core.CurrentPlayState != null && base.core.CurrentPlayState.Hud != null)
+        {
+            Achievement next = toastQueue[0];
+            toastQueue.RemoveAt(0);
+            toastCooldown = 130;
+            AchievementMeta meta = Metas[next];
+            string text;
+            if (base.core.ProfileData.IsAchievementUnlocked(next))
+            {
+                text = __(meta.Name);
+            }
+            else if (IsIncremental(next))
+            {
+                text = __(meta.Name) + " " + GetProgress(next) + "/" + Targets[next];
+            }
+            else
+            {
+                text = __(meta.Name);
+            }
+            base.core.CurrentPlayState.Hud.ShowAlert("ach_" + next, text, meta.ColorFG, 120, meta.Icon);
+        }
+        if (base.ticks % 100 != 0)
+        {
+            return;
+        }
+        List<Achievement> list = new List<Achievement>();
+        foreach (Achievement value in Enum.GetValues(typeof(Achievement)))
+        {
+            if (IsIncremental(value) && !base.core.ProfileData.IsAchievementUnlocked(value))
+            {
+                int progress = GetProgress(value);
+                int num = Targets[value];
+                int num2 = 100 * progress / num;
+                if (num2 > previousPercentComplete[value])
+                {
+                    list.Add(value);
+                    previousPercentComplete[value] = num2;
+                    int milestone = num2 / 25 * 25;
+                    if (milestone > lastMilestone[value] && milestone > 0 && milestone < 100 && !Metas[value].Hidden)
+                    {
+                        lastMilestone[value] = milestone;
+                        QueueToast(value);
+                    }
+                }
+                if (progress >= num)
+                {
+                    base.core.ProfileData.UnlockAchievement(value);
+                    QueueToast(value);
+                }
+            }
+        }
+        if (list.Count > 0)
+        {
+            base.core.Scores.ReportAchievmentsProgress(list);
+        }
+    }
+
+    private void QueueToast(Achievement achievement)
+    {
+        if (!base.core.OptionsData.AchievementToasts)
+        {
+            return;
+        }
+        if (toastQueue.Contains(achievement))
+        {
+            return;
+        }
+        if (toastQueue.Count < 4)
+        {
+            toastQueue.Add(achievement);
+        }
+    }
 
 	public void Unlock(Achievement achievement)
-	{
-		if (!base.core.ProfileData.IsAchievementUnlocked(achievement))
-		{
-			base.core.ProfileData.UnlockAchievement(achievement);
-			base.core.Scores.ReportAchievment(achievement);
-		}
-	}
+    {
+        if (!base.core.ProfileData.IsAchievementUnlocked(achievement))
+        {
+            base.core.ProfileData.UnlockAchievement(achievement);
+            base.core.Scores.ReportAchievment(achievement);
+            QueueToast(achievement);
+        }
+    }
 
 	[Conditional("DEBUG")]
 	public static void PrintAchievementIdsForGameCenter()

@@ -13,6 +13,7 @@ public class CharacterModsState : State
         DirectionalThrust,
         BraggAmmo,
         VampirePredator,
+        AchievementToasts,
         Back
     }
 
@@ -35,6 +36,7 @@ public class CharacterModsState : State
         touchMenu.SetupToggle(Button.DirectionalThrust, menuRect.TopLeft.Shift(12f, 90f), base.core.OptionsData.DirectionalThrust, 120);
         touchMenu.SetupToggle(Button.BraggAmmo, menuRect.TopLeft.Shift(12f, 111f), base.core.OptionsData.BraggAmmo, 120);
         touchMenu.SetupToggle(Button.VampirePredator, menuRect.TopLeft.Shift(12f, 132f), base.core.OptionsData.VampirePredator, 120);
+        touchMenu.SetupToggle(Button.AchievementToasts, menuRect.TopLeft.Shift(12f, 153f), base.core.OptionsData.AchievementToasts, 120);
         touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
@@ -102,7 +104,8 @@ public class CharacterModsState : State
         };
         base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.DirectionalThrust].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.DirectionalThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         base.core.Renderer["fg", 9000, false].DrawTextS("bragg ammo (3 / 30m)", touchMenu[Button.BraggAmmo].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.BraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("vampire: predator dives", touchMenu[Button.VampirePredator].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.VampirePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("vampire: predator ability", touchMenu[Button.VampirePredator].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.VampirePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("achievement toasts", touchMenu[Button.AchievementToasts].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.AchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         touchMenu.Draw();
         base.Draw();
     }
@@ -126,6 +129,12 @@ public class CharacterModsState : State
             base.core.OptionsData.VampirePredator = newValue;
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.kazhan_turn));
+        }
+        if (button == Button.AchievementToasts)
+        {
+            base.core.OptionsData.AchievementToasts = newValue;
+            base.core.SaveOptions();
+            SendMessage(new PlaySoundMessage(SoundName.coin));
         }
     }
     
