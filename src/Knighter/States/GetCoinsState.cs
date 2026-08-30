@@ -49,10 +49,12 @@ public class GetCoinsState : State
 			touchMenu.SetupButton(Button.FreeCoins, new RectangleF(x, num4, num, num2), _(SpriteName.button), _(SpriteName.button_pressed), _(SpriteName.button_disabled), stretch: true, SpriteFlip.None, ButtonColor.Orange, __(SId.COINSHOP_free_coins));
 			bool flag = true;
 			if (base.core.ProfileData.FreeCoinsLastTime != string.Empty)
-			{
-				DateTime dateTime = DateTime.Parse(base.core.ProfileData.FreeCoinsLastTime);
-				flag = DateTime.Now.Day != dateTime.Day;
-			}
+            {
+                if (DateTime.TryParse(base.core.ProfileData.FreeCoinsLastTime, out var dateTime))
+                {
+                    flag = DateTime.Now.Day != dateTime.Day;
+                }
+            }
 			touchMenu[Button.FreeCoins].Disabled = !flag;
 		}
 		else

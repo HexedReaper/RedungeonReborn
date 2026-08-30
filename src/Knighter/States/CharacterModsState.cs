@@ -1,4 +1,3 @@
-using System;
 using Knighter.Gameplay;
 using Knighter.Graphics;
 using Knighter.Helpers;
@@ -15,7 +14,7 @@ public class CharacterModsState : State
         Back
     }
 
-    private readonly TouchMenu<Button> touchMenu;
+    private TouchMenu<Button> touchMenu;
 
     private RectangleF menuRect;
 
@@ -23,35 +22,27 @@ public class CharacterModsState : State
 
     private Sprite chain;
 
-    private int hintTimer;
-
-    private string hint;
-
-    private Button hintButton;
-
     public CharacterModsState()
     {
-        base.TransDuration = 25;
-        IsOverlay = true;
+        base.TransDuration = 30;
         ShowCoins = false;
-        touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 3000);
+        IsOverlay = true;
         menuRect = new RectangleF((float)(base.core.Renderer.ScreenWidth - 148) * 0.5f, (float)(base.core.Renderer.ScreenHeight - 262) * 0.5f, 148f, 233f);
+        touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 10000);
+        touchMenu.OnToggle = OnToggle;
+        touchMenu.SetupToggle(Button.DirectionalThrust, menuRect.TopLeft.Shift(12f, 90f), base.core.OptionsData.DirectionalThrust, 120);
+        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
-        int num = 35;
-        int num2 = 30;
-        float num3 = menuRect.Left + 17f;
-        float num4 = menuRect.Bottom - 40f;
-        touchMenu.SetupButton(Button.DirectionalThrust, new RectangleF(num3, num4 - 70f, num, num2), base.core.SpriteManager.GetSprite(SpriteName.button), base.core.SpriteManager.GetSprite(SpriteName.button_pressed), null, stretch: true);
-        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
+        SendMessage(new PlaySoundMessage(SoundName.trans_2));
     }
 
-    public override void UpdateTransition()
+    public override void Update()
     {
-        float y = (float)Tween.BackEaseOut(TransD(0, 4), -250.0, 250.0, base.TransDuration - 4);
-        touchMenu[Button.DirectionalThrust].Rectangle.Shift(0f, y);
-        touchMenu[Button.Back].Rectangle.Shift(0f, y);
-        base.UpdateTransition();
+        touchMenu.Update();
+        IsOpaque = Transition == TransType.None;
+        base.core.AudioManager.MusicVolumeBox.Set("character-mods", 0.3f, inWorld: false);
+        base.Update();
     }
 
     public override void HandleInput()
@@ -63,86 +54,74 @@ public class CharacterModsState : State
         }
     }
 
-    public override void Update()
+    public override void UpdateTransition()
     {
-        IsOpaque = Transition == TransType.None;
-        if (hintTimer > 0)
-        {
-            hintTimer--;
-        }
-        base.Update();
+        float y = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
+        touchMenu[Button.DirectionalThrust].Rectangle.Shift(0f, y);
+        touchMenu[Button.Back].Rectangle.Shift(0f, y);
+        base.UpdateTransition();
     }
 
     public override void Draw()
     {
         float num = 1f - (float)base.Trans / (float)base.TransDuration;
-        base.core.Renderer["fg", 2000, false].FillScreen(Color.Black * (1f - num * num * num));
-        float num2 = (float)Tween.BackEaseOut(TransD(0, 4), -250.0, 250.0, base.TransDuration - 4);
+        base.core.Renderer["fg", 9000, false].FillScreen(Color.Black * (1f - num * num * num));
+        float num2 = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
         for (int i = chain.Height; menuRect.Top + 21f + num2 - (float)i > (float)(-chain.Height); i += chain.Height)
         {
-            base.core.Renderer["fg", 2000, false].DrawSpriteS(chain, new Vector2(menuRect.Left + 20f, menuRect.Top + 21f + num2 - (float)i));
-            base.core.Renderer["fg", 2000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
+            base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Left + 20f, menuRect.Top + 21f + num2 - (float)i));
+            base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
         }
-        base.core.Renderer["fg", 2002, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
-        TextProfile obj = new TextProfile
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
+        base.core.Renderer["fg", 9000, false].DrawTextS("CHARACTER MODS", menuRect.TopLeft.Shift(5f, 57f + num2), new TextProfile
         {
-            Decoration = TextDecoration.None,
+            Width = (int)menuRect.Width - 10,
+            Height = 44,
+            BoxAlignment = Alignment2D.Middle,
+            TextAlignment = Alignment2D.Middle,
             Color = default(Color).FromRgb(9462096),
-            Scale = 0.6f,
-            Width = (int)menuRect.Width,
-            BoxAlignment = Alignment2D.Left,
-            TextAlignment = Alignment2D.Center
-        };
-        TextProfile textProfile2 = obj.Alter(boxAlignment: Alignment2D.Left, textAlignment: Alignment2D.Center, scale: 0.5f, color: default(Color).FromRgb(6844288), secondColor: default(Color).FromRgb(855827), decoration: TextDecoration.None, width: (int)menuRect.Width);
-        base.core.Renderer["fg", 2002, false].DrawTextS("CHARACTER MODS", menuRect.TopLeft.Shift(5f, 40f + num2 + 17), obj.Alter(null, null, null, font: Font.Bold, textAlignment: Alignment2D.Middle, width: (int)menuRect.Width - 10, height: 44, boxAlignment: null, scale: 1f));
-        base.core.Renderer["fg", 2002, false].DrawTextS("directional thrust: " + (base.core.OptionsData.DirectionalThrust ? "on" : "off"), touchMenu[Button.DirectionalThrust].Rectangle.TopRight.Shift(8f, 8f), textProfile2.Alter(null, null, null, font: Font.Bold, textAlignment: Alignment2D.Left, width: (int)menuRect.Width - 55, height: null, boxAlignment: null, scale: 0.8f));
-        if (hintTimer > 0)
+            Decoration = TextDecoration.None,
+            Font = Font.Bold,
+            Scale = 0.9f
+        });
+        TextProfile textProfile = new TextProfile
         {
-            float num4 = 1f - (float)hintTimer / 70f;
-            RectangleF rectangleF2 = touchMenu[hintButton].Rectangle.Clone();
-            rectangleF2.X -= 30f;
-            rectangleF2.Width += 60f;
-            rectangleF2.Y -= 20f + 20f * num4;
-            base.core.Renderer["fg", 3010, false].DrawTextS(hint, rectangleF2.CenterTop, TextProfile.OrangeBoldText.Alter(TextProfile.OrangeLight * (1f - num4 * num4 * num4), Color.Black * (1f - num4 * num4 * num4), TextDecoration.Contour));
-        }
+            Width = 87,
+            Height = 30,
+            BoxAlignment = Alignment2D.Left,
+            TextAlignment = Alignment2D.LeftMiddle,
+            Decoration = TextDecoration.None,
+            Font = Font.Thin,
+            Scale = 0.75f
+        };
+        base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.DirectionalThrust].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.DirectionalThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         touchMenu.Draw();
         base.Draw();
     }
 
-    private void OnButtonRelease(Button button)
+    private void OnToggle(Button button, bool newValue)
     {
-        switch (button)
+        if (button == Button.DirectionalThrust)
         {
-        case Button.DirectionalThrust:
-            base.core.OptionsData.DirectionalThrust = !base.core.OptionsData.DirectionalThrust;
-            UpdateLabels();
+            base.core.OptionsData.DirectionalThrust = newValue;
             base.core.SaveOptions();
-            hint = ("directional thrust: " + (base.core.OptionsData.DirectionalThrust ? "on" : "off"));
-            hintButton = Button.DirectionalThrust;
-            hintTimer = 70;
             SendMessage(new PlaySoundMessage(SoundName.gylbard_sword));
-            break;
-        case Button.Back:
-            OnBackButtonPressed();
-            break;
         }
     }
 
-    public override void Load()
+    private void OnButtonRelease(Button button)
     {
-        UpdateLabels();
-        SendMessage(new PlaySoundMessage(SoundName.trans_2));
-    }
-
-    private void UpdateLabels()
-    {
-        touchMenu[Button.DirectionalThrust].LabelSprite = (base.core.OptionsData.DirectionalThrust ? _(SpriteName.knight_sword_big) : _(SpriteName.knight_sword));
+        if (button == Button.Back)
+        {
+            OnBackButtonPressed();
+        }
     }
 
     public override void OnBackButtonPressed()
     {
-        SendMessage(new PlaySoundMessage(SoundName.trans_1), 7);
+        base.core.SaveOptions();
         TransitionOut(CoreEvent.PopState);
+        SendMessage(new PlaySoundMessage(SoundName.trans_1), 7);
         base.OnBackButtonPressed();
     }
 }
