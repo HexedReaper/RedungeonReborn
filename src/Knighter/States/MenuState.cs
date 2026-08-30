@@ -17,6 +17,7 @@ public class MenuState : State
 {
 	private enum Button
 	{
+		Daily,
 		Start,
 		Shop,
 		Options,
@@ -107,6 +108,7 @@ public class MenuState : State
 			touchMenu.SetupButton(Button.Shop, new RectangleF(base.core.Renderer.ScreenCenter.X - 25f, num, 50f, 30f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "", null, icon: false, iconIsPicture: false, blink: false, null, null, labelAnim: base.core.CurrentCharDesc.AnimSequence, labelAnimSpeed: base.core.CurrentCharDesc.AnimSpeed * base.core.CurrentCharDesc.ButtonAnimSpeedFactor, yShift: (base.core.ProfileData.Character == Character.Creep) ? (-9.5f) : (-6f), xShift: 0f, fontSize: 1f, drawShadow: true);
 			touchMenu.SetupButton(Button.SubMenu, new RectangleF(base.core.Renderer.ScreenWidth - 23 - ((base.topSafeArea != 0) ? 5 : 0), (base.topSafeArea != 0) ? 7 : 0, 23f, 23f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Purple, "", _(SpriteName.icon_submenu), icon: true, iconIsPicture: false, blink: false, null, null, -3f, 0f, 1f, "", 0.095f, drawShadow: false, SoundName.button_down, SoundName.piston_extend);
 			touchMenu.SetupButton(Button.GPlay, new RectangleF(0f, 0f, 29f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Purple, "", _(SpriteName.icon_gplay));
+            touchMenu.SetupButton(Button.Daily, new RectangleF(31f, 0f, 50f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "DAILY", null, icon: false, iconIsPicture: false);
 		}
 		if (GameOver)
 		{
@@ -647,6 +649,9 @@ public class MenuState : State
 		case Button.SubMenu:
 			SendMessage(new PushStateMessage(new SubMenuState()));
 			break;
+		case Button.Daily:
+            SendMessage(new PushStateMessage(new DailyPrepareState()));
+            break;
 		case Button.GPlay:
 			if (base.core.Game.GooglePlayHelper.SignedOut)
 			{

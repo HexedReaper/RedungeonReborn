@@ -56,6 +56,18 @@ public class ProfileData : Component
 
 	public string LastSyncTime;
 
+    public int DailyBestDistance;
+
+    public string DailyBestDate;
+
+    public int DailyLastDistance;
+
+    public int DailyLastCoins;
+
+    public int DailyLastSeed;
+
+    public int DailyLastCharacter;
+
 	public Language Locale;
 
 	public bool LanguageSelectorPending;
@@ -97,6 +109,7 @@ public class ProfileData : Component
 		DeltaSyncData = new DeltaSyncData();
 		UseCloud = true;
 		LastSyncTime = string.Empty;
+        DailyBestDate = string.Empty;
 		Locale = Language.en_US;
 		LanguageSelectorPending = true;
 	}
@@ -246,6 +259,12 @@ public class ProfileData : Component
 		base.core.Storage.TryGetBool("use-cloud", ref UseCloud);
 		base.core.Storage.TryGetBool("initially-merged", ref InitiallyMerged);
 		base.core.Storage.TryGetString("last-sync-time", ref LastSyncTime);
+        base.core.Storage.TryGetInt("daily-best-distance", ref DailyBestDistance);
+        base.core.Storage.TryGetString("daily-best-date", ref DailyBestDate);
+        base.core.Storage.TryGetInt("daily-last-distance", ref DailyLastDistance);
+        base.core.Storage.TryGetInt("daily-last-coins", ref DailyLastCoins);
+        base.core.Storage.TryGetInt("daily-last-seed", ref DailyLastSeed);
+        base.core.Storage.TryGetInt("daily-last-character", ref DailyLastCharacter);
 		string result6 = string.Empty;
 		base.core.Storage.TryGetString("locale", ref result6);
 		if (result6.Equals(string.Empty))
@@ -297,6 +316,12 @@ public class ProfileData : Component
 		base.core.Storage.SetBool("use-cloud", UseCloud);
 		base.core.Storage.SetBool("initially-merged", InitiallyMerged);
 		base.core.Storage.SetString("last-sync-time", LastSyncTime);
+        base.core.Storage.SetInt("daily-best-distance", DailyBestDistance);
+        base.core.Storage.SetString("daily-best-date", DailyBestDate);
+        base.core.Storage.SetInt("daily-last-distance", DailyLastDistance);
+        base.core.Storage.SetInt("daily-last-coins", DailyLastCoins);
+        base.core.Storage.SetInt("daily-last-seed", DailyLastSeed);
+        base.core.Storage.SetInt("daily-last-character", DailyLastCharacter);
 		base.core.Storage.SetString("locale", Locale.ToString());
 		base.core.Storage.SetBool("language-selector-pending", LanguageSelectorPending);
 		base.core.Storage.Save();

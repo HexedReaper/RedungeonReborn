@@ -147,6 +147,17 @@ public class BatEntity : Entity
                         y = next.Y;
                         UpdateTiles();
                     }
+                    else
+                    {
+                        Fleeing = true;
+                        animation.Speed = 0.4f;
+                        IsBroken = true;
+                        Vector2 away = new Vector2(x, y) - target;
+                        away.Normalize();
+                        away *= 8f;
+                        SetFlying(value: false);
+                        SuspendedStartFlying((int)away.X, (int)away.Y, 0.001f, ignoreObstacles: true);
+                    }
                 }
             }
             else if (Moving)

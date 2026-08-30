@@ -22,9 +22,14 @@ public static class DailyRun
         Active = false;
     }
 
+    public static string TodayKey()
+    {
+        return DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
     public static int TodaysSeed()
     {
-        string key = "redungeon-daily-" + DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        string key = "redungeon-daily-" + TodayKey();
         int hash = 17;
         foreach (char c in key)
         {
@@ -38,12 +43,53 @@ public static class DailyRun
         int h = TodaysSeed();
         h = h * 31 + (int)character;
         h = h * 31 + (options.HardcoreWebs ? 1 : 0);
-        h = h * 31 + (options.DirectionalThrust ? 1 : 0);
-        h = h * 31 + (options.BraggAmmo ? 1 : 0);
-        h = h * 31 + (options.VampirePredator ? 1 : 0);
-        h = h * 31 + (options.UnfriendBats ? 1 : 0);
-        h = h * 31 + (options.FastWings ? 1 : 0);
+        h = h * 31 + ((character == Character.Knight && options.DirectionalThrust) ? 1 : 0);
+        h = h * 31 + ((character == Character.Bragg && options.BraggAmmo) ? 1 : 0);
+        h = h * 31 + ((character == Character.Vampire && options.VampirePredator) ? 1 : 0);
+        h = h * 31 + ((character == Character.Vampire && options.UnfriendBats) ? 1 : 0);
+        h = h * 31 + ((character == Character.Vampire && options.FastWings) ? 1 : 0);
         return h;
+    }
+
+    public static string ModsString(OptionsData o, Character character)
+    {
+        string text = "";
+        int n = 0;
+        if (o.HardcoreWebs)
+        {
+            text = ((n > 0) ? (text + " · ") : text) + "hardcore webs";
+            n++;
+        }
+        if (character == Character.Knight && o.DirectionalThrust)
+        {
+            text = ((n > 0) ? (text + " · ") : text) + "dir thrust";
+            n++;
+        }
+        if (character == Character.Bragg && o.BraggAmmo)
+        {
+            text = ((n > 0) ? (text + " · ") : text) + "bragg ammo";
+            n++;
+        }
+        if (character == Character.Vampire && o.VampirePredator)
+        {
+            text = ((n > 0) ? (text + " · ") : text) + "predator";
+            n++;
+        }
+        if (character == Character.Vampire && o.UnfriendBats)
+        {
+            text = ((n > 0) ? (text + " · ") : text) + "unfriend bats";
+            n++;
+        }
+        if (character == Character.Vampire && o.FastWings)
+        {
+            text = ((n > 0) ? (text + " · ") : text) + "fast wings";
+            n++;
+        }
+        if (n == 0)
+        {
+            return "vanilla";
+        }
+        return text;
     }
 
     public static int Next(int channel, int index, int from, int to)
