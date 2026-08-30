@@ -305,29 +305,20 @@ public class VampireChar : PlayerEntity
             other is RotobladeEntity || other is SpikesEntity || other is CrossbowEntity || other is SawEntity ||
             other is PistonEntity || other is PistonCoreEntity || other is SlimeEntity ||
             other is ZapperEntity || other is FollowerEntity || other is FirewallEntity || other is CannonEntity ||
-            other is WispEntity || other is SerpentEntity))
+            other is WispEntity || (other is BatEntity && base.core.OptionsData.UnfriendBats)))
         {
             if (!other.IsBroken)
             {
                 other.Break(this);
             }
-            bool counts;
-            if (other is SerpentEntity serpent)
+            if (other.IsBroken || other is SlimeEntity || other is WispEntity)
             {
-                counts = serpent.Part == SerpentEntity.SerpentPart.Head;
-            }
-            else
-            {
-                counts = other.IsBroken || other is SlimeEntity || other is WispEntity;
-            }
-            if (counts)
-            {
-                if (predatorKills < 15)
+                if (predatorKills < 10)
                 {
                     predatorKills++;
                 }
-                SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, predatorKills + "/15", default(Color).FromRgb(14045110), 1f, 30), CurrentPlatform));
-                if (predatorKills >= 15 && Abilities.SkillLevel[Skill.TurnIntoBat] < 2)
+                SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, predatorKills + "/10", default(Color).FromRgb(14045110), 1f, 30), CurrentPlatform));
+                if (predatorKills >= 10 && Abilities.SkillLevel[Skill.TurnIntoBat] < 2)
                 {
                     predatorKills = 0;
                     Abilities.SkillLevel[Skill.TurnIntoBat]++;

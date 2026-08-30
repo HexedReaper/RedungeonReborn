@@ -23,5 +23,22 @@ public enum Achievement
 	RikCollectHundredFireballs,
 	PanicBotDepleteHundredZappers,
 	BragFireHundredTimes,
-	SmashDozenPanicBots
+	SmashDozenPanicBots,
+    KillFiveHundredBats,
+    KillFiveHundredSlimes,
+    CollectFiveThousandCoins,
+    LootTwoHundredFiftyChests,
+    PlayForFiveHours,
+    BragFireFiveHundredTimes,
+    VampireFlyTwoHundredMeters,
+    MageSpendTenMinutesInSloMo,
+    SerpentSlayer,
+    KillFiftyWisps,
+    BreakHundredWebs,
+    NathanBreakThousandObstacles,
+    DieFrozen,
+    DiePoisoned,
+    DieConfused,
+    DieInMist,
+    DieInWeb
 }

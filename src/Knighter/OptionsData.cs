@@ -21,6 +21,7 @@ public class OptionsData : Component
 	public bool DirectionalThrust;
 	public bool BraggAmmo;
 	public bool VampirePredator;
+	public bool UnfriendBats;
 	public bool AchievementToasts;
 
 	public OptionsData()
@@ -37,6 +38,7 @@ public class OptionsData : Component
 		DirectionalThrust = false;
 		BraggAmmo = false;
 		VampirePredator = false;
+		UnfriendBats = false;
 		AchievementToasts = true;
 	}
 
@@ -54,6 +56,7 @@ public class OptionsData : Component
 		base.core.Storage.TryGetBool("directional-thrust", ref DirectionalThrust);
 		base.core.Storage.TryGetBool("bragg-ammo", ref BraggAmmo);
 		base.core.Storage.TryGetBool("vampire-predator", ref VampirePredator);
+		base.core.Storage.TryGetBool("unfriend-bats", ref UnfriendBats);
 		base.core.Storage.TryGetBool("achievement-toasts", ref AchievementToasts);
 	}
 
@@ -71,6 +74,7 @@ public class OptionsData : Component
 		base.core.Storage.SetBool("directional-thrust", DirectionalThrust);
 		base.core.Storage.SetBool("bragg-ammo", BraggAmmo);
 		base.core.Storage.SetBool("vampire-predator", VampirePredator);
+		base.core.Storage.SetBool("unfriend-bats", UnfriendBats);
 		base.core.Storage.SetBool("achievement-toasts", AchievementToasts);
         base.core.Storage.Save();
 	}

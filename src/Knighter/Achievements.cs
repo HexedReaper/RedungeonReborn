@@ -101,7 +101,45 @@ public class Achievements : Component
 			Achievement.SmashDozenPanicBots,
 			new AchievementMeta(SId.ACHIEVEMENT_PANIC_name, SId.ACHIEVEMENT_PANIC_brief, SId.ACHIEVEMENT_PANIC_debrief, SpriteName.ppanic_bot_2, default(Color).FromRgb(4718706), default(Color).FromRgb(16732240), default(Color).FromRgb(4718706), hidden: true, 0f, -8f)
 		}
+		
 	};
+
+	private class ModMeta
+    {
+        public string Name;
+
+        public SpriteName Icon;
+
+        public Color ColorFG;
+
+        public ModMeta(string name, SpriteName icon, Color colorFG)
+        {
+            Name = name;
+            Icon = icon;
+            ColorFG = colorFG;
+        }
+    }
+
+    private static readonly Dictionary<Achievement, ModMeta> ModMetas = new Dictionary<Achievement, ModMeta>
+    {
+        { Achievement.KillFiveHundredBats, new ModMeta("Bat Exterminator", SpriteName.bat_3, default(Color).FromRgb(4569718)) },
+        { Achievement.KillFiveHundredSlimes, new ModMeta("Slimepocalypse", SpriteName.slime_2, default(Color).FromRgb(2802993)) },
+        { Achievement.CollectFiveThousandCoins, new ModMeta("Coin Hoarder", SpriteName.achievement_coins, default(Color).FromRgb(16303176)) },
+        { Achievement.LootTwoHundredFiftyChests, new ModMeta("Master Thief", SpriteName.achievement_chest, default(Color).FromRgb(14903568)) },
+        { Achievement.PlayForFiveHours, new ModMeta("Dungeon Regular", SpriteName.achievement_veteran, default(Color).FromRgb(11026850)) },
+        { Achievement.BragFireFiveHundredTimes, new ModMeta("Trigger Happy", SpriteName.skill_hud_gun, default(Color).FromRgb(1876735)) },
+        { Achievement.VampireFlyTwoHundredMeters, new ModMeta("Night Wings", SpriteName.kazhan_bat_1, default(Color).FromRgb(14168481)) },
+        { Achievement.MageSpendTenMinutesInSloMo, new ModMeta("Time Lord", SpriteName.skill_hud_sandclock, default(Color).FromRgb(8570154)) },
+        { Achievement.SerpentSlayer, new ModMeta("Serpent Slayer", SpriteName.rib_skull_glow, default(Color).FromRgb(4758285)) },
+        { Achievement.KillFiftyWisps, new ModMeta("Light Eater", SpriteName.wisp_body_fire, default(Color).FromRgb(16757276)) },
+        { Achievement.BreakHundredWebs, new ModMeta("Web Wrecker", SpriteName.spider_web_cover, default(Color).FromRgb(5070470)) },
+        { Achievement.NathanBreakThousandObstacles, new ModMeta("Demolition Crew", SpriteName.skill_hud_wrench, default(Color).FromRgb(15808311)) },
+        { Achievement.DieFrozen, new ModMeta("Popsicle", SpriteName.wisp_body_snow, default(Color).FromRgb(12638456)) },
+        { Achievement.DiePoisoned, new ModMeta("Green Dream", SpriteName.wisp_body_poison, default(Color).FromRgb(11062016)) },
+        { Achievement.DieConfused, new ModMeta("Which Way Is Up", SpriteName.wisp_body_confusion, default(Color).FromRgb(16565559)) },
+        { Achievement.DieInMist, new ModMeta("Fear Of The Dark", SpriteName.wisp_body_darkness, default(Color).FromRgb(16738262)) },
+        { Achievement.DieInWeb, new ModMeta("Just A Fly", SpriteName.spider_web_1, default(Color).FromRgb(5070470)) }
+    };
 
 	public static Dictionary<InjuryType, Stat> CauseOfDeathStat = new Dictionary<InjuryType, Stat>
 	{
@@ -250,9 +288,77 @@ public class Achievements : Component
 			100
 		},
 		{
-			Achievement.SmashDozenPanicBots,
-			12
-		}
+        	Achievement.SmashDozenPanicBots,
+            12
+        },
+        {
+            Achievement.KillFiveHundredBats,
+            500
+        },
+        {
+            Achievement.KillFiveHundredSlimes,
+            500
+        },
+        {
+            Achievement.CollectFiveThousandCoins,
+            5000
+        },
+        {
+            Achievement.LootTwoHundredFiftyChests,
+            250
+        },
+        {
+            Achievement.PlayForFiveHours,
+            1080000
+        },
+        {
+            Achievement.BragFireFiveHundredTimes,
+            500
+        },
+        {
+            Achievement.VampireFlyTwoHundredMeters,
+            200
+        },
+        {
+            Achievement.MageSpendTenMinutesInSloMo,
+            36000
+        },
+        {
+            Achievement.SerpentSlayer,
+            25
+        },
+        {
+            Achievement.KillFiftyWisps,
+            50
+        },
+        {
+            Achievement.BreakHundredWebs,
+            100
+        },
+        {
+            Achievement.NathanBreakThousandObstacles,
+            1000
+        },
+        {
+            Achievement.DieFrozen,
+            1
+        },
+        {
+            Achievement.DiePoisoned,
+            1
+        },
+        {
+            Achievement.DieConfused,
+            1
+        },
+        {
+            Achievement.DieInMist,
+            1
+        },
+        {
+            Achievement.DieInWeb,
+            1
+        }
 	};
 
 	private readonly Dictionary<Achievement, int> previousPercentComplete;
@@ -321,7 +427,24 @@ public class Achievements : Component
 			Achievement.CollectThousandCoins => _stat(Stat.CoinsCollected), 
 			Achievement.Webmaster => _stat(Stat.FlawlessWebs), 
 			Achievement.SmashDozenPanicBots => _stat(Stat.SmashedPanicBots), 
-			_ => 0, 
+			Achievement.KillFiveHundredBats => _stat(Stat.BatsKilled), 
+            Achievement.KillFiveHundredSlimes => _stat(Stat.SlimesKilled), 
+            Achievement.CollectFiveThousandCoins => _stat(Stat.CoinsCollected), 
+            Achievement.LootTwoHundredFiftyChests => _stat(Stat.ChestsLooted), 
+            Achievement.PlayForFiveHours => _stat(Stat.TicksInGame), 
+            Achievement.BragFireFiveHundredTimes => _stat(Stat.BraggTimesFired), 
+            Achievement.VampireFlyTwoHundredMeters => _stat(Stat.VampireMetersFlownAsBat), 
+            Achievement.MageSpendTenMinutesInSloMo => _stat(Stat.MageTicksInSloMo), 
+            Achievement.SerpentSlayer => _stat(Stat.SerpentsKilled), 
+            Achievement.KillFiftyWisps => _stat(Stat.WispsKilled), 
+            Achievement.BreakHundredWebs => _stat(Stat.WebsBroken), 
+            Achievement.NathanBreakThousandObstacles => _stat(Stat.NathanObstaclesBroken), 
+            Achievement.DieFrozen => _stat(Stat.DiedFrozen), 
+            Achievement.DiePoisoned => _stat(Stat.DiedPoisoned), 
+            Achievement.DieConfused => _stat(Stat.DiedConfused), 
+            Achievement.DieInMist => _stat(Stat.DiedInMist), 
+            Achievement.DieInWeb => _stat(Stat.DiedInSpiderWeb), 
+            _ => 0,
 		};
 	}
 
@@ -336,21 +459,27 @@ public class Achievements : Component
             Achievement next = toastQueue[0];
             toastQueue.RemoveAt(0);
             toastCooldown = 130;
-            AchievementMeta meta = Metas[next];
             string text;
-            if (base.core.ProfileData.IsAchievementUnlocked(next))
+            SpriteName icon;
+            Color color;
+            if (ModMetas.ContainsKey(next))
             {
-                text = __(meta.Name);
-            }
-            else if (IsIncremental(next))
-            {
-                text = __(meta.Name) + " " + GetProgress(next) + "/" + Targets[next];
+                text = ModMetas[next].Name;
+                icon = ModMetas[next].Icon;
+                color = ModMetas[next].ColorFG;
             }
             else
             {
+                AchievementMeta meta = Metas[next];
                 text = __(meta.Name);
+                icon = meta.Icon;
+                color = meta.ColorFG;
             }
-            base.core.CurrentPlayState.Hud.ShowAlert("ach_" + next, text, meta.ColorFG, 120, meta.Icon);
+            if (!base.core.ProfileData.IsAchievementUnlocked(next) && IsIncremental(next))
+            {
+                text = text + " " + GetProgress(next) + "/" + Targets[next];
+            }
+            base.core.CurrentPlayState.Hud.ShowAlert("ach_" + next, text, color, 120, icon);
         }
         if (base.ticks % 100 != 0)
         {
@@ -366,10 +495,13 @@ public class Achievements : Component
                 int num2 = 100 * progress / num;
                 if (num2 > previousPercentComplete[value])
                 {
-                    list.Add(value);
+                    if (!ModMetas.ContainsKey(value))
+                    {
+                        list.Add(value);
+                    }
                     previousPercentComplete[value] = num2;
                     int milestone = num2 / 25 * 25;
-                    if (milestone > lastMilestone[value] && milestone > 0 && milestone < 100 && !Metas[value].Hidden)
+                    if (milestone > lastMilestone[value] && milestone > 0 && milestone < 100 && (!Metas.ContainsKey(value) || !Metas[value].Hidden))
                     {
                         lastMilestone[value] = milestone;
                         QueueToast(value);
