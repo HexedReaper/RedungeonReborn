@@ -24,7 +24,7 @@ public class WebEntity : Entity
     private Stack<Vector2> pattern;
 
     private Vector2[] initialPattern;
-	
+
 	private PlayerEntity capturedPlayer;
 
 	private int arrowTimer;
@@ -108,12 +108,14 @@ public class WebEntity : Entity
 			Difficulty = ((distance < 80) ? 2 : 3);
 		}
 		pattern = new Stack<Vector2>();
+        initialPattern = new Vector2[Difficulty];
         for (int i = 0; i < Difficulty; i++)
         {
             int num = Component._rnd(0, 3);
-            pattern.Push(new Vector2((num > 0) ? (num - 2) : 0, (num < 3) ? (num - 1) : 0));
+            Vector2 vector = new Vector2((num > 0) ? (num - 2) : 0, (num < 3) ? (num - 1) : 0);
+            pattern.Push(vector);
+            initialPattern[i] = vector;
         }
-        initialPattern = pattern.ToArray();
 	}
 
 	public override void Update()
@@ -258,8 +260,8 @@ public class WebEntity : Entity
 
     private void RestartPattern()
     {
-        pattern.Clear();
-        for (int num = initialPattern.Length - 1; num >= 0; num--)
+        pattern = new Stack<Vector2>();
+        for (int num = 0; num < initialPattern.Length; num++)
         {
             pattern.Push(initialPattern[num]);
         }
