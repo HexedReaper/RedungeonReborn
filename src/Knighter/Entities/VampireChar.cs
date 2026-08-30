@@ -357,13 +357,13 @@ public class VampireChar : PlayerEntity
 	}
 
 	public override bool TryResistSpell(SpellType spellType, Entity offender = null)
-	{
-		if (!FlightActive)
-		{
-			return base.TryResistSpell(spellType, offender);
-		}
-		return true;
-	}
+    {
+        if (FlightActive || Flying)
+        {
+            return true;
+        }
+        return base.TryResistSpell(spellType, offender);
+    }
 
 	public override bool SpawnFragments(bool bolt = false)
 	{

@@ -1,4 +1,5 @@
 using System;
+using Knighter.States;
 using Knighter.Graphics;
 using Knighter.Helpers;
 using Knighter.Localization;
@@ -226,9 +227,9 @@ public class BraggChar : PlayerEntity
 
 	private void DrawCustomHUD()
     {
-        if (base.core.OptionsData.BraggAmmo)
+        if (base.core.OptionsData.BraggAmmo && base.core.GetCurrentState() is PlayState)
         {
-            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo, new Vector2(base.core.Renderer.ScreenCenter.X, 46f), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
+            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo, new Vector2(base.core.Renderer.ScreenWidth - 30f, base.core.Renderer.ScreenHeight - 82f), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
         }
     }
 
