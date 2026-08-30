@@ -136,11 +136,11 @@ public class BatEntity : Entity
                 }
                 Vector2 target = base.core.CurrentPlayState.Player.WorldCoordinates;
                 Vector2 offset = target - new Vector2(x, y);
-                if (offset.LengthSquared() < 16f)
+                if (offset.LengthSquared() < 9f)
                 {
                     offset.Normalize();
-                    x += offset.X * 0.05f;
-                    y += offset.Y * 0.05f;
+                    x += offset.X * 0.035f;
+                    y += offset.Y * 0.035f;
                     UpdateTiles();
                 }
             }
