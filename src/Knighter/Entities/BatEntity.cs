@@ -129,9 +129,14 @@ public class BatEntity : Entity
             unfriended = (base.core.OptionsData.UnfriendBats && base.core.CurrentPlayState != null && base.core.CurrentPlayState.Player is VampireChar);
             if (unfriended)
             {
+                if (loveEmitter != null)
+                {
+                    loveEmitter.Stop();
+                    loveEmitter = null;
+                }
                 Vector2 target = base.core.CurrentPlayState.Player.WorldCoordinates;
-                x += (target.X - x) * 0.03f;
-                y += (target.Y - y) * 0.03f;
+                x += (target.X - x) * 0.04f;
+                y += (target.Y - y) * 0.04f;
                 UpdateTiles();
             }
             else if (Moving)
@@ -163,7 +168,7 @@ public class BatEntity : Entity
 
 	public override void Draw()
 	{
-		avoidTarget = (avoidPlayer ? (900f - Component._m((base.core.CurrentPlayState.Player.WorldCenter - base.WorldCenter).LengthSquared(), 900f)) : 0f);
+		avoidTarget = ((avoidPlayer && !unfriended) ? (900f - Component._m((base.core.CurrentPlayState.Player.WorldCenter - base.WorldCenter).LengthSquared(), 900f)) : 0f);
 		Sprite currentFrame = animation.GetCurrentFrame();
 		Color? tint = (unfriended ? default(Color).FromRgb(16732240) : (Color?)null);
         base.core.Renderer[base.Z + 3].DrawSpriteW(currentFrame, base.WorldCenter.Shift(-10.5f, -12f - avoid * 0.03f), tint, new Vector2((!Fleeing) ? 1f : (1f + 0.6f * (float)fleeDelay / 70f)));
@@ -220,10 +225,10 @@ public class BatEntity : Entity
 	{
 		if (base.Age >= 10 && !Fleeing)
 		{
-			if (other is PlayerEntity playerEntity && !avoidPlayer)
-			{
-				playerEntity.Hurt(InjuryType.Bat, this);
-			}
+			if (other is PlayerEntity playerEntity && (!avoidPlayer || unfriended))
+            {
+                playerEntity.Hurt(InjuryType.Bat, this);
+            }
 			base.CollideWith(other);
 		}
 	}

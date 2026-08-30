@@ -283,51 +283,81 @@ public class VampireChar : PlayerEntity
 	}
 
 	public override bool TryResist(InjuryType injuryType, Entity offender)
-	{
-		if (reviving)
-		{
-			return true;
-		}
-		if (FlightActive)
-		{
-			if (injuryType != InjuryType.Saw && injuryType != InjuryType.Slime && injuryType != InjuryType.Sword)
-			{
-				return injuryType == InjuryType.Zap;
-			}
-			return true;
-		}
-		return base.TryResist(injuryType, offender);
-	}
+    {
+        if (reviving)
+        {
+            return true;
+        }
+        if (FlightActive)
+        {
+            if (base.core.OptionsData.UnfriendBats && injuryType == InjuryType.Bat)
+            {
+                return base.TryResist(injuryType, offender);
+            }
+            if (base.core.OptionsData.VampirePredator && offender is StatueEntity statue && !statue.Unbreakable)
+            {
+                statue.Break(this);
+                if (statue.IsBroken)
+                {
+                    RegisterKill(statue);
+                }
+                return true;
+            }
+            if (injuryType != InjuryType.Saw && injuryType != InjuryType.Slime && injuryType != InjuryType.Sword)
+            {
+                return injuryType == InjuryType.Zap;
+            }
+            return true;
+        }
+        return base.TryResist(injuryType, offender);
+    }
 
-	public override void CollideWith(Entity other)
+    public override void CollideWith(Entity other)
     {
         if (base.core.OptionsData.VampirePredator && FlightActive && !Dead && !reviving && (
-            other is RotobladeEntity || other is SpikesEntity || other is CrossbowEntity || other is SawEntity ||
-            other is PistonEntity || other is PistonCoreEntity || other is SlimeEntity ||
-            other is ZapperEntity || other is FollowerEntity || other is FirewallEntity || other is CannonEntity ||
-            other is WispEntity || (other is BatEntity && base.core.OptionsData.UnfriendBats)))
+            other is SlimeEntity || other is WispEntity || other is SerpentEntity || other is StatueEntity ||
+            (other is BatEntity && base.core.OptionsData.UnfriendBats)))
         {
             if (!other.IsBroken)
             {
                 other.Break(this);
             }
-            if (other.IsBroken || other is SlimeEntity || other is WispEntity)
+            bool counts;
+            if (other is SerpentEntity serpent)
             {
-                if (predatorKills < 10)
-                {
-                    predatorKills++;
-                }
-                SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, predatorKills + "/10", default(Color).FromRgb(14045110), 1f, 30), CurrentPlatform));
-                if (predatorKills >= 10 && Abilities.SkillLevel[Skill.TurnIntoBat] < 2)
-                {
-                    predatorKills = 0;
-                    Abilities.SkillLevel[Skill.TurnIntoBat]++;
-                    base.playState.Hud.ShowAlert("bat-restore", __(Abilities.SkillDesc[Skill.TurnIntoBat].Name), default(Color).FromRgb(14045110), 90, Abilities.SkillDesc[Skill.TurnIntoBat].HudMainIcon);
-                    SendMessage(new PlaySoundMessage(SoundName.kazhan_turn));
-                }
+                counts = serpent.Part == SerpentEntity.SerpentPart.Head;
+            }
+            else if (other is StatueEntity)
+            {
+                counts = other.IsBroken;
+            }
+            else
+            {
+                counts = other.IsBroken || other is SlimeEntity || other is WispEntity;
+            }
+            if (counts)
+            {
+                RegisterKill(other);
             }
         }
         base.CollideWith(other);
+    }
+
+	private void RegisterKill(Entity victim)
+    {
+        base.playState.Camera.Shake("shot");
+        if (predatorKills < 10)
+        {
+            predatorKills++;
+        }
+        SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, predatorKills + "/10", default(Color).FromRgb(14045110), 1f, 30), CurrentPlatform));
+        if (predatorKills >= 10 && Abilities.SkillLevel[Skill.TurnIntoBat] < 2)
+        {
+            predatorKills = 0;
+            Abilities.SkillLevel[Skill.TurnIntoBat]++;
+            base.playState.Hud.ShowAlert("bat-restore", __(Abilities.SkillDesc[Skill.TurnIntoBat].Name), default(Color).FromRgb(14045110), 90, Abilities.SkillDesc[Skill.TurnIntoBat].HudMainIcon);
+            SendMessage(new PlaySoundMessage(SoundName.kazhan_turn));
+        }
     }
 
 	protected override bool TryResistFall()
