@@ -19,6 +19,7 @@ public class OptionsData : Component
 	public bool SeeThroughMode;
 	public bool HardcoreWebs;
 	public bool DirectionalThrust;
+	public bool BraggAmmo;
 
 	public OptionsData()
 	{
@@ -32,6 +33,7 @@ public class OptionsData : Component
 		SeeThroughMode = false;
 		HardcoreWebs = false;
 		DirectionalThrust = false;
+		BraggAmmo = false;
 	}
 
 	public void LoadFromStorage()
@@ -46,6 +48,7 @@ public class OptionsData : Component
 		base.core.Storage.TryGetBool("see-through", ref SeeThroughMode);
         base.core.Storage.TryGetBool("hardcore-webs", ref HardcoreWebs);
 		base.core.Storage.TryGetBool("directional-thrust", ref DirectionalThrust);
+		base.core.Storage.TryGetBool("bragg-ammo", ref BraggAmmo);
 	}
 
 	public void SaveIntoStorage()
@@ -60,6 +63,7 @@ public class OptionsData : Component
         base.core.Storage.SetBool("see-through", SeeThroughMode);
         base.core.Storage.SetBool("hardcore-webs", HardcoreWebs);
 		base.core.Storage.SetBool("directional-thrust", DirectionalThrust);
+		base.core.Storage.SetBool("bragg-ammo", BraggAmmo);
         base.core.Storage.Save();
 	}
 }

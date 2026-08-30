@@ -11,6 +11,7 @@ public class CharacterModsState : State
     private enum Button
     {
         DirectionalThrust,
+        BraggAmmo,
         Back
     }
 
@@ -31,6 +32,7 @@ public class CharacterModsState : State
         touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 10000);
         touchMenu.OnToggle = OnToggle;
         touchMenu.SetupToggle(Button.DirectionalThrust, menuRect.TopLeft.Shift(12f, 90f), base.core.OptionsData.DirectionalThrust, 120);
+        touchMenu.SetupToggle(Button.BraggAmmo, menuRect.TopLeft.Shift(12f, 111f), base.core.OptionsData.BraggAmmo, 120);
         touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
@@ -77,7 +79,7 @@ public class CharacterModsState : State
         {
             Width = (int)menuRect.Width - 10,
             Height = 44,
-            BoxAlignment = Alignment2D.Middle,
+            BoxAlignment = Alignment2D.Left,
             TextAlignment = Alignment2D.Middle,
             Color = default(Color).FromRgb(9462096),
             Decoration = TextDecoration.None,
@@ -95,6 +97,7 @@ public class CharacterModsState : State
             Scale = 0.75f
         };
         base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.DirectionalThrust].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.DirectionalThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("bragg ammo (3 / 30m)", touchMenu[Button.BraggAmmo].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.BraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         touchMenu.Draw();
         base.Draw();
     }
@@ -107,7 +110,14 @@ public class CharacterModsState : State
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.gylbard_sword));
         }
+        if (button == Button.BraggAmmo)
+        {
+            base.core.OptionsData.BraggAmmo = newValue;
+            base.core.SaveOptions();
+            SendMessage(new PlaySoundMessage(SoundName.bragg_gun_cock));
+        }
     }
+    
 
     private void OnButtonRelease(Button button)
     {

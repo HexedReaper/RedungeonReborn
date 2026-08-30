@@ -19,6 +19,14 @@ public class BraggChar : PlayerEntity
 
 	private int shotCost = 15;
 
+    private int ammo = 3;
+
+    private float climbProgress;
+
+    private float lastWorldY;
+
+    private bool climbStarted;
+
 	private bool shooting => shotAnim >= 0;
 
 	public int Keys { get; private set; }
@@ -96,14 +104,25 @@ public class BraggChar : PlayerEntity
 	{
 		if (!base.Falling)
 		{
-			if (base.core.CurrentPlayState.Session.CollectedCoins < shotCost)
-			{
-				SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, string.Format(__(SId.SKILL_GUNSHOT_alert_cost), shotCost)), CurrentPlatform));
-				return;
-			}
-			base.core.CurrentPlayState.Session.CollectedCoins -= shotCost;
-			base.core.ProfileData.Coins -= shotCost;
-			SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, "-^" + shotCost, Color.White, 1.5f), CurrentPlatform));
+			if (base.core.OptionsData.BraggAmmo)
+            {
+                if (ammo <= 0)
+                {
+                    SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, __(SId.SKILL_still_charging)), CurrentPlatform));
+                    return;
+                }
+            }
+            else
+            {
+                if (base.core.CurrentPlayState.Session.CollectedCoins < shotCost)
+                {
+                    SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, string.Format(__(SId.SKILL_GUNSHOT_alert_cost), shotCost)), CurrentPlatform));
+                    return;
+                }
+                base.core.CurrentPlayState.Session.CollectedCoins -= shotCost;
+                base.core.ProfileData.Coins -= shotCost;
+                SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, "-^" + shotCost, Color.White, 1.5f), CurrentPlatform));
+            }
 			shotAnim = 0;
 			Light light = base.core.CurrentPlayState.LightManager.AddLight(Color.Gold, 0.8f, 0.4f, this);
 			light.Follow(this);
@@ -121,8 +140,12 @@ public class BraggChar : PlayerEntity
 				1 => 0, 
 				_ => 20, 
 			}, this), null));
-			_inc(Stat.BraggTimesFired);
-			base.TryTriggerAbility();
+            _inc(Stat.BraggTimesFired);
+            if (base.core.OptionsData.BraggAmmo)
+            {
+                ammo--;
+            }
+            base.TryTriggerAbility();
 		}
 	}
 
@@ -138,7 +161,26 @@ public class BraggChar : PlayerEntity
 	public override void Update()
 	{
 		base.playState.Hud.AbilitiesHud.skillPanels[Skill.TreasureHunt].Text = "× " + Keys;
-		if (shooting)
+        if (base.core.OptionsData.BraggAmmo && ammo < 3)
+        {
+            if (!climbStarted)
+            {
+                lastWorldY = base.WorldCoordinates.Y;
+                climbStarted = true;
+            }
+            float dy = lastWorldY - base.WorldCoordinates.Y;
+            if (dy > 0f && dy < 5f)
+            {
+                climbProgress += dy;
+            }
+            lastWorldY = base.WorldCoordinates.Y;
+            if (climbProgress >= 30f)
+            {
+                climbProgress = 0f;
+                ammo = 3;
+            }
+        }
+        if (shooting)
 		{
 			shotAnim++;
 			if (shotAnim >= shotAnimDuration)
@@ -227,14 +269,21 @@ public class BraggChar : PlayerEntity
 	}
 
 	protected override void UpdateAbilities()
-	{
-		float num = Abilities.SkillCharge[Skill.Gunshot];
-		Abilities.SkillCharge[Skill.Gunshot] = Component._m((float)base.playState.Session.CollectedCoins / (float)shotCost, 1f);
-		if (Abilities.SkillCharge[Skill.Gunshot].IsEqualTo(1f) && num < 1f)
-		{
-			SendMessage(new PlayWorldSoundMessage(SoundName.bragg_gun_cock, base.WorldCenter));
-		}
-	}
+    {
+        float num = Abilities.SkillCharge[Skill.Gunshot];
+        if (base.core.OptionsData.BraggAmmo)
+        {
+            Abilities.SkillCharge[Skill.Gunshot] = (float)ammo / 3f;
+        }
+        else
+        {
+            Abilities.SkillCharge[Skill.Gunshot] = Component._m((float)base.playState.Session.CollectedCoins / (float)shotCost, 1f);
+        }
+        if (Abilities.SkillCharge[Skill.Gunshot].IsEqualTo(1f) && num < 1f)
+        {
+            SendMessage(new PlayWorldSoundMessage(SoundName.bragg_gun_cock, base.WorldCenter));
+        }
+    }
 
 	public void CollectKey(int count = 1)
 	{
