@@ -303,6 +303,10 @@ public class VampireChar : PlayerEntity
                 }
                 return true;
             }
+            if (base.core.OptionsData.VampirePredator && offender is WispEntity)
+            {
+                return true;
+            }
             if (injuryType != InjuryType.Saw && injuryType != InjuryType.Slime && injuryType != InjuryType.Sword)
             {
                 return injuryType == InjuryType.Zap;
@@ -346,6 +350,8 @@ public class VampireChar : PlayerEntity
 	private void RegisterKill(Entity victim)
     {
         base.playState.Camera.Shake("shot");
+        SendMessage(new SpawnEntityMessage(new EffectEntity(victim.CenterCoordinates, "hit_claws_", "123").SetLayer("fg", -2, lit: false), null));
+        SendMessage(new SpawnEntityMessage(new EffectEntity(victim.CenterCoordinates, "hit_claws_", "123", mirrored: true).SetLayer("fg", -2, lit: false), null), 15);
         if (predatorKills < 10)
         {
             predatorKills++;
