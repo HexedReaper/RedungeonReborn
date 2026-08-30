@@ -301,14 +301,26 @@ public class VampireChar : PlayerEntity
 
 	public override void CollideWith(Entity other)
     {
-        if (base.core.OptionsData.VampirePredator && FlightActive && !Dead && !reviving && !other.IsBroken && (
+        if (base.core.OptionsData.VampirePredator && FlightActive && !Dead && !reviving && (
             other is RotobladeEntity || other is SpikesEntity || other is CrossbowEntity || other is SawEntity ||
             other is PistonEntity || other is PistonCoreEntity || other is SlimeEntity ||
             other is ZapperEntity || other is FollowerEntity || other is FirewallEntity || other is CannonEntity ||
-            other is WispEntity))
+            other is WispEntity || other is SerpentEntity))
         {
-            other.Break(this);
-            if (other.IsBroken || other is SlimeEntity || other is WispEntity)
+            if (!other.IsBroken)
+            {
+                other.Break(this);
+            }
+            bool counts;
+            if (other is SerpentEntity serpent)
+            {
+                counts = serpent.Part == SerpentEntity.SerpentPart.Head;
+            }
+            else
+            {
+                counts = other.IsBroken || other is SlimeEntity || other is WispEntity;
+            }
+            if (counts)
             {
                 if (predatorKills < 15)
                 {

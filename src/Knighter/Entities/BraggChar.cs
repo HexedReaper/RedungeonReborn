@@ -23,7 +23,7 @@ public class BraggChar : PlayerEntity
 
     private float climbProgress;
 
-    private float lastWorldY;
+    private float bestY;
 
     private bool climbStarted;
 
@@ -162,24 +162,26 @@ public class BraggChar : PlayerEntity
 	{
 		base.playState.Hud.AbilitiesHud.skillPanels[Skill.TreasureHunt].Text = "× " + Keys;
         base.playState.Hud.AbilitiesHud.skillPanels[Skill.Gunshot].Text = (base.core.OptionsData.BraggAmmo ? ("× " + ammo) : "");
-        base.playState.Hud.AbilitiesHud.skillPanels[Skill.Gunshot].Text = (base.core.OptionsData.BraggAmmo ? ("× " + ammo) : "");
-        if (base.core.OptionsData.BraggAmmo && ammo < 3)
+        if (base.core.OptionsData.BraggAmmo)
         {
             if (!climbStarted)
             {
-                lastWorldY = base.WorldCoordinates.Y;
+                bestY = base.WorldCoordinates.Y;
                 climbStarted = true;
             }
-            float dy = lastWorldY - base.WorldCoordinates.Y;
-            if (dy > 0f && dy < 5f)
+            if (base.WorldCoordinates.Y < bestY)
             {
-                climbProgress += dy;
-            }
-            lastWorldY = base.WorldCoordinates.Y;
-            if (climbProgress >= 10f)
-            {
-                climbProgress = 0f;
-                ammo++;
+                float gained = bestY - base.WorldCoordinates.Y;
+                bestY = base.WorldCoordinates.Y;
+                if (ammo < 3)
+                {
+                    climbProgress += gained;
+                    if (climbProgress >= 10f)
+                    {
+                        climbProgress = 0f;
+                        ammo++;
+                    }
+                }
             }
         }
         if (shooting)
