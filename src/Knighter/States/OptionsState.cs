@@ -23,6 +23,7 @@ public class OptionsState : State
 		Back,
 		PrivacyPolicy,
 		HardcoreWebs,
+		CharacterMods,
 		Debug1,
 		Debug2,
 		Debug3,
@@ -87,6 +88,7 @@ public class OptionsState : State
 		touchMenu.SetupButton(Button.PrivacyPolicy, new RectangleF(menuRect.Left + 17f, num4 - 135f + 48f, menuRect.Width - 34f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, __(SId.OPTIONS_privacy_policy));
 		touchMenu.SetupButton(Button.Cloud, new RectangleF(num3, num4 - 70f, num, num2), base.core.SpriteManager.GetSprite(SpriteName.button), base.core.SpriteManager.GetSprite(SpriteName.button_pressed), null, stretch: true);
         touchMenu.SetupButton(Button.HardcoreWebs, new RectangleF(num3 + 40f, num4 - 70f, num, num2), base.core.SpriteManager.GetSprite(SpriteName.button), base.core.SpriteManager.GetSprite(SpriteName.button_pressed), null, stretch: true);
+		touchMenu.SetupButton(Button.CharacterMods, new RectangleF(num3 + 80f, num4 - 70f, num, num2), base.core.SpriteManager.GetSprite(SpriteName.button), base.core.SpriteManager.GetSprite(SpriteName.button_pressed), null, stretch: true);
 		touchMenu.SetupButton(Button.Languages, new RectangleF(num3, num4 - 35f, num, num2), base.core.SpriteManager.GetSprite(SpriteName.button), base.core.SpriteManager.GetSprite(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_globe));
 		touchMenu.SetupButton(Button.RestoreIap, new RectangleF(num3 + 40f, num4 - 35f, num, num2), base.core.SpriteManager.GetSprite(SpriteName.button), base.core.SpriteManager.GetSprite(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_restore_iap));
 		touchMenu.SetupButton(Button.Feedback, new RectangleF(num3 + 80f, num4 - 35f, num, num2), base.core.SpriteManager.GetSprite(SpriteName.button), base.core.SpriteManager.GetSprite(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_feedback));
@@ -100,6 +102,7 @@ public class OptionsState : State
 		touchMenu[Button.PrivacyPolicy].Rectangle.Shift(0f, y);
 		touchMenu[Button.Cloud].Rectangle.Shift(0f, y);
         touchMenu[Button.HardcoreWebs].Rectangle.Shift(0f, y);
+		touchMenu[Button.CharacterMods].Rectangle.Shift(0f, y);
 		touchMenu[Button.Languages].Rectangle.Shift(0f, y);
 		touchMenu[Button.RestoreIap].Rectangle.Shift(0f, y);
 		touchMenu[Button.Feedback].Rectangle.Shift(0f, y);
@@ -255,6 +258,9 @@ public class OptionsState : State
             hintTimer = 70;
             SendMessage(new PlaySoundMessage(SoundName.web_1));
             break;
+		case Button.CharacterMods:
+            SendMessage(new PushStateMessage(new CharacterModsState()));
+            break;
 		case Button.Languages:
 			SendMessage(new PushStateMessage(new LanguageSelectorState()));
 			break;
@@ -281,6 +287,7 @@ public class OptionsState : State
 		touchMenu[Button.PlaySounds].LabelSprite = (base.core.OptionsData.PlaySounds ? _(SpriteName.icon_sound_on) : _(SpriteName.icon_sound_off));
         touchMenu[Button.PlayMusic].LabelSprite = (base.core.OptionsData.PlayMusic ? _(SpriteName.icon_music_on) : _(SpriteName.icon_music_off));
         touchMenu[Button.HardcoreWebs].LabelSprite = (base.core.OptionsData.HardcoreWebs ? _(SpriteName.spider_web_cover) : _(SpriteName.spider_web_1));
+		touchMenu[Button.CharacterMods].LabelSprite = _(SpriteName.knight_portrait);
 	}
 
 	public override void OnBackButtonPressed()
