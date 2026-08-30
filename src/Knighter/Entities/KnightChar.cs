@@ -158,11 +158,12 @@ public class KnightChar : PlayerEntity
 				{
 					p.Position = base.WorldCenter;
 					p.Dead = p.Age == 30;
-				}).OnDraw(delegate(Particle p)
-				{
-					float num2 = (30f - (float)p.Age) / 30f;
-					base.core.Renderer["fg", -2, false].DrawSpriteW(_(SpriteName.knight_sword_big), p.Position + AttackSwordOffset(), Color.White * num2 * 2f, new Vector2(0.5f + (1f - num2) * 1.6f), AttackRotation(), SpriteFlip.None, SpriteOrigin.BottomCenter);
-				})
+				                }).OnDraw(delegate(Particle p)
+                {
+                    float num2 = (30f - (float)p.Age) / 30f;
+                    float num3 = 0.5f + (1f - num2) * 1.6f;
+                    base.core.Renderer["fg", -2, false].DrawSpriteW(sword, p.Position + RotFromNorth(new Vector2(1f, -9f - num3 * sword.Height * 0.5f)), Color.White * num2 * 2f, new Vector2(num3), AttackRotation(), SpriteFlip.None, SpriteOrigin.Center);
+                })
 					.Emit(1);
 			}
 			if (attackTimer < 10)
@@ -200,13 +201,13 @@ public class KnightChar : PlayerEntity
 		if (attackTimer >= 0)
 		{
 			float num = Component._m(Component._sin((float)attackTimer * (float)Math.PI / 40f) * 2f, 1f);
-			base.core.Renderer["fg", -2, false].FillScreen(Color.Black * num * 0.6f);
-			base.core.Renderer["fg", -2, false].FillScreen(Color.Black * num * 0.6f);
+            base.core.Renderer["fg", -2, false].FillScreen(Color.Black * num * 0.6f);
             Sprite sprite = _(SpriteName.knight_n6);
-            Vector2 vector = base.WorldPosition.Shift(0f, -7f);
-            base.core.Renderer["fg", -1, false].DrawSpriteW(sprite, vector + PosShift + new Vector2(sprite.Width, sprite.Height) * 0.5f, null, null, AttackRotation(), SpriteFlip.None, SpriteOrigin.Center);
-            base.core.Renderer["fg", -2, false].DrawSpriteW(sprite, vector.Shift(0f, 12f) + PosShift + base.dAnim, Color.Black * 0.2f, new Vector2(1f, 0.8f), 0f, SpriteFlip.Vertical);
-            base.core.Renderer["fg", -2, false].DrawSpriteW(sword, vector.Shift(9f, 3f) + PosShift, null, new Vector2(1f) * 0.8f, AttackRotation(), SpriteFlip.None, SpriteOrigin.BottomCenter);
+            Vector2 pivot = base.WorldCenter;
+            float rot = AttackRotation();
+            base.core.Renderer["fg", -1, false].DrawSpriteW(sprite, pivot + RotFromNorth(new Vector2(sprite.Width * 0.5f - 9.5f, sprite.Height * 0.5f - 22f)), null, null, rot, SpriteFlip.None, SpriteOrigin.Center);
+            base.core.Renderer["fg", -2, false].DrawSpriteW(sprite, pivot + RotFromNorth(new Vector2(sprite.Width * 0.5f - 9.5f, sprite.Height * 0.4f - 10f)) + base.dAnim, Color.Black * 0.2f, new Vector2(1f, 0.8f), rot, SpriteFlip.Vertical, SpriteOrigin.Center);
+            base.core.Renderer["fg", -2, false].DrawSpriteW(sword, pivot + RotFromNorth(new Vector2(-0.5f, -19f - sword.Height * 0.4f)), null, new Vector2(1f) * 0.8f, rot, SpriteFlip.None, SpriteOrigin.Center);
 		}
 		else
 		{
@@ -230,22 +231,22 @@ public class KnightChar : PlayerEntity
 		return 0f;
 	}
 
-	private Vector2 AttackSwordOffset()
-	{
-		if (attackDirection.X > 0f)
-		{
-			return new Vector2(9f, 1f);
-		}
-		if (attackDirection.X < 0f)
-		{
-			return new Vector2(-9f, -1f);
-		}
-		if (attackDirection.Y > 0f)
-		{
-			return new Vector2(-1f, 9f);
-		}
-		return new Vector2(1f, -9f);
-	}
+	private Vector2 RotFromNorth(Vector2 v)
+    {
+        if (attackDirection.X > 0f)
+        {
+            return new Vector2(0f - v.Y, v.X);
+        }
+        if (attackDirection.X < 0f)
+        {
+            return new Vector2(v.Y, 0f - v.X);
+        }
+        if (attackDirection.Y > 0f)
+        {
+            return new Vector2(0f - v.X, 0f - v.Y);
+        }
+        return v;
+    }
 
 	public override bool SpawnFragments(bool bolt = false)
 	{
