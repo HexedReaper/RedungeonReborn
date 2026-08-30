@@ -162,6 +162,7 @@ public class BraggChar : PlayerEntity
 	{
 		base.playState.Hud.AbilitiesHud.skillPanels[Skill.TreasureHunt].Text = "× " + Keys;
         base.playState.Hud.AbilitiesHud.skillPanels[Skill.Gunshot].Text = (base.core.OptionsData.BraggAmmo ? ("× " + ammo) : "");
+        base.playState.Hud.AbilitiesHud.skillPanels[Skill.Gunshot].Text = (base.core.OptionsData.BraggAmmo ? ("× " + ammo) : "");
         if (base.core.OptionsData.BraggAmmo && ammo < 3)
         {
             if (!climbStarted)
@@ -175,10 +176,10 @@ public class BraggChar : PlayerEntity
                 climbProgress += dy;
             }
             lastWorldY = base.WorldCoordinates.Y;
-            if (climbProgress >= 30f)
+            if (climbProgress >= 10f)
             {
                 climbProgress = 0f;
-                ammo = 3;
+                ammo++;
             }
         }
         if (shooting)
@@ -280,7 +281,7 @@ public class BraggChar : PlayerEntity
             }
             else
             {
-                Abilities.SkillCharge[Skill.Gunshot] = Component._m(climbProgress / 30f, 1f);
+                Abilities.SkillCharge[Skill.Gunshot] = Component._m(climbProgress / 10f, 1f);
             }
         }
         else

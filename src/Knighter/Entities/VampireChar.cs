@@ -303,12 +303,12 @@ public class VampireChar : PlayerEntity
     {
         if (base.core.OptionsData.VampirePredator && FlightActive && !Dead && !reviving && !other.IsBroken && (
             other is RotobladeEntity || other is SpikesEntity || other is CrossbowEntity || other is SawEntity ||
-            other is PistonEntity || other is PistonCoreEntity || other is BatEntity || other is SlimeEntity ||
+            other is PistonEntity || other is PistonCoreEntity || other is SlimeEntity ||
             other is ZapperEntity || other is FollowerEntity || other is FirewallEntity || other is CannonEntity ||
-            other is WispEntity || (other is SerpentEntity && !(other as SerpentEntity).IsChineseDragon)))
+            other is WispEntity))
         {
             other.Break(this);
-            if (other.IsBroken)
+            if (other.IsBroken || other is SlimeEntity || other is WispEntity)
             {
                 if (predatorKills < 15)
                 {

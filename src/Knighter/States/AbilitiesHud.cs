@@ -89,8 +89,8 @@ public class AbilitiesHud : Component
 				num = (compact ? (num + (float)(itemIcon.Width + 20)) : (num + (float)(MaxLevel * (itemIcon.Width + 2) + 5)));
 				break;
 			case AbilityKind.Rechargeable:
-				num = ((!parent.ShopMode) ? 0f : (Ability.HideChargeBar ? (num + 6f) : (num + 30f + 9f)));
-				break;
+                num = ((!parent.ShopMode) ? ((Text != "") ? (num + 3f) : 0f) : (Ability.HideChargeBar ? (num + 6f) : (num + 30f + 9f)));
+                break;
 			case AbilityKind.Permanent:
 			{
 				Skill? panelSkill = PanelSkill;
@@ -229,9 +229,13 @@ public class AbilitiesHud : Component
 		public override void Draw()
 		{
 			if (Ability.Kind == AbilityKind.Rechargeable && !parent.ShopMode)
-			{
-				return;
-			}
+            {
+                if (Text == "")
+                {
+                    addedWidth = 0f;
+                    return;
+                }
+            }
 			Vector2 vector = new Vector2(0f);
 			if (shake > 0)
 			{
@@ -320,18 +324,22 @@ public class AbilitiesHud : Component
 				}
 				break;
 			case AbilityKind.Rechargeable:
-				if (parent.ShopMode && !Ability.HideChargeBar)
-				{
-					float num7 = (parent.ShopMode ? DemoCharge : CurrentCharge);
-					Sprite sprite = _(SpriteName.skill_charge_track);
-					base.core.Renderer["fg", num + 1, false].DrawSpriteS(sprite, new Vector2(num5, num6 + 6f));
-					float num8 = (float)(sprite.Width - 2 - 2) * num7;
-					Color white = Color.White;
-					base.core.Renderer["fg", num + 1, false].DrawSpriteS(barLeft, new Vector2(num5 + 1f, num6 + 7f), white);
-					base.core.Renderer["fg", num + 1, false].DrawSpriteS(barMiddle, new Vector2(num5 + 2f, num6 + 7f), scale: new Vector2(num8, 1f), tint: white);
-					base.core.Renderer["fg", num + 1, false].DrawSpriteS(barRight, new Vector2(num5 + 2f + num8, num6 + 7f), white);
-				}
-				break;
+                if (parent.ShopMode && !Ability.HideChargeBar)
+                {
+                    float num7 = (parent.ShopMode ? DemoCharge : CurrentCharge);
+                    Sprite sprite = _(SpriteName.skill_charge_track);
+                    base.core.Renderer["fg", num + 1, false].DrawSpriteS(sprite, new Vector2(num5, num6 + 6f));
+                    float num8 = (float)(sprite.Width - 2 - 2) * num7;
+                    Color white = Color.White;
+                    base.core.Renderer["fg", num + 1, false].DrawSpriteS(barLeft, new Vector2(num5 + 1f, num6 + 7f), white);
+                    base.core.Renderer["fg", num + 1, false].DrawSpriteS(barMiddle, new Vector2(num5 + 2f, num6 + 7f), scale: new Vector2(num8, 1f), tint: white);
+                    base.core.Renderer["fg", num + 1, false].DrawSpriteS(barRight, new Vector2(num5 + 2f + num8, num6 + 7f), white);
+                }
+                if (!parent.ShopMode && Text != "")
+                {
+                    addedWidth = base.core.Renderer["fg", num + 1, false].DrawTextS(Text, new Vector2(num5 - 2f, num6 + 3.5f), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Left, boxAlignment: Alignment2D.Left, decoration: TextDecoration.Extrude1, width: 50, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629))).Width;
+                }
+                break;
 			case AbilityKind.Permanent:
 				switch (PanelSkill)
 				{
