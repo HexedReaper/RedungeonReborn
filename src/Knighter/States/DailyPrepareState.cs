@@ -111,7 +111,7 @@ public class DailyPrepareState : State
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
         }
         base.core.Renderer["fg", 9000, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
-        base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", menuRect.TopLeft.Shift(5f, 57f + num2), new TextProfile
+        base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", menuRect.TopLeft.Shift(5f, 43f + num2), new TextProfile
         {
             Width = (int)menuRect.Width - 10,
             Height = 44,
@@ -132,11 +132,11 @@ public class DailyPrepareState : State
             Font = Font.Thin,
             Scale = 0.75f
         };
-        float y = 84f;
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(base.core.CurrentCharDesc.Icon), menuRect.TopLeft.Shift(20f, y + 8f + num2), null, null, 0f, SpriteFlip.None, SpriteOrigin.Center);
-        base.core.Renderer["fg", 9000, false].DrawTextS(__(base.core.CurrentCharDesc.Name), menuRect.TopLeft.Shift(36f, y + num2), textProfile.Alter(TextProfile.OrangeMiddle));
-        base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.TopLeft.Shift(36f, y + 13f + num2), textProfile.Alter(default(Color).FromRgb(9462096)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("code: " + DailyRun.SessionSeed(base.core.ProfileData.Character, base.core.OptionsData).ToString("X8"), menuRect.TopLeft.Shift(36f, y + 26f + num2), textProfile.Alter(default(Color).FromRgb(6910328)));
+        float y = 84f + num2;
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(base.core.CurrentCharDesc.Icon), menuRect.TopLeft.Shift(20f, y + 13f), null, null, 0f, SpriteFlip.None, SpriteOrigin.None);
+        base.core.Renderer["fg", 9000, false].DrawTextS(__(base.core.CurrentCharDesc.Name), menuRect.TopLeft.Shift(36f, y), textProfile.Alter(TextProfile.OrangeMiddle));
+        base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.TopLeft.Shift(36f, y + 13f), textProfile.Alter(default(Color).FromRgb(9462096)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("code: " + DailyRun.SessionSeed(base.core.ProfileData.Character, base.core.OptionsData).ToString("X8"), menuRect.TopLeft.Shift(36f, y + 26f), textProfile.Alter(default(Color).FromRgb(6910328)));
         y += 40f;
         List<string> list = new List<string>();
         Character character = base.core.ProfileData.Character;
