@@ -34,7 +34,7 @@ public class DailyPrepareState : State
         IsOverlay = true;
         menuRect = new RectangleF((float)(base.core.Renderer.ScreenWidth - 148) * 0.5f, (float)(base.core.Renderer.ScreenHeight - 233) * 0.5f, 148f, 233f);
         touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 10000);
-        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Left + 8f, menuRect.Top + 176f, menuRect.Width - 16f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Left + 8f, menuRect.Top + 176f, menuRect.Width - 16f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", null, icon: false, iconIsPicture: false);
         touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Left + 8f, menuRect.Top + 204f, menuRect.Width - 16f, 20f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "SHARE LAST RUN", null, icon: false, iconIsPicture: false);        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         touchMenu.SetupButton(Button.Exit, new RectangleF(menuRect.Left + 8f, menuRect.Bottom + 44f, menuRect.Width - 16f, 24f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "EXIT DAILY MODE", null, icon: false, iconIsPicture: false);
         touchMenu[Button.Exit].Hidden = !base.core.OptionsData.DailyRunEnabled;
@@ -132,12 +132,13 @@ public class DailyPrepareState : State
             Font = Font.Thin,
             Scale = 0.75f
         };
-        float y = 78f + num2;
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(CharDescription.Get[DailyRun.DailyCharacter()].Icon), menuRect.TopLeft.Shift(13f, y + 6f), null, null, 0f, SpriteFlip.None);
+        float stack = (float)Tween.BackEaseOut(base.Trans, -40.0, 40.0, base.TransDuration - 6);
+        float y = 78f + num2 + stack;
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(CharDescription.Get[DailyRun.DailyCharacter()].Icon), menuRect.TopLeft.Shift(13f, y + 6f + Component._sin((float)base.ticks * 0.1f) * 1.5f), null, null, 0f, SpriteFlip.None);
         base.core.Renderer["fg", 9000, false].DrawTextS(__(CharDescription.Get[DailyRun.DailyCharacter()].Name), menuRect.TopLeft.Shift(36f, y), textProfile.Alter(TextProfile.OrangeMiddle));
         base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.TopLeft.Shift(36f, y + 13f), textProfile.Alter(default(Color).FromRgb(9462096)));
         base.core.Renderer["fg", 9000, false].DrawTextS("code: " + DailyRun.SessionSeed(base.core.OptionsData).ToString("X8"), menuRect.TopLeft.Shift(36f, y + 26f), textProfile.Alter(default(Color).FromRgb(6910328)));
-        y += 38f;
+        y += 44f;
         List<string> list = new List<string>();
         Character character = DailyRun.DailyCharacter();
         if (base.core.OptionsData.HardcoreWebs)
@@ -203,6 +204,18 @@ public class DailyPrepareState : State
                 Scale = 0.7f
             });
         }
+        base.core.Renderer["fg", 9001, false].DrawTextS("START RUN", touchMenu[Button.Start].Rectangle.Center.Shift(0f, Component._sin((float)base.ticks * 0.08f) * 1.5f + 1f), new TextProfile
+        {
+            Width = (int)touchMenu[Button.Start].Rectangle.Width,
+            Height = 26,
+            BoxAlignment = Alignment2D.Middle,
+            TextAlignment = Alignment2D.Middle,
+            Color = default(Color).FromRgb(16430139),
+            SecondColor = Color.Black,
+            Decoration = TextDecoration.Extrude1,
+            Font = Font.Bold,
+            Scale = 1f
+        });
         touchMenu.Draw();
         base.Draw();
     }

@@ -17,7 +17,10 @@ public static class DailyRun
     {
         Active = true;
         seed = s;
-        core.ProfileData.Character = DailyCharacter();
+        Character daily = DailyCharacter();
+        core.ProfileData.Character = daily;
+        core.ProfileData.Characters[daily].Unlocked = true;
+        core.ProfileData.Characters[daily].Level = CharDescription.Get[daily].Levels.Count;
     }
 
     public static void End()
