@@ -41,10 +41,10 @@ public class DailyPrepareState : State
         string[] seq = desc.AnimSequence.Split('|');
         charAnim = new Animation(desc.AnimSpeed);
         charAnim.Add("live", seq[0], seq[1]);
+        charAnim.Play("live");
         touchMenu.SetupButton(Button.IconTap, new RectangleF(menuRect.Center.X - 26f, menuRect.Top + 40f, 52f, 34f), null, null);
-        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Left + 8f, menuRect.Top + 176f, menuRect.Width - 16f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Left + 8f, menuRect.Top + 204f, menuRect.Width - 16f, 20f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST RUN", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
+        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Left + 8f, menuRect.Top + 172f, menuRect.Width - 16f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 52f, menuRect.Top + 206f, 104f, 18f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST RUN", null, icon: false, iconIsPicture: false, blink: false, null, null, -3f, 0f, 0.75f);        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         touchMenu.SetupButton(Button.Exit, new RectangleF(menuRect.Left + 8f, menuRect.Bottom + 44f, menuRect.Width - 16f, 24f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "EXIT DAILY MODE", null, icon: false, iconIsPicture: false);
         touchMenu[Button.Exit].Hidden = !base.core.OptionsData.DailyRunEnabled;
         block = _(SpriteName.options_block);
