@@ -542,18 +542,28 @@ public sealed class Core : Component
 			ProfileData.LastDistance = session.Distance;
             if (DailyRun.Active)
             {
-                DailyRun.LastScreenshot = GameplayScreenshot;
                 if (ProfileData.DailyBestDate != DailyRun.TodayKey())
                 {
                     ProfileData.DailyBestDate = DailyRun.TodayKey();
                     ProfileData.DailyBestDistance = 0;
                 }
-                ProfileData.DailyBestDistance = Math.Max(ProfileData.DailyBestDistance, session.Distance);
-                ProfileData.DailyLastDistance = session.Distance;
-                ProfileData.DailyLastCoins = session.CollectedCoins;
-                ProfileData.DailyLastSeed = DailyRun.SessionSeed(ProfileData.Character, base.core.OptionsData);
-                ProfileData.DailyLastCharacter = (int)ProfileData.Character;
+                if (session.Distance >= ProfileData.DailyBestDistance)
+                {
+                    if (session.Distance > 0)
+                    {
+                        DailyRun.LastScreenshot = GameplayScreenshot;
+                    }
+                    ProfileData.DailyBestDistance = session.Distance;
+                    ProfileData.DailyBestCoins = session.CollectedCoins;
+                    ProfileData.DailyBestSeed = DailyRun.SessionSeed(ProfileData.Character, base.core.OptionsData);
+                    ProfileData.DailyBestCharacter = (int)ProfileData.Character;
+                }
                 ProfileData.SaveIntoStorage();
+                DailyRun.End();
+            }
+            if (core.OptionsData.DailyRunEnabled)
+            {
+                PushState(new DailyPrepareState());
             }
 			ProfileData.BestDistance = Math.Max(ProfileData.LastDistance, ProfileData.BestDistance);
 			ProfileData.SaveIntoStorage();

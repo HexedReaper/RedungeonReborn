@@ -116,6 +116,7 @@ public class MenuState : State
 			touchMenu.SetupButton(Button.Achievements, new RectangleF(10f + 1f * num2, num - 32, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_achievements));
 			touchMenu.SetupButton(Button.Scores, new RectangleF(10f, num - 32, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_scores), icon: true, iconIsPicture: false, blink: false, null, null, -3f, 0f, 1f, "", 0.095f, drawShadow: false, SoundName.button_down, SoundName.button_up, base.core.Game.GooglePlayHelper.SignedOut);
 			touchMenu.SetupButton(Button.GPlay, new RectangleF(10f + 2f * num2, num - 32, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_gplay));
+            touchMenu.SetupButton(Button.Daily, new RectangleF(0f, 0f, 50f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "DAILY", null, icon: false, iconIsPicture: false);
 		}
 		if (GameOver)
 		{

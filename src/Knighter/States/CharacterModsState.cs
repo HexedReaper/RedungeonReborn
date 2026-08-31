@@ -22,7 +22,6 @@ public class CharacterModsState : State
         HeaderOther,
         ToggleHardcoreWebs,
         ToggleAchievementToasts,
-        ToggleDailyRun,
         Back
     }
 
@@ -56,7 +55,16 @@ public class CharacterModsState : State
         touchMenu.SetupButton(Button.HeaderOther, new RectangleF(menuRect.Left + 8f, menuRect.Top, menuRect.Width - 16f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Other +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.ToggleHardcoreWebs, new Vector2(left, menuRect.Top), base.core.OptionsData.HardcoreWebs, 120);
         touchMenu.SetupToggle(Button.ToggleAchievementToasts, new Vector2(left, menuRect.Top), base.core.OptionsData.AchievementToasts, 120);
-        touchMenu.SetupToggle(Button.ToggleDailyRun, new Vector2(left, menuRect.Top + 217f), base.core.OptionsData.DailyRunEnabled, 120);
+        if (base.core.OptionsData.DailyRunEnabled)
+        {
+            touchMenu[Button.ToggleThrust].Disabled = true;
+            touchMenu[Button.ToggleBraggAmmo].Disabled = true;
+            touchMenu[Button.TogglePredator].Disabled = true;
+            touchMenu[Button.ToggleUnfriendBats].Disabled = true;
+            touchMenu[Button.ToggleFastWings].Disabled = true;
+            touchMenu[Button.ToggleHardcoreWebs].Disabled = true;
+            touchMenu[Button.ToggleAchievementToasts].Disabled = true;
+        }
         touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
@@ -82,7 +90,6 @@ public class CharacterModsState : State
         touchMenu[Button.ToggleFastWings].Hidden = openSection != 2;
         touchMenu[Button.ToggleHardcoreWebs].Hidden = openSection != 3;
         touchMenu[Button.ToggleAchievementToasts].Hidden = openSection != 3;
-        touchMenu[Button.ToggleDailyRun].Hidden = openSection != 3;
         float y = menuRect.Top + 80f;
         Place(Button.HeaderGylbard, y);
         y += 19f;
@@ -116,8 +123,6 @@ public class CharacterModsState : State
             Place(Button.ToggleHardcoreWebs, y);
             y += 19f;
             Place(Button.ToggleAchievementToasts, y);
-            y += 19f;
-            Place(Button.ToggleDailyRun, y);
             y += 19f;
         }
     }
@@ -153,7 +158,6 @@ public class CharacterModsState : State
         touchMenu[Button.HeaderOther].Rectangle.Shift(0f, y);
         touchMenu[Button.ToggleHardcoreWebs].Rectangle.Shift(0f, y);
         touchMenu[Button.ToggleAchievementToasts].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleDailyRun].Rectangle.Shift(0f, y);
         touchMenu[Button.Back].Rectangle.Shift(0f, y);
         base.UpdateTransition();
     }
@@ -207,7 +211,6 @@ public class CharacterModsState : State
         {
             base.core.Renderer["fg", 9000, false].DrawTextS("hardcore webs", touchMenu[Button.ToggleHardcoreWebs].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleHardcoreWebs].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
             base.core.Renderer["fg", 9000, false].DrawTextS("achievement toasts", touchMenu[Button.ToggleAchievementToasts].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleAchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("daily run (utc)", touchMenu[Button.ToggleDailyRun].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleDailyRun].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         }
         touchMenu.Draw();
         base.Draw();
@@ -256,12 +259,6 @@ public class CharacterModsState : State
             base.core.OptionsData.AchievementToasts = newValue;
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.coin));
-        }
-        if (button == Button.ToggleDailyRun)
-        {
-            base.core.OptionsData.DailyRunEnabled = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.trans_2));
         }
     }
 

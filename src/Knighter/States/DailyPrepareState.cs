@@ -15,6 +15,7 @@ public class DailyPrepareState : State
     {
         Start,
         Share,
+        Exit,
         Back
     }
 
@@ -35,6 +36,8 @@ public class DailyPrepareState : State
         touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 10000);
         touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Left + 8f, menuRect.Top + 176f, menuRect.Width - 16f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
         touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Left + 8f, menuRect.Top + 204f, menuRect.Width - 16f, 20f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "SHARE LAST RUN", null, icon: false, iconIsPicture: false);        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
+        touchMenu.SetupButton(Button.Exit, new RectangleF(menuRect.Left + 8f, menuRect.Bottom + 44f, menuRect.Width - 16f, 24f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "EXIT DAILY MODE", null, icon: false, iconIsPicture: false);
+        touchMenu[Button.Exit].Hidden = !base.core.OptionsData.DailyRunEnabled;
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
@@ -93,6 +96,7 @@ public class DailyPrepareState : State
         touchMenu[Button.Start].Rectangle.Shift(0f, y);
         touchMenu[Button.Share].Rectangle.Shift(0f, y);
         touchMenu[Button.Back].Rectangle.Shift(0f, y);
+        touchMenu[Button.Exit].Rectangle.Shift(0f, y);
         base.UpdateTransition();
     }
 
@@ -185,14 +189,21 @@ public class DailyPrepareState : State
         }
         else if (button == Button.Share)
         {
-            if (base.core.ProfileData.DailyLastDistance > 0)
+            if (base.core.ProfileData.DailyBestDistance > 0 && base.core.ProfileData.DailyBestDate == DailyRun.TodayKey())
             {
-                base.core.Sharing.ShareDaily(base.core.ProfileData.DailyLastDistance, base.core.ProfileData.DailyLastCoins, base.core.ProfileData.DailyLastSeed, base.core.ProfileData.DailyLastCharacter, DailyRun.ModsString(base.core.OptionsData, base.core.ProfileData.Character));
+                base.core.Sharing.ShareDaily(base.core.ProfileData.DailyBestDistance, base.core.ProfileData.DailyBestCoins, base.core.ProfileData.DailyBestSeed, base.core.ProfileData.DailyBestCharacter, DailyRun.ModsString(base.core.OptionsData, base.core.ProfileData.Character));
             }
             else
             {
                 SendMessage(new PlaySoundMessage(SoundName.web_1));
             }
+        }
+        else if (button == Button.Exit)
+        {
+            base.core.OptionsData.DailyRunEnabled = false;
+            base.core.SaveOptions();
+            DailyRun.End();
+            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
         }
         else if (button == Button.Back)
         {

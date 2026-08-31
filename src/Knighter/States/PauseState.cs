@@ -14,7 +14,8 @@ public class PauseState : State
 		BackToGame,
 		Exit,
 		Options,
-		Share
+		Share,
+        ExitDaily
 	}
 
 	private readonly TouchMenu<Button> touchMenu;
@@ -39,6 +40,8 @@ public class PauseState : State
 		RectangleF rectangle = new RectangleF(screenCenter.X - num3 * 0.5f - 3f, screenCenter.Y - num3 * 0.5f - 3f, num3 + 6f, num3 + 20f);
 		touchMenu.SetupButton(Button.Share, rectangle, null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", null, icon: true, iconIsPicture: false, blink: false, null, null, -3f, 0f, 1f, "", 0.095f, drawShadow: false, SoundName.paper_touch, SoundName.paper);
 		touchMenu.SetupButton(Button.Options, new RectangleF(10 + 3 * num2, num, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_options));
+		touchMenu.SetupButton(Button.ExitDaily, new RectangleF(10f, 10f + base.topSafeArea, 130f, 22f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "EXIT DAILY MODE", null, icon: false, iconIsPicture: false);
+        touchMenu[Button.ExitDaily].Hidden = !base.core.OptionsData.DailyRunEnabled;
 		screenshotSprite = base.core.SpriteManager.MakeFullSpriteFromScreenshot(base.core.GameplayScreenshot);
 		int num4 = screenshotSprite.Width / 5;
 		int num5 = (screenshotSprite.Height - num4 * 3) / 2;
@@ -141,6 +144,14 @@ public class PauseState : State
 		case Button.Options:
 			SendMessage(new CoreEventMessage(CoreEvent.ShowOptions));
 			break;
+		case Button.ExitDaily:
+            base.core.OptionsData.DailyRunEnabled = false;
+            base.core.SaveOptions();
+            DailyRun.End();
+            SendMessage(new PlaySoundMessage(SoundName.trans_1));
+            TransitionOut(CoreEvent.ResetGame);
+            stoppedGame = true;
+            break;
 		case Button.Share:
 		{
 			string shareMessage = string.Format(__(SId.SHARE_from_pause), "Redungeon", "Eneminds", "Nitrome", "Google Play: goo.gl/FUb9zH");

@@ -60,13 +60,11 @@ public class ProfileData : Component
 
     public string DailyBestDate;
 
-    public int DailyLastDistance;
+    public int DailyBestCoins;
 
-    public int DailyLastCoins;
+    public int DailyBestSeed;
 
-    public int DailyLastSeed;
-
-    public int DailyLastCharacter;
+    public int DailyBestCharacter;
 
 	public Language Locale;
 
@@ -261,10 +259,9 @@ public class ProfileData : Component
 		base.core.Storage.TryGetString("last-sync-time", ref LastSyncTime);
         base.core.Storage.TryGetInt("daily-best-distance", ref DailyBestDistance);
         base.core.Storage.TryGetString("daily-best-date", ref DailyBestDate);
-        base.core.Storage.TryGetInt("daily-last-distance", ref DailyLastDistance);
-        base.core.Storage.TryGetInt("daily-last-coins", ref DailyLastCoins);
-        base.core.Storage.TryGetInt("daily-last-seed", ref DailyLastSeed);
-        base.core.Storage.TryGetInt("daily-last-character", ref DailyLastCharacter);
+        base.core.Storage.TryGetInt("daily-best-coins", ref DailyBestCoins);
+        base.core.Storage.TryGetInt("daily-best-seed", ref DailyBestSeed);
+        base.core.Storage.TryGetInt("daily-best-character", ref DailyBestCharacter);
 		string result6 = string.Empty;
 		base.core.Storage.TryGetString("locale", ref result6);
 		if (result6.Equals(string.Empty))
@@ -280,9 +277,9 @@ public class ProfileData : Component
 
 	public void SaveIntoStorage()
 	{
-		base.core.Storage.SetInt("coins", Coins);
-		base.core.Storage.SetInt("last-distance", LastDistance);
-		base.core.Storage.SetInt("best-distance", BestDistance);
+		base.core.Storage.SetInt("daily-best-coins", DailyBestCoins);
+        base.core.Storage.SetInt("daily-best-seed", DailyBestSeed);
+        base.core.Storage.SetInt("daily-best-character", DailyBestCharacter);
 		base.core.Storage.SetBool("remove-ads", AdsRemoved);
 		base.core.Storage.SetBool("coin-doubler-enabled", CoinDoublerEnabled);
 		base.core.Storage.SetBool("app-rated", AppRated);
@@ -318,10 +315,6 @@ public class ProfileData : Component
 		base.core.Storage.SetString("last-sync-time", LastSyncTime);
         base.core.Storage.SetInt("daily-best-distance", DailyBestDistance);
         base.core.Storage.SetString("daily-best-date", DailyBestDate);
-        base.core.Storage.SetInt("daily-last-distance", DailyLastDistance);
-        base.core.Storage.SetInt("daily-last-coins", DailyLastCoins);
-        base.core.Storage.SetInt("daily-last-seed", DailyLastSeed);
-        base.core.Storage.SetInt("daily-last-character", DailyLastCharacter);
 		base.core.Storage.SetString("locale", Locale.ToString());
 		base.core.Storage.SetBool("language-selector-pending", LanguageSelectorPending);
 		base.core.Storage.Save();

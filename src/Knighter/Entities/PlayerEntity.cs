@@ -592,9 +592,9 @@ public abstract class PlayerEntity : Entity, IPushableEntity
 			InjuryType.Fall => 20, 
 			_ => 60, 
 		}), 1, 1, delegate
-		{
-			playState.TransitionOut(CoreEvent.OfferToContiune);
-		});
+        {
+            playState.TransitionOut(DailyRun.Active ? CoreEvent.GameOver : CoreEvent.OfferToContiune);
+        });
 		if (TrappedInWeb)
 		{
 			_inc(Stat.DiedInSpiderWeb);
