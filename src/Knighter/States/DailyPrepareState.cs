@@ -14,7 +14,8 @@ public class DailyPrepareState : State
     private enum Button
     {
         IconTap,
-        SealTap,
+        CodeTap,
+        ModsTap,
         Start,
         Share,
         Back
@@ -32,6 +33,8 @@ public class DailyPrepareState : State
 
     private bool showResult;
 
+    private bool showMods;
+
     private int swingT = -1;
 
     public DailyPrepareState()
@@ -47,10 +50,11 @@ public class DailyPrepareState : State
         charAnim.Add("live", seq[0], seq[1]);
         charAnim.Play("live");
         touchMenu.SetupButton(Button.IconTap, new RectangleF(menuRect.Center.X - 26f, menuRect.Top + 72f, 52f, 28f), null, null);
-        touchMenu.SetupButton(Button.SealTap, new RectangleF(menuRect.Center.X - 18f, menuRect.Top + 119f, 36f, 26f), null, null);
-        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Center.X - 52f, menuRect.Bottom + 10f, 104f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 46f, menuRect.Bottom + 42f, 92f, 16f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST", null, icon: false, iconIsPicture: false, blink: false, default(Color).FromRgb(11216961), null, -3f, 0f, 0.7f);
-        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 64f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
+        touchMenu.SetupButton(Button.CodeTap, new RectangleF(menuRect.Center.X - 44f, menuRect.Top + 125f, 88f, 13f), null, null);
+        touchMenu.SetupButton(Button.ModsTap, new RectangleF(menuRect.Center.X - 44f, menuRect.Top + 152f, 88f, 14f), null, null);
+        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Center.X - 52f, menuRect.Bottom + 4f, 104f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 46f, menuRect.Bottom + 36f, 92f, 16f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST", null, icon: false, iconIsPicture: false, blink: false, default(Color).FromRgb(11216961), null, -3f, 0f, 0.7f);
+        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 58f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
@@ -89,7 +93,8 @@ public class DailyPrepareState : State
     {
         float y = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
         touchMenu[Button.IconTap].Rectangle.Shift(0f, y);
-        touchMenu[Button.SealTap].Rectangle.Shift(0f, y);
+        touchMenu[Button.CodeTap].Rectangle.Shift(0f, y);
+        touchMenu[Button.ModsTap].Rectangle.Shift(0f, y);
         touchMenu[Button.Start].Rectangle.Shift(0f, y);
         touchMenu[Button.Share].Rectangle.Shift(0f, y);
         touchMenu[Button.Back].Rectangle.Shift(0f, y);
@@ -134,9 +139,8 @@ public class DailyPrepareState : State
         base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.CenterTop.Shift(0f, 117f + num2 + stack), CenteredProfile(0.75f).Alter(default(Color).FromRgb(9462096)));
         bool haveResult = base.core.ProfileData.DailyLastDistance > 0;
         int sealCode = ((showResult && haveResult) ? base.core.ProfileData.DailyLastResultCode : DailyRun.SessionSeed(base.core.OptionsData));
-        string sealLabel = ((showResult && haveResult) ? "result " : "setup ") + sealCode.ToString("X8");
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.circle_13), new Vector2(menuRect.Center.X, menuRect.Top + 132f + num2 + stack), default(Color).FromRgb(9121856) * 0.9f, Vector2.One * 0.55f, (float)base.ticks * 0.008f, SpriteFlip.None, SpriteOrigin.Center);
-        base.core.Renderer["fg", 9001, false].DrawTextS(sealLabel, new Vector2(menuRect.Center.X, menuRect.Top + 132f + num2 + stack), CenteredProfile(0.55f, bold: true).Alter(default(Color).FromRgb(16763904)));
+        string sealLabel = ((showResult && haveResult) ? "result: " : "code: ") + sealCode.ToString("X8");
+        base.core.Renderer["fg", 9000, false].DrawTextS(sealLabel, menuRect.CenterTop.Shift(0f, 130f + num2 + stack), CenteredProfile(0.75f).Alter((showResult && haveResult) ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         float y = 156f + num2 + stack;
         Character character = DailyRun.DailyCharacter();
         List<string> list = new List<string>();
@@ -164,7 +168,20 @@ public class DailyPrepareState : State
         {
             list.Add("fast wings");
         }
-        base.core.Renderer["fg", 9000, false].DrawTextS("MODS", menuRect.CenterTop.Shift(0f, y), CenteredProfile(0.6f).Alter(default(Color).FromRgb(9462096)));
+        string modsLabel = "mods " + (showMods ? "-" : "+") + ((list.Count == 0) ? " (none)" : (" (" + list.Count + ")"));
+        base.core.Renderer["fg", 9000, false].DrawTextS(modsLabel, menuRect.CenterTop.Shift(0f, y), CenteredProfile(0.65f).Alter(default(Color).FromRgb(9462096)));
+        y += 14f;
+        if (showMods)
+        {
+            if (list.Count == 0)
+            {
+                base.core.Renderer["fg", 9000, false].DrawTextS("none (vanilla)", menuRect.CenterTop.Shift(0f, y), CenteredProfile(0.7f).Alter(default(Color).FromRgb(6910328)));
+            }
+            for (int j = 0; j < list.Count; j++)
+            {
+                base.core.Renderer["fg", 9000, false].DrawTextS("- " + list[j], menuRect.CenterTop.Shift(0f, y + 13 * j), CenteredProfile(0.7f).Alter(TextProfile.OrangeMiddle));
+            }
+        }
         y += 14f;
         if (list.Count == 0)
         {
@@ -175,9 +192,11 @@ public class DailyPrepareState : State
             base.core.Renderer["fg", 9000, false].DrawTextS("- " + list[j], menuRect.CenterTop.Shift(0f, y + 13 * j), CenteredProfile(0.7f).Alter(TextProfile.OrangeMiddle));
         }
         bool heartLit = (base.core.ProfileData.DailyBestDate == DailyRun.TodayKey() && base.core.ProfileData.DailyBestDistance >= 20);
-        float statY = y + 13f * Math.Max(list.Count, 1) + 6f;
+        float statY = y + (showMods ? (13f * Math.Max(list.Count, 1)) : 0f) + 6f;
         float heartPulse = (heartLit ? (1f + 0.12f * Component._sin((float)base.ticks * 0.1f)) : 1f);
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(menuRect.Center.X - 46f, statY + 5f + num2 + stack), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse, 0f, SpriteFlip.None, SpriteOrigin.Center);
+        string statText = "dailies played: " + base.core.ProfileData.DailyTotalPlayed;
+        float statW = base.core.Renderer["fg", 9000, false].DrawTextS(statText, menuRect.CenterTop.Shift(0f, statY + num2 + stack), CenteredProfile(0.7f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328))).Width;
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(menuRect.Center.X - statW * 0.5f - 9f, statY + 5f + num2 + stack), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse, 0f, SpriteFlip.None, SpriteOrigin.Center);
         base.core.Renderer["fg", 9000, false].DrawTextS("dailies played: " + base.core.ProfileData.DailyTotalPlayed, menuRect.CenterTop.Shift(0f, statY + num2 + stack), CenteredProfile(0.7f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         if (base.core.ProfileData.DailyBestDistance > 0 && base.core.ProfileData.DailyBestDate != DailyRun.TodayKey())
         {
@@ -203,10 +222,15 @@ public class DailyPrepareState : State
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.swoosh_2));
         }
-        else if (button == Button.SealTap)
+        else if (button == Button.CodeTap)
         {
             showResult = !showResult;
             SendMessage(new PlaySoundMessage(SoundName.paper_touch));
+        }
+        else if (button == Button.ModsTap)
+        {
+            showMods = !showMods;
+            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
         }
         else if (button == Button.Start)
         {
