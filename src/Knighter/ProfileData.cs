@@ -63,7 +63,7 @@ public class ProfileData : Component
     public int DailyBestCoins;
 
     public int DailyBestSeed;
-	
+
 	public int DailyBestCharacter;
 
     public int DailyBestResultCode;
@@ -77,6 +77,7 @@ public class ProfileData : Component
     public int DailyLastCharacter;
 
     public int DailyLastResultCode;
+	public int DailyTotalPlayed;
 
 	public Language Locale;
 
@@ -120,6 +121,7 @@ public class ProfileData : Component
 		UseCloud = true;
 		LastSyncTime = string.Empty;
         DailyBestDate = string.Empty;
+		DailyTotalPlayed = 0;
 		Locale = Language.en_US;
 		LanguageSelectorPending = true;
 	}
@@ -279,6 +281,7 @@ public class ProfileData : Component
         base.core.Storage.TryGetInt("daily-last-seed", ref DailyLastSeed);
         base.core.Storage.TryGetInt("daily-last-character", ref DailyLastCharacter);
         base.core.Storage.TryGetInt("daily-last-result-code", ref DailyLastResultCode);
+		base.core.Storage.TryGetInt("daily-total-played", ref DailyTotalPlayed);
 		string result6 = string.Empty;
 		base.core.Storage.TryGetString("locale", ref result6);
 		if (result6.Equals(string.Empty))
@@ -340,6 +343,7 @@ public class ProfileData : Component
         base.core.Storage.SetInt("daily-last-seed", DailyLastSeed);
         base.core.Storage.SetInt("daily-last-character", DailyLastCharacter);
         base.core.Storage.SetInt("daily-last-result-code", DailyLastResultCode);
+		base.core.Storage.SetInt("daily-total-played", DailyTotalPlayed);
 		base.core.Storage.SetString("locale", Locale.ToString());
 		base.core.Storage.SetBool("language-selector-pending", LanguageSelectorPending);
 		base.core.Storage.Save();

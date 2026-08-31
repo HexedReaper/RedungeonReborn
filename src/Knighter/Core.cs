@@ -565,6 +565,7 @@ public sealed class Core : Component
                     ProfileData.DailyBestCharacter = (int)DailyRun.DailyCharacter();
                     ProfileData.DailyBestResultCode = ProfileData.DailyLastResultCode;
                 }
+                ProfileData.DailyTotalPlayed++;
                 ProfileData.SaveIntoStorage();
                 DailyRun.End();
             }

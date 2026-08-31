@@ -14,6 +14,7 @@ public class DailyPrepareState : State
     private enum Button
     {
         IconTap,
+        SealTap,
         Start,
         Share,
         Back
@@ -29,6 +30,10 @@ public class DailyPrepareState : State
 
     private Animation charAnim;
 
+    private bool showResult;
+
+    private int swingT = -1;
+
     public DailyPrepareState()
     {
         base.TransDuration = 30;
@@ -41,9 +46,12 @@ public class DailyPrepareState : State
         charAnim = new Animation(desc.AnimSpeed);
         charAnim.Add("live", seq[0], seq[1]);
         charAnim.Play("live");
-        touchMenu.SetupButton(Button.IconTap, new RectangleF(menuRect.Center.X - 26f, menuRect.Top + 40f, 52f, 34f), null, null);
-        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Center.X - 52f, menuRect.Top + 168f, 104f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 46f, menuRect.Top + 204f, 92f, 18f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST", null, icon: false, iconIsPicture: false, blink: false, default(Color).FromRgb(11216961), null, -3f, 0f, 0.7f);        block = _(SpriteName.options_block);
+        touchMenu.SetupButton(Button.IconTap, new RectangleF(menuRect.Center.X - 26f, menuRect.Top + 72f, 52f, 28f), null, null);
+        touchMenu.SetupButton(Button.SealTap, new RectangleF(menuRect.Center.X - 18f, menuRect.Top + 119f, 36f, 26f), null, null);
+        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Center.X - 52f, menuRect.Bottom + 10f, 104f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 46f, menuRect.Bottom + 42f, 92f, 16f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST", null, icon: false, iconIsPicture: false, blink: false, default(Color).FromRgb(11216961), null, -3f, 0f, 0.7f);
+        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 64f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
+        block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
     }
@@ -55,6 +63,14 @@ public class DailyPrepareState : State
         {
             charAnim.Update();
         }
+        if (swingT >= 0)
+        {
+            swingT++;
+            if (swingT == 50)
+            {
+                SendMessage(new CoreEventMessage(CoreEvent.ResetAndStartGame));
+            }
+        }
         IsOpaque = Transition == TransType.None;
         base.core.AudioManager.MusicVolumeBox.Set("daily-prepare", 0.3f, inWorld: false);
         base.Update();
@@ -62,7 +78,7 @@ public class DailyPrepareState : State
 
     public override void HandleInput()
     {
-        if (Transition == TransType.None)
+        if (Transition == TransType.None && swingT < 0)
         {
             touchMenu.HandleInput();
             base.HandleInput();
@@ -73,13 +89,14 @@ public class DailyPrepareState : State
     {
         float y = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
         touchMenu[Button.IconTap].Rectangle.Shift(0f, y);
+        touchMenu[Button.SealTap].Rectangle.Shift(0f, y);
         touchMenu[Button.Start].Rectangle.Shift(0f, y);
         touchMenu[Button.Share].Rectangle.Shift(0f, y);
         touchMenu[Button.Back].Rectangle.Shift(0f, y);
         base.UpdateTransition();
     }
 
-    private TextProfile CenteredProfile(float scale)
+    private TextProfile CenteredProfile(float scale, bool bold = false)
     {
         return new TextProfile
         {
@@ -88,7 +105,7 @@ public class DailyPrepareState : State
             BoxAlignment = Alignment2D.Middle,
             TextAlignment = Alignment2D.Middle,
             Decoration = TextDecoration.None,
-            Font = Font.Thin,
+            Font = bold ? Font.Bold : Font.Thin,
             Scale = scale
         };
     }
@@ -99,30 +116,28 @@ public class DailyPrepareState : State
         base.core.Renderer["fg", 9000, false].FillScreen(Color.Black * (1f - num * num * num));
         float num2 = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
         float stack = (float)Tween.BackEaseOut(base.Trans, -40.0, 40.0, base.TransDuration - 6);
+        float swing = ((swingT >= 0) ? (1.2f * (float)(swingT * swingT) / 2500f) : 0f);
+        float swingSin = (float)Math.Sin(swing);
+        float swingCos = (float)Math.Cos(swing);
         for (int i = chain.Height; menuRect.Top + 21f + num2 - (float)i > (float)(-chain.Height); i += chain.Height)
         {
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Left + 20f, menuRect.Top + 21f + num2 - (float)i));
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
         }
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
-        base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", menuRect.CenterTop.Shift(0f, 60f + num2), new TextProfile
-        {
-            Width = 148,
-            Height = 20,
-            BoxAlignment = Alignment2D.Middle,
-            TextAlignment = Alignment2D.Middle,
-            Color = default(Color).FromRgb(9462096),
-            Decoration = TextDecoration.None,
-            Font = Font.Bold,
-            Scale = 0.9f
-        });
+        Vector2 panelTop = new Vector2(menuRect.Center.X - (menuRect.Top + num2) * swingSin, (menuRect.Top + num2) * swingCos);
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(block, panelTop, null, null, swing, SpriteFlip.None, SpriteOrigin.TopCenter);
+        base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", menuRect.CenterTop.Shift(0f, 60f + num2), CenteredProfile(0.9f, bold: true).Alter(default(Color).FromRgb(9462096)));
         CharDescription desc = CharDescription.Get[DailyRun.DailyCharacter()];
         Sprite iconSprite = (base.core.OptionsData.DailyIconAnimated ? charAnim.GetCurrentFrame() : _(desc.Icon));
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(iconSprite, new Vector2(menuRect.Center.X, menuRect.Top + 62f + num2 + stack), null, null, 0f, SpriteFlip.None, SpriteOrigin.Center);
-        base.core.Renderer["fg", 9000, false].DrawTextS(__(desc.Name), menuRect.CenterTop.Shift(0f, 78f + num2 + stack), CenteredProfile(0.75f).Alter(TextProfile.OrangeMiddle));
-        base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.CenterTop.Shift(0f, 92f + num2 + stack), CenteredProfile(0.75f).Alter(default(Color).FromRgb(9462096)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("code: " + DailyRun.SessionSeed(base.core.OptionsData).ToString("X8"), menuRect.CenterTop.Shift(0f, 106f + num2 + stack), CenteredProfile(0.75f).Alter(default(Color).FromRgb(6910328)));
-        float y = 134f + num2 + stack;
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(iconSprite, new Vector2(menuRect.Center.X, menuRect.Top + 86f + num2 + stack), null, null, 0f, SpriteFlip.None, SpriteOrigin.Center);
+        base.core.Renderer["fg", 9000, false].DrawTextS(__(desc.Name), menuRect.CenterTop.Shift(0f, 104f + num2 + stack), CenteredProfile(0.75f).Alter(TextProfile.OrangeMiddle));
+        base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.CenterTop.Shift(0f, 117f + num2 + stack), CenteredProfile(0.75f).Alter(default(Color).FromRgb(9462096)));
+        bool haveResult = base.core.ProfileData.DailyLastDistance > 0;
+        int sealCode = ((showResult && haveResult) ? base.core.ProfileData.DailyLastResultCode : DailyRun.SessionSeed(base.core.OptionsData));
+        string sealLabel = ((showResult && haveResult) ? "result " : "setup ") + sealCode.ToString("X8");
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.circle_13), new Vector2(menuRect.Center.X, menuRect.Top + 132f + num2 + stack), default(Color).FromRgb(9121856) * 0.9f, Vector2.One * 0.55f, (float)base.ticks * 0.008f, SpriteFlip.None, SpriteOrigin.Center);
+        base.core.Renderer["fg", 9001, false].DrawTextS(sealLabel, new Vector2(menuRect.Center.X, menuRect.Top + 132f + num2 + stack), CenteredProfile(0.55f, bold: true).Alter(default(Color).FromRgb(16763904)));
+        float y = 156f + num2 + stack;
         Character character = DailyRun.DailyCharacter();
         List<string> list = new List<string>();
         if (base.core.OptionsData.HardcoreWebs)
@@ -159,7 +174,24 @@ public class DailyPrepareState : State
         {
             base.core.Renderer["fg", 9000, false].DrawTextS("- " + list[j], menuRect.CenterTop.Shift(0f, y + 13 * j), CenteredProfile(0.7f).Alter(TextProfile.OrangeMiddle));
         }
+        bool heartLit = (base.core.ProfileData.DailyBestDate == DailyRun.TodayKey() && base.core.ProfileData.DailyBestDistance >= 20);
+        float statY = y + 13f * Math.Max(list.Count, 1) + 6f;
+        float heartPulse = (heartLit ? (1f + 0.12f * Component._sin((float)base.ticks * 0.1f)) : 1f);
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(menuRect.Center.X - 46f, statY + 5f + num2 + stack), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse, 0f, SpriteFlip.None, SpriteOrigin.Center);
+        base.core.Renderer["fg", 9000, false].DrawTextS("dailies played: " + base.core.ProfileData.DailyTotalPlayed, menuRect.CenterTop.Shift(0f, statY + num2 + stack), CenteredProfile(0.7f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        if (base.core.ProfileData.DailyBestDistance > 0 && base.core.ProfileData.DailyBestDate != DailyRun.TodayKey())
+        {
+            float bob = Component._sin((float)base.ticks * 0.05f) * 2f;
+            Vector2 ghostPos = new Vector2(menuRect.Left - 22f, menuRect.Top + 110f + num2 + bob);
+            base.core.Renderer["fg", 9000, false].DrawSpriteS(_(CharDescription.Get[(Character)base.core.ProfileData.DailyBestCharacter].SkullSprite), ghostPos, Color.White * 0.45f, Vector2.One * 0.7f, 0f, SpriteFlip.None, SpriteOrigin.Center);
+            base.core.Renderer["fg", 9000, false].DrawTextS("yesterday", new Vector2(ghostPos.X, ghostPos.Y + 16f), CenteredProfile(0.5f).Alter(default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS(base.core.ProfileData.DailyBestDistance + "m", new Vector2(ghostPos.X, ghostPos.Y + 26f), CenteredProfile(0.5f).Alter(TextProfile.OrangeMiddle));
+        }
         touchMenu.Draw();
+        if (swingT >= 0)
+        {
+            base.core.Renderer["fg", 10500, false].FillScreen(Color.Black * Component._M(1f, (float)swingT / 30f));
+        }
         base.Draw();
     }
 
@@ -171,11 +203,17 @@ public class DailyPrepareState : State
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.swoosh_2));
         }
+        else if (button == Button.SealTap)
+        {
+            showResult = !showResult;
+            SendMessage(new PlaySoundMessage(SoundName.paper_touch));
+        }
         else if (button == Button.Start)
         {
             base.core.OptionsData.DailyRunEnabled = true;
             base.core.SaveOptions();
-            SendMessage(new CoreEventMessage(CoreEvent.ResetAndStartGame));
+            swingT = 0;
+            SendMessage(new PlaySoundMessage(SoundName.piston_extend));
         }
         else if (button == Button.Share)
         {

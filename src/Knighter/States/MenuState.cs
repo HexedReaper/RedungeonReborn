@@ -18,6 +18,7 @@ public class MenuState : State
 	private enum Button
 	{
 		Daily,
+		ExitDaily,
 		Start,
 		Shop,
 		Options,
@@ -115,8 +116,10 @@ public class MenuState : State
 			touchMenu.SetupButton(Button.Share, new RectangleF(12f + 3f * num2, num - 32 - 20, num2, 50f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.None, "", _(Settings.ShareIcon), icon: true, iconIsPicture: false, blink: false, null, null, 7f, 0f, 1f, "", 0.095f, drawShadow: false, SoundName.paper_touch, SoundName.paper);
 			touchMenu.SetupButton(Button.Achievements, new RectangleF(10f + 1f * num2, num - 32, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_achievements));
 			touchMenu.SetupButton(Button.Scores, new RectangleF(10f, num - 32, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_scores), icon: true, iconIsPicture: false, blink: false, null, null, -3f, 0f, 1f, "", 0.095f, drawShadow: false, SoundName.button_down, SoundName.button_up, base.core.Game.GooglePlayHelper.SignedOut);
-			touchMenu.SetupButton(Button.GPlay, new RectangleF(10f + 2f * num2, num - 32, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_gplay));
+            touchMenu.SetupButton(Button.GPlay, new RectangleF(10f + 2f * num2, num - 32, num2, 30f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "", _(SpriteName.icon_gplay));
             touchMenu.SetupButton(Button.Daily, new RectangleF(0f, 0f, 50f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "DAILY", null, icon: false, iconIsPicture: false);
+            touchMenu.SetupButton(Button.ExitDaily, new RectangleF(0f, 26f, 130f, 20f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "EXIT DAILY MODE", null, icon: false, iconIsPicture: false);
+            touchMenu[Button.ExitDaily].Hidden = !base.core.OptionsData.DailyRunEnabled;
 		}
 		if (GameOver)
 		{
@@ -656,6 +659,12 @@ public class MenuState : State
 			break;
 		case Button.Daily:
             SendMessage(new PushStateMessage(new DailyPrepareState()));
+            break;
+        case Button.ExitDaily:
+            base.core.OptionsData.DailyRunEnabled = false;
+            base.core.SaveOptions();
+            DailyRun.End();
+            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
             break;
 		case Button.GPlay:
 			if (base.core.Game.GooglePlayHelper.SignedOut)
