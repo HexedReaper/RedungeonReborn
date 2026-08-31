@@ -16,7 +16,6 @@ public class DailyPrepareState : State
         IconTap,
         Start,
         Share,
-        Exit,
         Back
     }
 
@@ -43,11 +42,8 @@ public class DailyPrepareState : State
         charAnim.Add("live", seq[0], seq[1]);
         charAnim.Play("live");
         touchMenu.SetupButton(Button.IconTap, new RectangleF(menuRect.Center.X - 26f, menuRect.Top + 40f, 52f, 34f), null, null);
-        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Left + 8f, menuRect.Top + 172f, menuRect.Width - 16f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 52f, menuRect.Top + 206f, 104f, 18f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST RUN", null, icon: false, iconIsPicture: false, blink: false, null, null, -3f, 0f, 0.75f);        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
-        touchMenu.SetupButton(Button.Exit, new RectangleF(menuRect.Left + 8f, menuRect.Bottom + 44f, menuRect.Width - 16f, 24f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "EXIT DAILY MODE", null, icon: false, iconIsPicture: false);
-        touchMenu[Button.Exit].Hidden = !base.core.OptionsData.DailyRunEnabled;
-        block = _(SpriteName.options_block);
+        touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Center.X - 52f, menuRect.Top + 168f, 104f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 46f, menuRect.Top + 204f, 92f, 18f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST", null, icon: false, iconIsPicture: false, blink: false, default(Color).FromRgb(11216961), null, -3f, 0f, 0.7f);        block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
     }
@@ -80,7 +76,6 @@ public class DailyPrepareState : State
         touchMenu[Button.Start].Rectangle.Shift(0f, y);
         touchMenu[Button.Share].Rectangle.Shift(0f, y);
         touchMenu[Button.Back].Rectangle.Shift(0f, y);
-        touchMenu[Button.Exit].Rectangle.Shift(0f, y);
         base.UpdateTransition();
     }
 
@@ -110,7 +105,7 @@ public class DailyPrepareState : State
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
         }
         base.core.Renderer["fg", 9000, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
-        base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", menuRect.CenterTop.Shift(0f, 30f + num2), new TextProfile
+        base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", menuRect.CenterTop.Shift(0f, 60f + num2), new TextProfile
         {
             Width = 148,
             Height = 20,
@@ -192,13 +187,6 @@ public class DailyPrepareState : State
             {
                 SendMessage(new PlaySoundMessage(SoundName.web_1));
             }
-        }
-        else if (button == Button.Exit)
-        {
-            base.core.OptionsData.DailyRunEnabled = false;
-            base.core.SaveOptions();
-            DailyRun.End();
-            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
         }
         else if (button == Button.Back)
         {
