@@ -28,10 +28,10 @@ public class Sharing : Component
         base.core.SystemCalls.OpenUrl("https://www.eneminds.com");
     }
 
-    public void ShareDaily(int distance, int coins, int seed, int character, string mods)
+    public void ShareDaily(int distance, int coins, int seed, int character, string mods, int resultCode)
     {
         string charName = __(CharDescription.Get[(Character)character].Name);
-        string text = string.Format("Redungeon Daily {0}\n{1} · {2}\n{3}m · {4} coins\nverify: {5}", DailyRun.TodayKey(), charName, mods, distance, coins, seed.ToString("X8"));
+        string text = string.Format("Redungeon Daily {0}\n{1} · {2}\n{3}m · {4} coins\nsetup: {5}\nresult: {6}", DailyRun.TodayKey(), charName, mods, distance, coins, seed.ToString("X8"), resultCode.ToString("X8"));
         Screenshot screenshot = (DailyRun.LastScreenshot ?? base.core.GameplayScreenshot);
         if (screenshot != null)
         {

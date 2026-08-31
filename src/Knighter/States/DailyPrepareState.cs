@@ -133,7 +133,7 @@ public class DailyPrepareState : State
             Scale = 0.75f
         };
         float y = 84f + num2;
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(base.core.CurrentCharDesc.Icon), menuRect.TopLeft.Shift(20f, y + 13f), null, null, 0f, SpriteFlip.None, SpriteOrigin.None);
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(base.core.CurrentCharDesc.Icon), menuRect.TopLeft.Shift(13f, y + 6f), null, null, 0f, SpriteFlip.None);
         base.core.Renderer["fg", 9000, false].DrawTextS(__(base.core.CurrentCharDesc.Name), menuRect.TopLeft.Shift(36f, y), textProfile.Alter(TextProfile.OrangeMiddle));
         base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.TopLeft.Shift(36f, y + 13f), textProfile.Alter(default(Color).FromRgb(9462096)));
         base.core.Renderer["fg", 9000, false].DrawTextS("code: " + DailyRun.SessionSeed(base.core.ProfileData.Character, base.core.OptionsData).ToString("X8"), menuRect.TopLeft.Shift(36f, y + 26f), textProfile.Alter(default(Color).FromRgb(6910328)));
@@ -189,9 +189,9 @@ public class DailyPrepareState : State
         }
         else if (button == Button.Share)
         {
-            if (base.core.ProfileData.DailyBestDistance > 0 && base.core.ProfileData.DailyBestDate == DailyRun.TodayKey())
+            if (base.core.ProfileData.DailyLastDistance > 0)
             {
-                base.core.Sharing.ShareDaily(base.core.ProfileData.DailyBestDistance, base.core.ProfileData.DailyBestCoins, base.core.ProfileData.DailyBestSeed, base.core.ProfileData.DailyBestCharacter, DailyRun.ModsString(base.core.OptionsData, base.core.ProfileData.Character));
+                base.core.Sharing.ShareDaily(base.core.ProfileData.DailyLastDistance, base.core.ProfileData.DailyLastCoins, base.core.ProfileData.DailyLastSeed, base.core.ProfileData.DailyLastCharacter, DailyRun.ModsString(base.core.OptionsData, base.core.ProfileData.Character), base.core.ProfileData.DailyLastResultCode);
             }
             else
             {

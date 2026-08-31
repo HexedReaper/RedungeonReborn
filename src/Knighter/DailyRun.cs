@@ -53,6 +53,19 @@ public static class DailyRun
         return h;
     }
 
+    public static int ResultCode(int sessionSeed, int distance, int coins, int revives)
+    {
+        int h = sessionSeed;
+        h = h * 31 + distance;
+        h = h * 31 + coins;
+        h = h * 31 + revives;
+        if (h == int.MinValue)
+        {
+            h = 42;
+        }
+        return h;
+    }
+
     public static string ModsString(OptionsData o, Character character)
     {
         string text = "";
