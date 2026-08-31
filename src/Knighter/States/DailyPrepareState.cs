@@ -132,14 +132,14 @@ public class DailyPrepareState : State
             Font = Font.Thin,
             Scale = 0.75f
         };
-        float y = 84f + num2;
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(base.core.CurrentCharDesc.Icon), menuRect.TopLeft.Shift(13f, y + 6f), null, null, 0f, SpriteFlip.None);
-        base.core.Renderer["fg", 9000, false].DrawTextS(__(base.core.CurrentCharDesc.Name), menuRect.TopLeft.Shift(36f, y), textProfile.Alter(TextProfile.OrangeMiddle));
+        float y = 78f + num2;
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(CharDescription.Get[DailyRun.DailyCharacter()].Icon), menuRect.TopLeft.Shift(13f, y + 6f), null, null, 0f, SpriteFlip.None);
+        base.core.Renderer["fg", 9000, false].DrawTextS(__(CharDescription.Get[DailyRun.DailyCharacter()].Name), menuRect.TopLeft.Shift(36f, y), textProfile.Alter(TextProfile.OrangeMiddle));
         base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.TopLeft.Shift(36f, y + 13f), textProfile.Alter(default(Color).FromRgb(9462096)));
-        base.core.Renderer["fg", 9000, false].DrawTextS("code: " + DailyRun.SessionSeed(base.core.ProfileData.Character, base.core.OptionsData).ToString("X8"), menuRect.TopLeft.Shift(36f, y + 26f), textProfile.Alter(default(Color).FromRgb(6910328)));
-        y += 40f;
+        base.core.Renderer["fg", 9000, false].DrawTextS("code: " + DailyRun.SessionSeed(base.core.OptionsData).ToString("X8"), menuRect.TopLeft.Shift(36f, y + 26f), textProfile.Alter(default(Color).FromRgb(6910328)));
+        y += 38f;
         List<string> list = new List<string>();
-        Character character = base.core.ProfileData.Character;
+        Character character = DailyRun.DailyCharacter();
         if (base.core.OptionsData.HardcoreWebs)
         {
             list.Add("hardcore webs");
@@ -164,16 +164,44 @@ public class DailyPrepareState : State
         {
             list.Add("fast wings");
         }
-        base.core.Renderer["fg", 9000, false].DrawTextS("mods:", menuRect.TopLeft.Shift(12f, y + num2), textProfile.Alter(default(Color).FromRgb(9462096)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("MODS", menuRect.CenterTop.Shift(0f, y + num2), new TextProfile
+        {
+            Width = 60,
+            Height = 30,
+            BoxAlignment = Alignment2D.Middle,
+            TextAlignment = Alignment2D.Middle,
+            Color = default(Color).FromRgb(9462096),
+            Decoration = TextDecoration.None,
+            Font = Font.Thin,
+            Scale = 0.6f
+        });
         y += 13f;
         if (list.Count == 0)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("none (vanilla)", menuRect.TopLeft.Shift(24f, y + num2), textProfile.Alter(default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("none (vanilla)", menuRect.CenterTop.Shift(0f, y + num2), new TextProfile
+            {
+                Width = 148,
+                Height = 30,
+                BoxAlignment = Alignment2D.Middle,
+                TextAlignment = Alignment2D.Middle,
+                Decoration = TextDecoration.None,
+                Font = Font.Thin,
+                Scale = 0.7f
+            });
             y += 13f;
         }
         for (int j = 0; j < list.Count; j++)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("- " + list[j], menuRect.TopLeft.Shift(24f, y + 13 * j + num2), textProfile.Alter(TextProfile.OrangeMiddle));
+            base.core.Renderer["fg", 9000, false].DrawTextS("- " + list[j], menuRect.CenterTop.Shift(0f, y + 13 * j + num2), new TextProfile
+            {
+                Width = 148,
+                Height = 30,
+                BoxAlignment = Alignment2D.Middle,
+                TextAlignment = Alignment2D.Middle,
+                Decoration = TextDecoration.None,
+                Font = Font.Thin,
+                Scale = 0.7f
+            });
         }
         touchMenu.Draw();
         base.Draw();

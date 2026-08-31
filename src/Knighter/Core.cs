@@ -450,7 +450,7 @@ public sealed class Core : Component
         ClearStates();
         if (core.OptionsData.DailyRunEnabled)
         {
-            DailyRun.Begin(DailyRun.SessionSeed(core.ProfileData.Character, core.OptionsData));
+            DailyRun.Begin(DailyRun.SessionSeed(core.OptionsData), core);
         }
         else
         {
@@ -551,18 +551,18 @@ public sealed class Core : Component
                 {
                     DailyRun.LastScreenshot = GameplayScreenshot;
                 }
-                int dailySeed = DailyRun.SessionSeed(ProfileData.Character, base.core.OptionsData);
+                int dailySeed = DailyRun.SessionSeed(base.core.OptionsData);
                 ProfileData.DailyLastDistance = session.Distance;
                 ProfileData.DailyLastCoins = session.CollectedCoins;
                 ProfileData.DailyLastSeed = dailySeed;
-                ProfileData.DailyLastCharacter = (int)ProfileData.Character;
+                ProfileData.DailyLastCharacter = (int)DailyRun.DailyCharacter();
                 ProfileData.DailyLastResultCode = DailyRun.ResultCode(dailySeed, session.Distance, session.CollectedCoins, session.Revives);
                 if (session.Distance > ProfileData.DailyBestDistance)
                 {
                     ProfileData.DailyBestDistance = session.Distance;
                     ProfileData.DailyBestCoins = session.CollectedCoins;
                     ProfileData.DailyBestSeed = dailySeed;
-                    ProfileData.DailyBestCharacter = (int)ProfileData.Character;
+                    ProfileData.DailyBestCharacter = (int)DailyRun.DailyCharacter();
                     ProfileData.DailyBestResultCode = ProfileData.DailyLastResultCode;
                 }
                 ProfileData.SaveIntoStorage();
@@ -599,7 +599,7 @@ public sealed class Core : Component
             ClearStates();
             if (core.OptionsData.DailyRunEnabled)
             {
-                DailyRun.Begin(DailyRun.SessionSeed(core.ProfileData.Character, core.OptionsData));
+                DailyRun.Begin(DailyRun.SessionSeed(core.OptionsData), core);
             }
             else
             {

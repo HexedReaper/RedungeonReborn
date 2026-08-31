@@ -13,10 +13,11 @@ public static class DailyRun
 
     private static int seed;
 
-    public static void Begin(int s)
+    public static void Begin(int s, Core core)
     {
         Active = true;
         seed = s;
+        core.ProfileData.Character = DailyCharacter();
     }
 
     public static void End()
@@ -39,17 +40,23 @@ public static class DailyRun
         }
         return hash;
     }
+    public static Character DailyCharacter()
+    {
+        Array values = Enum.GetValues(typeof(Character));
+        int index = new Random(TodaysSeed() ^ 0x5f5f).Next(values.Length);
+        return (Character)values.GetValue(index);
+    }
 
-    public static int SessionSeed(Character character, OptionsData options)
+    public static int SessionSeed(OptionsData options)
     {
         int h = TodaysSeed();
-        h = h * 31 + (int)character;
+        h = h * 31 + (int)DailyCharacter();
         h = h * 31 + (options.HardcoreWebs ? 1 : 0);
-        h = h * 31 + ((character == Character.Knight && options.DirectionalThrust) ? 1 : 0);
-        h = h * 31 + ((character == Character.Bragg && options.BraggAmmo) ? 1 : 0);
-        h = h * 31 + ((character == Character.Vampire && options.VampirePredator) ? 1 : 0);
-        h = h * 31 + ((character == Character.Vampire && options.UnfriendBats) ? 1 : 0);
-        h = h * 31 + ((character == Character.Vampire && options.FastWings) ? 1 : 0);
+        h = h * 31 + ((DailyCharacter() == Character.Knight && options.DirectionalThrust) ? 1 : 0);
+        h = h * 31 + ((DailyCharacter() == Character.Bragg && options.BraggAmmo) ? 1 : 0);
+        h = h * 31 + ((DailyCharacter() == Character.Vampire && options.VampirePredator) ? 1 : 0);
+        h = h * 31 + ((DailyCharacter() == Character.Vampire && options.UnfriendBats) ? 1 : 0);
+        h = h * 31 + ((DailyCharacter() == Character.Vampire && options.FastWings) ? 1 : 0);
         return h;
     }
 
