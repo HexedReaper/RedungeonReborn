@@ -52,14 +52,15 @@ public static class DailyRun
 
     public static int SessionSeed(OptionsData options)
     {
+        int dc = (int)DailyCharacter();
         int h = TodaysSeed();
-        h = h * 31 + (int)DailyCharacter();
+        h = h * 31 + dc;
         h = h * 31 + (options.HardcoreWebs ? 1 : 0);
-        h = h * 31 + ((DailyCharacter() == Character.Knight && options.DirectionalThrust) ? 1 : 0);
-        h = h * 31 + ((DailyCharacter() == Character.Bragg && options.BraggAmmo) ? 1 : 0);
-        h = h * 31 + ((DailyCharacter() == Character.Vampire && options.VampirePredator) ? 1 : 0);
-        h = h * 31 + ((DailyCharacter() == Character.Vampire && options.UnfriendBats) ? 1 : 0);
-        h = h * 31 + ((DailyCharacter() == Character.Vampire && options.FastWings) ? 1 : 0);
+        h = h * 31 + ((dc == (int)Character.Knight && options.DirectionalThrust) ? 1 : 0);
+        h = h * 31 + ((dc == (int)Character.Bragg && options.BraggAmmo) ? 1 : 0);
+        h = h * 31 + ((dc == (int)Character.Vampire && options.VampirePredator) ? 1 : 0);
+        h = h * 31 + ((dc == (int)Character.Vampire && options.UnfriendBats) ? 1 : 0);
+        h = h * 31 + ((dc == (int)Character.Vampire && options.FastWings) ? 1 : 0);
         return h;
     }
 
