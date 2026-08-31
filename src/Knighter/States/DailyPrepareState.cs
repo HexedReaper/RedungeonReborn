@@ -31,6 +31,8 @@ public class DailyPrepareState : State
 
     private Animation charAnim;
 
+    private Animation torchFire;
+
     private bool showResult;
 
     private bool showMods;
@@ -49,9 +51,12 @@ public class DailyPrepareState : State
         charAnim = new Animation(desc.AnimSpeed);
         charAnim.Add("live", seq[0], seq[1]);
         charAnim.Play("live");
-        touchMenu.SetupButton(Button.IconTap, new RectangleF(menuRect.Center.X - 26f, menuRect.Top + 72f, 52f, 28f), null, null);
-        touchMenu.SetupButton(Button.CodeTap, new RectangleF(menuRect.Center.X - 44f, menuRect.Top + 125f, 88f, 13f), null, null);
-        touchMenu.SetupButton(Button.ModsTap, new RectangleF(menuRect.Center.X - 44f, menuRect.Top + 152f, 88f, 14f), null, null);
+        torchFire = new Animation(0.1f);
+        torchFire.Add("burn", "torch_fire_", "123456");
+        torchFire.Play("burn");
+        touchMenu.SetupButton(Button.IconTap, new RectangleF(menuRect.Center.X - 26f, menuRect.Top + 78f, 52f, 28f), null, null);
+        touchMenu.SetupButton(Button.CodeTap, new RectangleF(menuRect.Center.X - 50f, menuRect.Top + 129f, 100f, 14f), null, null);
+        touchMenu.SetupButton(Button.ModsTap, new RectangleF(menuRect.Center.X - 50f, menuRect.Top + 151f, 100f, 14f), null, null);
         touchMenu.SetupButton(Button.Start, new RectangleF(menuRect.Center.X - 52f, menuRect.Bottom + 4f, 104f, 26f), _(SpriteName.button), _(SpriteName.button_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Orange, "START RUN", null, icon: false, iconIsPicture: false);
         touchMenu.SetupButton(Button.Share, new RectangleF(menuRect.Center.X - 46f, menuRect.Bottom + 36f, 92f, 16f), _(SpriteName.button_green), _(SpriteName.button_green_pressed), null, stretch: true, SpriteFlip.None, ButtonColor.Green, "SHARE LAST", null, icon: false, iconIsPicture: false, blink: false, default(Color).FromRgb(11216961), null, -3f, 0f, 0.7f);
         touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 58f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
@@ -67,6 +72,7 @@ public class DailyPrepareState : State
         {
             charAnim.Update();
         }
+        torchFire.Update();
         if (swingT >= 0)
         {
             swingT++;
@@ -115,6 +121,12 @@ public class DailyPrepareState : State
         };
     }
 
+    private void DrawTorch(Vector2 basePos, float dayFrac)
+    {
+        base.core.Renderer["fg", 9001, false].DrawSpriteS(_(SpriteName.dungeon_torch), basePos, null, Vector2.One * 0.7f, 0f, SpriteFlip.None, SpriteOrigin.BottomCenter);
+        base.core.Renderer["fg", 9002, false].DrawSpriteS(torchFire.GetCurrentFrame(), basePos.Shift(0f, -1f), null, Vector2.One * (0.3f + 0.7f * dayFrac) * 0.7f, 0f, SpriteFlip.None, SpriteOrigin.BottomCenter);
+    }
+
     public override void Draw()
     {
         float num = 1f - (float)base.Trans / (float)base.TransDuration;
@@ -124,6 +136,9 @@ public class DailyPrepareState : State
         float swing = ((swingT >= 0) ? (1.2f * (float)(swingT * swingT) / 2500f) : 0f);
         float swingSin = (float)Math.Sin(swing);
         float swingCos = (float)Math.Cos(swing);
+        DateTime utcNow = DateTime.UtcNow;
+        double secondsLeft = 86400.0 - (utcNow.Hour * 3600 + utcNow.Minute * 60 + utcNow.Second);
+        float dayFrac = (float)(secondsLeft / 86400.0);
         for (int i = chain.Height; menuRect.Top + 21f + num2 - (float)i > (float)(-chain.Height); i += chain.Height)
         {
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Left + 20f, menuRect.Top + 21f + num2 - (float)i));
@@ -131,17 +146,19 @@ public class DailyPrepareState : State
         }
         Vector2 panelTop = new Vector2(menuRect.Center.X - (menuRect.Top + num2) * swingSin, (menuRect.Top + num2) * swingCos);
         base.core.Renderer["fg", 9000, false].DrawSpriteS(block, panelTop, null, null, swing, SpriteFlip.None, SpriteOrigin.TopCenter);
+        DrawTorch(new Vector2(menuRect.Left + 18f, menuRect.Top + 84f + num2), dayFrac);
+        DrawTorch(new Vector2(menuRect.Right - 18f, menuRect.Top + 84f + num2), dayFrac);
         base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", menuRect.CenterTop.Shift(0f, 60f + num2), CenteredProfile(0.9f, bold: true).Alter(default(Color).FromRgb(9462096)));
         CharDescription desc = CharDescription.Get[DailyRun.DailyCharacter()];
         Sprite iconSprite = (base.core.OptionsData.DailyIconAnimated ? charAnim.GetCurrentFrame() : _(desc.Icon));
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(iconSprite, new Vector2(menuRect.Center.X, menuRect.Top + 86f + num2 + stack), null, null, 0f, SpriteFlip.None, SpriteOrigin.Center);
-        base.core.Renderer["fg", 9000, false].DrawTextS(__(desc.Name), menuRect.CenterTop.Shift(0f, 104f + num2 + stack), CenteredProfile(0.75f).Alter(TextProfile.OrangeMiddle));
-        base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.CenterTop.Shift(0f, 117f + num2 + stack), CenteredProfile(0.75f).Alter(default(Color).FromRgb(9462096)));
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(iconSprite, new Vector2(menuRect.Center.X, menuRect.Top + 96f + num2 + stack), null, null, 0f, SpriteFlip.None, SpriteOrigin.Center);
+        base.core.Renderer["fg", 9000, false].DrawTextS(__(desc.Name), menuRect.CenterTop.Shift(0f, 114f + num2 + stack), CenteredProfile(0.75f).Alter(TextProfile.OrangeMiddle));
+        base.core.Renderer["fg", 9000, false].DrawTextS(DailyRun.TodayKey(), menuRect.CenterTop.Shift(0f, 127f + num2 + stack), CenteredProfile(0.75f).Alter(default(Color).FromRgb(9462096)));
         bool haveResult = base.core.ProfileData.DailyLastDistance > 0;
         int sealCode = ((showResult && haveResult) ? base.core.ProfileData.DailyLastResultCode : DailyRun.SessionSeed(base.core.OptionsData));
         string sealLabel = ((showResult && haveResult) ? "result: " : "code: ") + sealCode.ToString("X8");
-        base.core.Renderer["fg", 9000, false].DrawTextS(sealLabel, menuRect.CenterTop.Shift(0f, 130f + num2 + stack), CenteredProfile(0.75f).Alter((showResult && haveResult) ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        float y = 156f + num2 + stack;
+        base.core.Renderer["fg", 9000, false].DrawTextS(sealLabel, menuRect.CenterTop.Shift(0f, 140f + num2 + stack), CenteredProfile(0.75f).Alter((showResult && haveResult) ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        float y = 162f + num2 + stack;
         Character character = DailyRun.DailyCharacter();
         List<string> list = new List<string>();
         if (base.core.OptionsData.HardcoreWebs)
@@ -181,27 +198,18 @@ public class DailyPrepareState : State
             {
                 base.core.Renderer["fg", 9000, false].DrawTextS("- " + list[j], menuRect.CenterTop.Shift(0f, y + 13 * j), CenteredProfile(0.7f).Alter(TextProfile.OrangeMiddle));
             }
-        }
-        y += 14f;
-        if (list.Count == 0)
-        {
-            base.core.Renderer["fg", 9000, false].DrawTextS("none (vanilla)", menuRect.CenterTop.Shift(0f, y), CenteredProfile(0.7f).Alter(default(Color).FromRgb(6910328)));
-        }
-        for (int j = 0; j < list.Count; j++)
-        {
-            base.core.Renderer["fg", 9000, false].DrawTextS("- " + list[j], menuRect.CenterTop.Shift(0f, y + 13 * j), CenteredProfile(0.7f).Alter(TextProfile.OrangeMiddle));
+            y += 13f * list.Count;
         }
         bool heartLit = (base.core.ProfileData.DailyBestDate == DailyRun.TodayKey() && base.core.ProfileData.DailyBestDistance >= 20);
-        float statY = y + (showMods ? (13f * Math.Max(list.Count, 1)) : 0f) + 6f;
+        float statY = y + 8f;
         float heartPulse = (heartLit ? (1f + 0.12f * Component._sin((float)base.ticks * 0.1f)) : 1f);
         string statText = "dailies played: " + base.core.ProfileData.DailyTotalPlayed;
-        float statW = base.core.Renderer["fg", 9000, false].DrawTextS(statText, menuRect.CenterTop.Shift(0f, statY + num2 + stack), CenteredProfile(0.7f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328))).Width;
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(menuRect.Center.X - statW * 0.5f - 9f, statY + 5f + num2 + stack), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse, 0f, SpriteFlip.None, SpriteOrigin.Center);
-        base.core.Renderer["fg", 9000, false].DrawTextS("dailies played: " + base.core.ProfileData.DailyTotalPlayed, menuRect.CenterTop.Shift(0f, statY + num2 + stack), CenteredProfile(0.7f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        float statW = base.core.Renderer["fg", 9000, false].DrawTextS(statText, menuRect.CenterTop.Shift(0f, statY), CenteredProfile(0.7f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328))).Width;
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(menuRect.Center.X - statW * 0.5f - 10f, statY + 5f), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse, 0f, SpriteFlip.None, SpriteOrigin.Center);
         if (base.core.ProfileData.DailyBestDistance > 0 && base.core.ProfileData.DailyBestDate != DailyRun.TodayKey())
         {
             float bob = Component._sin((float)base.ticks * 0.05f) * 2f;
-            Vector2 ghostPos = new Vector2(menuRect.Left - 22f, menuRect.Top + 110f + num2 + bob);
+            Vector2 ghostPos = new Vector2(menuRect.Left - 22f, menuRect.Top + 120f + num2 + bob);
             base.core.Renderer["fg", 9000, false].DrawSpriteS(_(CharDescription.Get[(Character)base.core.ProfileData.DailyBestCharacter].SkullSprite), ghostPos, Color.White * 0.45f, Vector2.One * 0.7f, 0f, SpriteFlip.None, SpriteOrigin.Center);
             base.core.Renderer["fg", 9000, false].DrawTextS("yesterday", new Vector2(ghostPos.X, ghostPos.Y + 16f), CenteredProfile(0.5f).Alter(default(Color).FromRgb(6910328)));
             base.core.Renderer["fg", 9000, false].DrawTextS(base.core.ProfileData.DailyBestDistance + "m", new Vector2(ghostPos.X, ghostPos.Y + 26f), CenteredProfile(0.5f).Alter(TextProfile.OrangeMiddle));
