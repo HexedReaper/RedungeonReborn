@@ -228,7 +228,6 @@ public class DailyPrepareState : State
         float num = 1f - (float)base.Trans / (float)base.TransDuration;
         base.core.Renderer["fg", 9000, false].FillScreen(Color.Black * (1f - num * num * num));
         float num2 = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
-        float stack = (float)Tween.BackEaseOut(base.Trans, -40.0, 40.0, base.TransDuration - 6);
         float swing = ((swingT >= 0) ? (1.2f * (float)(swingT * swingT) / 2500f) : 0f);
         float swingSin = (float)Math.Sin(swing);
         float swingCos = (float)Math.Cos(swing);
@@ -242,7 +241,7 @@ public class DailyPrepareState : State
         Vector2 panelTop = new Vector2(menuRect.Center.X - (menuRect.Top + num2) * swingSin, (menuRect.Top + num2) * swingCos);
         base.core.Renderer["fg", 9000, false].DrawSpriteS(block, panelTop, null, null, swing, SpriteFlip.None, SpriteOrigin.TopCenter);
         float topT = menuRect.Top + num2;
-        float topS = topT + stack;
+        float topS = topT;
         float cx = menuRect.Center.X;
         int totalMinutes = (int)(secondsLeft / 60.0);
         int hoursLeft = totalMinutes / 60;
@@ -271,7 +270,7 @@ public class DailyPrepareState : State
         }
         bool heartLit = (base.core.ProfileData.DailyBestDate == DailyRun.TodayKey() && base.core.ProfileData.DailyBestDistance >= 20);
         float heartPulse = (heartLit ? (1f + 0.12f * Component._sin((float)base.ticks * 0.1f)) : 1f);
-        base.core.Renderer["fg", 9000, false].DrawTextS("dailies played: " + base.core.ProfileData.DailyTotalPlayed, new Vector2(cx + CounterX, topS + CounterY), CenteredProfile(0.75f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(9462096)));
+        base.core.Renderer["fg", 9000, false].DrawTextS("attempts: " + DailyRun.AttemptsToday, new Vector2(cx + CounterX, topS + CounterY), CenteredProfile(0.75f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(9462096)));
         string todayText = (heartLit ? "played today!" : "not played yet");
         base.core.Renderer["fg", 9000, false].DrawTextS(todayText, new Vector2(cx + TodayX, topS + TodayY), CenteredProfile(0.75f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(cx + HeartX, topS + HeartY), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse, 0f, SpriteFlip.None, SpriteOrigin.Center);

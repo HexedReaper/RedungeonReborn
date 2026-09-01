@@ -24,6 +24,31 @@ public static class DailyRun
 
     private static Character snapSelected;
 
+    // attempts on the current daily (session-scope for now; persisted via ProfileData next)
+    private static string attemptsDayKey = "";
+
+    private static int attemptsToday;
+
+    public static int AttemptsToday
+    {
+        get
+        {
+            string key = TodayKey();
+            if (attemptsDayKey != key)
+            {
+                attemptsDayKey = key;
+                attemptsToday = 0;
+            }
+            return attemptsToday;
+        }
+    }
+
+    public static void CountAttempt()
+    {
+        _ = AttemptsToday;
+        attemptsToday++;
+    }
+
     public static void Begin(int s, Core core)
     {
         Active = true;

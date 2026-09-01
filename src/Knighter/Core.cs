@@ -567,6 +567,7 @@ public sealed class Core : Component
                     ProfileData.DailyBestResultCode = ProfileData.DailyLastResultCode;
                 }
                 ProfileData.DailyTotalPlayed++;
+                DailyRun.CountAttempt();
                 ProfileData.SaveIntoStorage();
                 DailyRun.End();
             }
