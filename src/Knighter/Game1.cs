@@ -22,18 +22,14 @@ public sealed class Game1 : Game
 	}
 
 	protected override void Initialize()
-	{
-		float num = (float)graphics.GraphicsDevice.Viewport.Width / (float)graphics.GraphicsDevice.Viewport.Height;
-		if (2f / 3f < num)
-		{
-			Settings.PixelScale = Settings.GuiScale * (float)graphics.GraphicsDevice.Viewport.Height / 266f;
-		}
-		else
-		{
-			Settings.PixelScale = (float)graphics.GraphicsDevice.Viewport.Width / 177f;
-		}
-		base.Initialize();
-	}
+    {
+        // guarantee BOTH minimum virtual dims on every device:
+        // width >= 177 (original rule), height >= 340 (panel 233 + button stack)
+        float scaleW = (float)graphics.GraphicsDevice.Viewport.Width / 177f;
+        float scaleH = Settings.GuiScale * (float)graphics.GraphicsDevice.Viewport.Height / 340f;
+        Settings.PixelScale = (float)System.Math.Min(scaleW, scaleH);
+        base.Initialize();
+    }
 
 	protected override void LoadContent()
 	{

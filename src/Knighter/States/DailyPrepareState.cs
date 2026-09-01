@@ -46,7 +46,7 @@ public class DailyPrepareState : State
     private const float CounterY = 199f;
     private const float TodayX = -37f;
     private const float TodayY = 212f;
-    private const float HeartX = -3f;      // rel panel center
+    private const float HeartX = 4f;      // rel panel center
     private const float HeartY = 214f;
     private const float GhostX = 119f;     // rel panel left
     private const float GhostY = 189f;
