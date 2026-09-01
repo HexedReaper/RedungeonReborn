@@ -86,7 +86,7 @@ public class VampireChar : PlayerEntity
 				}
 			})
 			.Start(2, 4);
-		flightDuration = 60 * ((base.core.ProfileData.CurrentCharLevel < 5) ? 2 : 5);
+		flightDuration = 60 * (2 + base.core.ProfileData.CurrentCharLevel);
 		flaps = new BagOf<SoundName>().Put(SoundName.kazhan_flap_1).Put(SoundName.kazhan_flap_2).Put(SoundName.kazhan_flap_3);
 	}
 
@@ -290,14 +290,10 @@ public class VampireChar : PlayerEntity
         }
         if (FlightActive)
         {
-            if (base.core.OptionsData.UnfriendBats && injuryType == InjuryType.Bat)
-            {
-                if (base.core.OptionsData.VampirePredator)
-                {
-                    return true;
-                }
-                return base.TryResist(injuryType, offender);
-            }
+            if (injuryType == InjuryType.Bat)
+			{
+				return true;
+			}
             if (base.core.OptionsData.VampirePredator && offender is StatueEntity statue && !statue.Unbreakable)
             {
                 statue.Break(this);
@@ -356,6 +352,10 @@ public class VampireChar : PlayerEntity
         base.playState.Camera.Shake("shot");
         SendMessage(new SpawnEntityMessage(new EffectEntity(victim.CenterCoordinates, "hit_claws_", "123").SetLayer("fg", -2, lit: false), null));
         SendMessage(new SpawnEntityMessage(new EffectEntity(victim.CenterCoordinates, "hit_claws_", "123", mirrored: true).SetLayer("fg", -2, lit: false), null), 15);
+		if (FlightActive)
+        {
+            flightTimer += 45;
+        }
         if (predatorKills < 10)
         {
             predatorKills++;

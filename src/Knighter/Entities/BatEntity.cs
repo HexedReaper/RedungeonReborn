@@ -134,7 +134,8 @@ public class BatEntity : Entity
         animation.Update();
         if (!Fleeing)
         {
-            unfriended = (base.core.OptionsData.UnfriendBats && base.core.CurrentPlayState != null && base.core.CurrentPlayState.Player is VampireChar && !base.core.CurrentPlayState.Player.Dead);
+            VampireChar vampire = ((base.core.CurrentPlayState != null) ? (base.core.CurrentPlayState.Player as VampireChar) : null);
+            unfriended = (base.core.OptionsData.UnfriendBats && vampire != null && !vampire.Dead);
             bool anchorMoved = false;
             if (unfriended)
             {
@@ -143,9 +144,24 @@ public class BatEntity : Entity
                     loveEmitter.Stop();
                     loveEmitter = null;
                 }
-                Vector2 target = base.core.CurrentPlayState.Player.WorldCoordinates;
+                Vector2 target = vampire.WorldCoordinates;
                 Vector2 offset = target - new Vector2(x, y);
-                if (offset.LengthSquared() < HuntRadiusSq && IsLeadHunter())
+                if (base.core.OptionsData.VampirePredator && vampire.FlightActive && offset.LengthSquared() < HuntRadiusSq)
+                {
+                    Fleeing = true;
+                    animation.Speed = 0.4f;
+                    IsBroken = true;
+                    Vector2 away = new Vector2(x, y) - target;
+                    if (away.LengthSquared() < 0.001f)
+                    {
+                        away = new Vector2(0f, -1f);
+                    }
+                    away.Normalize();
+                    away *= 8f;
+                    SetFlying(value: false);
+                    SuspendedStartFlying((int)away.X, (int)away.Y, 0.001f, ignoreObstacles: true);
+                }
+                else if (offset.LengthSquared() < HuntRadiusSq && IsLeadHunter() && FairToHunt(vampire, target))
                 {
                     if (!hunting)
                     {
@@ -155,29 +171,27 @@ public class BatEntity : Entity
                     offset.Normalize();
                     Vector2 next = spawn + offset * HuntSpeed;
                     var tile = levelMap[next];
-                    bool blocked = tile == null || !tile.IsPassableFor(this);
-                    bool leashed = (next - home).LengthSquared() >= LeashSq;
-                    if (!blocked && !leashed)
+                    if (tile != null && tile.IsPassableFor(this) && (next - home).LengthSquared() < LeashSq)
                     {
                         spawn = next;
                         anchorMoved = true;
-                    }
-                    else if (blocked)
-                    {
-                        Fleeing = true;
-                        animation.Speed = 0.4f;
-                        IsBroken = true;
-                        Vector2 away = new Vector2(x, y) - target;
-                        away.Normalize();
-                        away *= 8f;
-                        SetFlying(value: false);
-                        SuspendedStartFlying((int)away.X, (int)away.Y, 0.001f, ignoreObstacles: true);
                     }
                 }
                 else
                 {
                     hunting = false;
                 }
+            }
+            else
+            {
+                hunting = false;
+            }
+            if (!hunting && (spawn.X != home.X || spawn.Y != home.Y))
+            {
+                Vector2 back = home - spawn;
+                float dist = back.Length();
+                spawn = ((dist <= HuntSpeed) ? home : (spawn + back / dist * HuntSpeed));
+                anchorMoved = true;
             }
             if (Moving)
             {
@@ -211,6 +225,27 @@ public class BatEntity : Entity
         avoid += (avoidTarget - avoid) * 0.1f;
         base.Update();
     }
+
+	private bool FairToHunt(VampireChar vampire, Vector2 target)
+    {
+        if (vampire.CurrentPlatform != null)
+        {
+            return false;
+        }
+        int open = 0;
+        open += (OpenForPlayer(target.Shift(1f, 0f)) ? 1 : 0);
+        open += (OpenForPlayer(target.Shift(-1f, 0f)) ? 1 : 0);
+        open += (OpenForPlayer(target.Shift(0f, 1f)) ? 1 : 0);
+        open += (OpenForPlayer(target.Shift(0f, -1f)) ? 1 : 0);
+        return open >= 3;
+    }
+
+    private bool OpenForPlayer(Vector2 t)
+    {
+        var tile = levelMap[t];
+        return tile != null && tile.IsPassableFor(base.core.CurrentPlayState.Player);
+    }
+
 	private bool IsLeadHunter()
     {
         Vector2 playerPos = base.core.CurrentPlayState.Player.WorldCoordinates;
