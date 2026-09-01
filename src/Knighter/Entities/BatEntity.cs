@@ -42,6 +42,8 @@ public class BatEntity : Entity
 	private float avoidTarget;
 	private bool hunting;
 	private bool scatterFlee;
+	private int scatterT;
+    private float scatterX;
 
     private Vector2 home;
 
@@ -151,20 +153,11 @@ public class BatEntity : Entity
                 {
                     Fleeing = true;
                     scatterFlee = true;
+                    scatterT = 240;
+                    scatterX = x;
+                    hunting = false;
                     animation.Speed = 0.4f;
-                    IsBroken = true;
-                    fleeTimeout = 420;
-                    Vector2 away = new Vector2(x, y) - target;
-                    away.X *= 0.4f;
-                    away.Y -= 1.5f;
-                    if (away.LengthSquared() < 0.001f)
-                    {
-                        away = new Vector2(0f, -1f);
-                    }
-                    away.Normalize();
-                    away *= 8f;
-                    SetFlying(value: false);
-                    SuspendedStartFlying((int)away.X, (int)away.Y, 0.001f, ignoreObstacles: true);
+                    SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
                 }
                 else if (offset.LengthSquared() < HuntRadiusSq && IsLeadHunter() && FairToHunt(vampire, target))
                 {
@@ -213,6 +206,34 @@ public class BatEntity : Entity
                 UpdateTiles();
             }
         }
+        else if (scatterFlee)
+        {
+            scatterT--;
+            y -= 0.03f;
+            x = scatterX + Component._sin((float)base.worldTicks * 0.15f) * 0.25f;
+            UpdateTiles();
+            if (scatterT <= 0)
+            {
+                Vector2 tilePos = new Vector2(x, y);
+                var tileHere = levelMap[tilePos];
+                bool safeSpot = tileHere != null && tileHere.IsPassableFor(this);
+                Vector2 playerPos = base.core.CurrentPlayState.Player.WorldCoordinates;
+                bool clearOfPlayer = (tilePos - playerPos).LengthSquared() > 2.25f;
+                if (safeSpot && clearOfPlayer)
+                {
+                    scatterFlee = false;
+                    Fleeing = false;
+                    spawn = tilePos;
+                    home = spawn;
+                    hunting = false;
+                    animation.Speed = 0.15f;
+                }
+                else
+                {
+                    SendMessage(new RemoveEntityMessage(this));
+                }
+            }
+        }
         else
         {
             fleeDelay--;
@@ -224,28 +245,7 @@ public class BatEntity : Entity
             fleeTimeout--;
             if (fleeTimeout == 0)
             {
-                Vector2 tilePos = new Vector2(x, y);
-                var tileHere = levelMap[tilePos];
-                bool safeSpot = tileHere != null && tileHere.IsPassableFor(this);
-                Vector2 playerPos = base.core.CurrentPlayState.Player.WorldCoordinates;
-                bool clearOfPlayer = (tilePos - playerPos).LengthSquared() > 2.25f;
-                if (scatterFlee && safeSpot && clearOfPlayer)
-                {
-                    scatterFlee = false;
-                    Fleeing = false;
-                    IsBroken = false;
-                    spawn = tilePos;
-                    home = spawn;
-                    hunting = false;
-                    fleeDelay = 70;
-                    fleeTimeout = 200;
-                    animation.Speed = 0.15f;
-                    SetFlying(value: true);
-                }
-                else
-                {
-                    SendMessage(new RemoveEntityMessage(this));
-                }
+                SendMessage(new RemoveEntityMessage(this));
             }
         }
         avoid += (avoidTarget - avoid) * 0.1f;
@@ -293,7 +293,7 @@ public class BatEntity : Entity
 		avoidTarget = ((avoidPlayer && !unfriended) ? (900f - Component._m((base.core.CurrentPlayState.Player.WorldCenter - base.WorldCenter).LengthSquared(), 900f)) : 0f);
 		Sprite currentFrame = animation.GetCurrentFrame();
 		Color? tint = (unfriended ? default(Color).FromRgb(16732240) : (Color?)null);
-        base.core.Renderer[base.Z + 3].DrawSpriteW(currentFrame, base.WorldCenter.Shift(-10.5f, -12f - avoid * 0.03f), tint, new Vector2((!Fleeing) ? 1f : (1f + 0.6f * (float)fleeDelay / 70f)));
+        base.core.Renderer[base.Z + 3].DrawSpriteW(currentFrame, base.WorldCenter.Shift(-10.5f, -12f - avoid * 0.03f), tint, new Vector2((!Fleeing) ? 1f : ((scatterFlee ? 1f : (1f + 0.6f * (float)fleeDelay / 70f)))));
 		base.core.Renderer["bg", base.Z + 32, false].DrawSpriteW(currentFrame, base.WorldCenter.Shift(-10.5f, 0f), Color.Black * 0.2f, new Vector2(1f, 0.8f), 0f, SpriteFlip.Vertical);
 		base.Draw();
 	}
