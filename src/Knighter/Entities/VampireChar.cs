@@ -325,7 +325,7 @@ public class VampireChar : PlayerEntity
     {
         if (base.core.OptionsData.VampirePredator && FlightActive && !Dead && !reviving && (
             other is SlimeEntity || other is WispEntity || other is SerpentEntity || other is StatueEntity ||
-            (other is BatEntity && base.core.OptionsData.UnfriendBats && !(other as BatEntity).Fleeing)))
+            (other is BatEntity && base.core.OptionsData.UnfriendBats)))
         {
             if (!other.IsBroken)
             {
