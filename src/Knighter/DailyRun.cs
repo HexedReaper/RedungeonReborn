@@ -13,55 +13,12 @@ public static class DailyRun
 
     private static int seed;
 
-    // pre-daily snapshot so Begin()'s temporary unlock/max never becomes permanent
-    private static bool snapValid;
-
-    private static Character snapChar;
-
-    private static bool snapUnlocked;
-
-    private static int snapLevel;
-
-    private static Character snapSelected;
-
-    // attempts on the current daily (session-scope for now; persisted via ProfileData next)
-    private static string attemptsDayKey = "";
-
-    private static int attemptsToday;
-
-    public static int AttemptsToday
-    {
-        get
-        {
-            string key = TodayKey();
-            if (attemptsDayKey != key)
-            {
-                attemptsDayKey = key;
-                attemptsToday = 0;
-            }
-            return attemptsToday;
-        }
-    }
-
-    public static void CountAttempt()
-    {
-        _ = AttemptsToday;
-        attemptsToday++;
-    }
-
     public static void Begin(int s, Core core)
     {
         Active = true;
         seed = s;
         Character daily = DailyCharacter();
-        if (!snapValid)
-        {
-            snapValid = true;
-            snapChar = daily;
-            snapUnlocked = core.ProfileData.Characters[daily].Unlocked;
-            snapLevel = core.ProfileData.Characters[daily].Level;
-            snapSelected = core.ProfileData.Character;
-        }
+        core.ProfileData.BeginDailyCharacterOverride(daily);
         core.ProfileData.Character = daily;
         core.ProfileData.Characters[daily].Unlocked = true;
         core.ProfileData.Characters[daily].Level = CharDescription.Get[daily].Levels.Count;
@@ -70,14 +27,14 @@ public static class DailyRun
     public static void End()
     {
         Active = false;
-        if (snapValid)
-        {
-            snapValid = false;
-            ProfileData profile = Core.Instance.ProfileData;
-            profile.Character = snapSelected;
-            profile.Characters[snapChar].Unlocked = snapUnlocked;
-            profile.Characters[snapChar].Level = snapLevel;
-        }
+        Core.Instance.ProfileData.EndDailyCharacterOverride();
+    }
+
+    public static int AttemptsToday => Core.Instance.ProfileData.DailyAttemptsToday();
+
+    public static void CountAttempt()
+    {
+        Core.Instance.ProfileData.CountDailyAttempt();
     }
 
     public static string TodayKey()
@@ -95,6 +52,7 @@ public static class DailyRun
         }
         return hash;
     }
+
     public static Character DailyCharacter()
     {
         Array values = Enum.GetValues(typeof(Character));

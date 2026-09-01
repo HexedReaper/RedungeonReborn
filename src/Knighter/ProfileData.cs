@@ -79,6 +79,20 @@ public class ProfileData : Component
     public int DailyLastResultCode;
 	public int DailyTotalPlayed;
 
+	public bool DailySnapValid;
+
+    public int DailySnapCharacter;
+
+    public bool DailySnapUnlocked;
+
+    public int DailySnapLevel;
+
+    public int DailySnapSelected;
+
+    public string DailyAttemptsDate;
+
+    public int DailyAttempts;
+
 	public Language Locale;
 
 	public bool LanguageSelectorPending;
@@ -122,6 +136,13 @@ public class ProfileData : Component
 		LastSyncTime = string.Empty;
         DailyBestDate = string.Empty;
 		DailyTotalPlayed = 0;
+		DailySnapValid = false;
+        DailySnapCharacter = 0;
+        DailySnapUnlocked = false;
+        DailySnapLevel = 0;
+        DailySnapSelected = 0;
+        DailyAttemptsDate = string.Empty;
+        DailyAttempts = 0;
 		Locale = Language.en_US;
 		LanguageSelectorPending = true;
 	}
@@ -282,6 +303,13 @@ public class ProfileData : Component
         base.core.Storage.TryGetInt("daily-last-character", ref DailyLastCharacter);
         base.core.Storage.TryGetInt("daily-last-result-code", ref DailyLastResultCode);
 		base.core.Storage.TryGetInt("daily-total-played", ref DailyTotalPlayed);
+		base.core.Storage.TryGetBool("daily-snap-valid", ref DailySnapValid);
+        base.core.Storage.TryGetInt("daily-snap-character", ref DailySnapCharacter);
+        base.core.Storage.TryGetBool("daily-snap-unlocked", ref DailySnapUnlocked);
+        base.core.Storage.TryGetInt("daily-snap-level", ref DailySnapLevel);
+        base.core.Storage.TryGetInt("daily-snap-selected", ref DailySnapSelected);
+        base.core.Storage.TryGetString("daily-attempts-date", ref DailyAttemptsDate);
+        base.core.Storage.TryGetInt("daily-attempts", ref DailyAttempts);
 		string result6 = string.Empty;
 		base.core.Storage.TryGetString("locale", ref result6);
 		if (result6.Equals(string.Empty))
@@ -290,9 +318,13 @@ public class ProfileData : Component
 		}
 		Locale = (Language)Enum.Parse(typeof(Language), result6);
 		if (!base.core.Storage.TryGetBool("language-selector-pending", ref LanguageSelectorPending))
-		{
-			base.core.ProfileData.LanguageSelectorPending = true;
-		}
+        {
+            base.core.ProfileData.LanguageSelectorPending = true;
+        }
+        if (DailySnapValid && !DailyRun.Active)
+        {
+            EndDailyCharacterOverride();
+        }
 	}
 
 	public void SaveIntoStorage()
@@ -344,8 +376,59 @@ public class ProfileData : Component
         base.core.Storage.SetInt("daily-last-character", DailyLastCharacter);
         base.core.Storage.SetInt("daily-last-result-code", DailyLastResultCode);
 		base.core.Storage.SetInt("daily-total-played", DailyTotalPlayed);
+		base.core.Storage.SetBool("daily-snap-valid", DailySnapValid);
+        base.core.Storage.SetInt("daily-snap-character", DailySnapCharacter);
+        base.core.Storage.SetBool("daily-snap-unlocked", DailySnapUnlocked);
+        base.core.Storage.SetInt("daily-snap-level", DailySnapLevel);
+        base.core.Storage.SetInt("daily-snap-selected", DailySnapSelected);
+        base.core.Storage.SetString("daily-attempts-date", DailyAttemptsDate);
+        base.core.Storage.SetInt("daily-attempts", DailyAttempts);
 		base.core.Storage.SetString("locale", Locale.ToString());
 		base.core.Storage.SetBool("language-selector-pending", LanguageSelectorPending);
 		base.core.Storage.Save();
 	}
+
+	public void BeginDailyCharacterOverride(Character daily)
+    {
+        if (DailySnapValid)
+        {
+            return;
+        }
+        DailySnapValid = true;
+        DailySnapCharacter = (int)daily;
+        DailySnapUnlocked = Characters[daily].Unlocked;
+        DailySnapLevel = Characters[daily].Level;
+        DailySnapSelected = (int)Character;
+        SaveIntoStorage();
+    }
+
+    public void EndDailyCharacterOverride()
+    {
+        if (!DailySnapValid)
+        {
+            return;
+        }
+        DailySnapValid = false;
+        Character = (Character)DailySnapSelected;
+        Characters[(Character)DailySnapCharacter].Unlocked = DailySnapUnlocked;
+        Characters[(Character)DailySnapCharacter].Level = DailySnapLevel;
+        SaveIntoStorage();
+    }
+
+    public int DailyAttemptsToday()
+    {
+        string key = DailyRun.TodayKey();
+        if (DailyAttemptsDate != key)
+        {
+            DailyAttemptsDate = key;
+            DailyAttempts = 0;
+        }
+        return DailyAttempts;
+    }
+
+    public void CountDailyAttempt()
+    {
+        DailyAttemptsToday();
+        DailyAttempts++;
+    }
 }
