@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Knighter.Gameplay;
 using Knighter.Graphics;
@@ -26,19 +25,19 @@ public class CharacterModsState : State
         Back
     }
 
-    // ---- layout: defaults baked from UiLayoutEditor dump; editor still live (hold top-left corner ~0.7s) ----
-    private const float PanelDY = 0f;        // whole sign up/down (hand-edit only)
-    private const float TitleX = 5f;         // rel panel left
-    private const float TitleY = 57f;        // rel panel top
-    private const float SectionTopY = 80f;   // first header top, rel panel top
-    private const float SectionPitch = 19f;  // gap between stacked rows
-    private const float TogglePitch = 19f;   // gap between toggle rows inside a section
+    // ---- layout tuned on device via UiLayoutEditor (dump 2025-09-01) ----
+    private const float PanelDY = 0f;        // (hand-edit only)
+    private const float TitleX = 6f;         // rel panel left
+    private const float TitleY = 34f;        // rel panel top
+    private const float SectionTopY = 67f;   // first header top, rel panel top
+    private const float SectionPitch = 17f;  // gap between stacked rows
+    private const float TogglePitch = 16f;   // gap between toggle rows inside a section (raise to 20f if taps double-flip)
     private const float HeaderDX = 8f;       // header left/right inset
     private const float ToggleDX = 12f;      // toggle left inset
     private const float LabelDX = 32f;       // toggle label offset from toggle top-left
     private const float LabelDY = -7f;
     private const float BackBtnX = 0f;       // rel panel center
-    private const float BackBtnY = 10f;      // below panel bottom
+    private const float BackBtnY = 8f;       // below panel bottom
 
     private TouchMenu<Button> touchMenu;
 
@@ -49,33 +48,6 @@ public class CharacterModsState : State
     private Sprite chain;
 
     private int openSection;
-
-    private float titleX = TitleX;
-    private float titleY = TitleY;
-    private float secTopY = SectionTopY;
-    private float secPitchY = SectionPitch;
-    private float togPitchY = TogglePitch;
-    private float backX = BackBtnX;
-    private float backY = BackBtnY;
-
-    private UiLayoutEditor edLayout;
-
-    private UiLayoutEditor.Item edTitle;
-
-    private UiLayoutEditor.Item edSecTop;
-
-    private UiLayoutEditor.Item edSecPitch;
-
-    private UiLayoutEditor.Item edTogPitch;
-
-    private UiLayoutEditor.Item edBack;
-
-
-    private float lastTop = -1f;
-
-    private float lastPitch = -1f;
-
-    private float lastTog = -1f;
 
     public CharacterModsState()
     {
@@ -111,34 +83,7 @@ public class CharacterModsState : State
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         LayoutMenu();
-        edLayout = new UiLayoutEditor("CharacterModsState");
-        edTitle = edLayout.Add("Title", titleX, titleY, () => new Vector2(menuRect.Left + edTitle.X + (menuRect.Width - 10f) * 0.5f, menuRect.Top + edTitle.Y + 22f));
-        edSecTop = edLayout.Add("SectionTopY", 0f, secTopY, () => touchMenu[Button.HeaderGylbard].Rectangle.Center, null, false, true);
-        edSecPitch = edLayout.Add("SectionPitch", 0f, secPitchY, () => touchMenu[Button.HeaderBragg].Rectangle.Center, null, false, true);
-        edTogPitch = edLayout.Add("TogglePitch", 0f, togPitchY, () => TogPitchAnchor(), null, false, true);
-        edBack = edLayout.Add("BackBtn", backX, backY, () => touchMenu[Button.Back].Rectangle.Center);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
-    }
-
-    private Vector2 TogPitchAnchor()
-    {
-        if (openSection == 0)
-        {
-            return touchMenu[Button.ToggleThrust].Rectangle.Center;
-        }
-        if (openSection == 1)
-        {
-            return touchMenu[Button.ToggleBraggAmmo].Rectangle.Center;
-        }
-        if (openSection == 2)
-        {
-            return touchMenu[Button.TogglePredator].Rectangle.Center;
-        }
-        if (openSection == 3)
-        {
-            return touchMenu[Button.ToggleHardcoreWebs].Rectangle.Center;
-        }
-        return touchMenu[Button.HeaderGylbard].Rectangle.Center.Shift(0f, secPitchY + togPitchY);
     }
 
     private void Place(Button button, float y)
@@ -159,53 +104,40 @@ public class CharacterModsState : State
         touchMenu[Button.ToggleFastWings].Hidden = openSection != 2;
         touchMenu[Button.ToggleHardcoreWebs].Hidden = openSection != 3;
         touchMenu[Button.ToggleAchievementToasts].Hidden = openSection != 3;
-        float y = menuRect.Top + secTopY;
+        float y = menuRect.Top + SectionTopY;
         Place(Button.HeaderGylbard, y);
-        y += secPitchY;
+        y += SectionPitch;
         if (openSection == 0)
         {
             Place(Button.ToggleThrust, y);
-            y += togPitchY;
+            y += TogglePitch;
         }
         Place(Button.HeaderBragg, y);
-        y += secPitchY;
+        y += SectionPitch;
         if (openSection == 1)
         {
             Place(Button.ToggleBraggAmmo, y);
-            y += togPitchY;
+            y += TogglePitch;
         }
         Place(Button.HeaderVampire, y);
-        y += secPitchY;
+        y += SectionPitch;
         if (openSection == 2)
         {
             Place(Button.TogglePredator, y);
-            y += togPitchY;
+            y += TogglePitch;
             Place(Button.ToggleUnfriendBats, y);
-            y += togPitchY;
+            y += TogglePitch;
             Place(Button.ToggleFastWings, y);
-            y += togPitchY;
+            y += TogglePitch;
         }
         Place(Button.HeaderOther, y);
-        y += secPitchY;
+        y += SectionPitch;
         if (openSection == 3)
         {
             Place(Button.ToggleHardcoreWebs, y);
-            y += togPitchY;
+            y += TogglePitch;
             Place(Button.ToggleAchievementToasts, y);
         }
-    }
-
-    private void ApplyEditorLayout()
-    {
-        titleX = edTitle.X;
-        titleY = edTitle.Y;
-        secTopY = edSecTop.Y;
-        secPitchY = edSecPitch.Y;
-        togPitchY = edTogPitch.Y;
-        backX = edBack.X;
-        backY = edBack.Y;
-        LayoutMenu();
-        touchMenu[Button.Back].Rectangle = new RectangleF(menuRect.Center.X + backX - 35f, menuRect.Bottom + backY, 70f, 30f);
     }
 
     public override void Update()
@@ -220,11 +152,6 @@ public class CharacterModsState : State
     {
         if (Transition == TransType.None)
         {
-            if (edLayout.HandleInput())
-            {
-                ApplyEditorLayout();
-                return;
-            }
             touchMenu.HandleInput();
             base.HandleInput();
         }
@@ -259,7 +186,7 @@ public class CharacterModsState : State
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
         }
         base.core.Renderer["fg", 9000, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
-        base.core.Renderer["fg", 9000, false].DrawTextS("MODIFICATIONS", menuRect.TopLeft.Shift(titleX, titleY + num2), new TextProfile
+        base.core.Renderer["fg", 9000, false].DrawTextS("MODIFICATIONS", menuRect.TopLeft.Shift(TitleX, TitleY + num2), new TextProfile
         {
             Width = (int)menuRect.Width - 10,
             Height = 44,
@@ -300,7 +227,6 @@ public class CharacterModsState : State
             base.core.Renderer["fg", 9000, false].DrawTextS("achievement toasts", touchMenu[Button.ToggleAchievementToasts].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleAchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         }
         touchMenu.Draw();
-        edLayout.Draw();
         base.Draw();
     }
 
