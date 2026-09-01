@@ -41,6 +41,7 @@ public class BatEntity : Entity
 
 	private float avoidTarget;
 	private bool hunting;
+	private bool scatterFlee;
 
     private Vector2 home;
 
@@ -149,9 +150,13 @@ public class BatEntity : Entity
                 if (base.core.OptionsData.VampirePredator && vampire.FlightActive && offset.LengthSquared() < HuntRadiusSq)
                 {
                     Fleeing = true;
+                    scatterFlee = true;
                     animation.Speed = 0.4f;
                     IsBroken = true;
+                    fleeTimeout = 420;
                     Vector2 away = new Vector2(x, y) - target;
+                    away.X *= 0.4f;
+                    away.Y -= 1.5f;
                     if (away.LengthSquared() < 0.001f)
                     {
                         away = new Vector2(0f, -1f);
@@ -219,7 +224,28 @@ public class BatEntity : Entity
             fleeTimeout--;
             if (fleeTimeout == 0)
             {
-                SendMessage(new RemoveEntityMessage(this));
+                Vector2 tilePos = new Vector2(x, y);
+                var tileHere = levelMap[tilePos];
+                bool safeSpot = tileHere != null && tileHere.IsPassableFor(this);
+                Vector2 playerPos = base.core.CurrentPlayState.Player.WorldCoordinates;
+                bool clearOfPlayer = (tilePos - playerPos).LengthSquared() > 2.25f;
+                if (scatterFlee && safeSpot && clearOfPlayer)
+                {
+                    scatterFlee = false;
+                    Fleeing = false;
+                    IsBroken = false;
+                    spawn = tilePos;
+                    home = spawn;
+                    hunting = false;
+                    fleeDelay = 70;
+                    fleeTimeout = 200;
+                    animation.Speed = 0.15f;
+                    SetFlying(value: true);
+                }
+                else
+                {
+                    SendMessage(new RemoveEntityMessage(this));
+                }
             }
         }
         avoid += (avoidTarget - avoid) * 0.1f;

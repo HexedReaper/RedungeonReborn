@@ -31,6 +31,9 @@ public class VampireChar : PlayerEntity
 	private int sinceLastSound = 60;
 
 	private int predatorKills;
+	private int flightBase;
+
+    private int flightBank;
 
 	public bool FlightActive { get; private set; }
 
@@ -86,7 +89,7 @@ public class VampireChar : PlayerEntity
 				}
 			})
 			.Start(2, 4);
-		flightDuration = 60 * (2 + base.core.ProfileData.CurrentCharLevel);
+		flightBase = 60 * (2 + base.core.ProfileData.CurrentCharLevel);
 		flaps = new BagOf<SoundName>().Put(SoundName.kazhan_flap_1).Put(SoundName.kazhan_flap_2).Put(SoundName.kazhan_flap_3);
 	}
 
@@ -118,7 +121,9 @@ public class VampireChar : PlayerEntity
 				batAnim.Speed = 0.2f;
 				SetFlying(value: true);
 				FlightActive = true;
-				flightTimer = flightDuration;
+				flightDuration = flightBase + flightBank;
+                flightTimer = flightDuration;
+                flightBank = 0;
 				FlightIgnoresObstacles = false;
 				base.ZappedSprite = SpriteName.zapped_bat;
 				light.TargetIntencity = 1f;
@@ -354,7 +359,14 @@ public class VampireChar : PlayerEntity
         SendMessage(new SpawnEntityMessage(new EffectEntity(victim.CenterCoordinates, "hit_claws_", "123", mirrored: true).SetLayer("fg", -2, lit: false), null), 15);
 		if (FlightActive)
         {
-            flightTimer += 45;
+            if (flightTimer > 40)
+            {
+                flightTimer += 45;
+            }
+            else
+            {
+                flightBank = Math.Min(flightBank + 45, 180);
+            }
         }
         if (predatorKills < 10)
         {
