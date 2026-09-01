@@ -50,6 +50,14 @@ public class CharacterModsState : State
 
     private int openSection;
 
+    private float titleX = TitleX;
+    private float titleY = TitleY;
+    private float secTopY = SectionTopY;
+    private float secPitchY = SectionPitch;
+    private float togPitchY = TogglePitch;
+    private float backX = BackBtnX;
+    private float backY = BackBtnY;
+
     private UiLayoutEditor edLayout;
 
     private UiLayoutEditor.Item edTitle;
@@ -61,6 +69,7 @@ public class CharacterModsState : State
     private UiLayoutEditor.Item edTogPitch;
 
     private UiLayoutEditor.Item edBack;
+
 
     private float lastTop = -1f;
 
@@ -103,11 +112,11 @@ public class CharacterModsState : State
         chain = _(SpriteName.gui_chain);
         LayoutMenu();
         edLayout = new UiLayoutEditor("CharacterModsState");
-        edTitle = edLayout.Add("Title", TitleX, TitleY, () => new Vector2(menuRect.Left + edTitle.X + (menuRect.Width - 10f) * 0.5f, menuRect.Top + edTitle.Y + 22f));
-        edSecTop = edLayout.Add("SectionTopY", 0f, SectionTopY, () => touchMenu[Button.HeaderGylbard].Rectangle.Center, null, false, true);
-        edSecPitch = edLayout.Add("SectionPitch", 0f, SectionPitch, () => touchMenu[Button.HeaderBragg].Rectangle.Center, null, false, true);
-        edTogPitch = edLayout.Add("TogglePitch", 0f, TogglePitch, () => TogPitchAnchor(), null, false, true);
-        edBack = edLayout.Add("BackBtn", BackBtnX, BackBtnY, () => touchMenu[Button.Back].Rectangle.Center);
+        edTitle = edLayout.Add("Title", titleX, titleY, () => new Vector2(menuRect.Left + edTitle.X + (menuRect.Width - 10f) * 0.5f, menuRect.Top + edTitle.Y + 22f));
+        edSecTop = edLayout.Add("SectionTopY", 0f, secTopY, () => touchMenu[Button.HeaderGylbard].Rectangle.Center, null, false, true);
+        edSecPitch = edLayout.Add("SectionPitch", 0f, secPitchY, () => touchMenu[Button.HeaderBragg].Rectangle.Center, null, false, true);
+        edTogPitch = edLayout.Add("TogglePitch", 0f, togPitchY, () => TogPitchAnchor(), null, false, true);
+        edBack = edLayout.Add("BackBtn", backX, backY, () => touchMenu[Button.Back].Rectangle.Center);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
     }
 
@@ -129,7 +138,7 @@ public class CharacterModsState : State
         {
             return touchMenu[Button.ToggleHardcoreWebs].Rectangle.Center;
         }
-        return touchMenu[Button.HeaderGylbard].Rectangle.Center.Shift(0f, edSecPitch.Y + edTogPitch.Y);
+        return touchMenu[Button.HeaderGylbard].Rectangle.Center.Shift(0f, secPitchY + togPitchY);
     }
 
     private void Place(Button button, float y)
@@ -150,52 +159,53 @@ public class CharacterModsState : State
         touchMenu[Button.ToggleFastWings].Hidden = openSection != 2;
         touchMenu[Button.ToggleHardcoreWebs].Hidden = openSection != 3;
         touchMenu[Button.ToggleAchievementToasts].Hidden = openSection != 3;
-        float y = menuRect.Top + edSecTop.Y;
+        float y = menuRect.Top + secTopY;
         Place(Button.HeaderGylbard, y);
-        y += edSecPitch.Y;
+        y += secPitchY;
         if (openSection == 0)
         {
             Place(Button.ToggleThrust, y);
-            y += edTogPitch.Y;
+            y += togPitchY;
         }
         Place(Button.HeaderBragg, y);
-        y += edSecPitch.Y;
+        y += secPitchY;
         if (openSection == 1)
         {
             Place(Button.ToggleBraggAmmo, y);
-            y += edTogPitch.Y;
+            y += togPitchY;
         }
         Place(Button.HeaderVampire, y);
-        y += edSecPitch.Y;
+        y += secPitchY;
         if (openSection == 2)
         {
             Place(Button.TogglePredator, y);
-            y += edTogPitch.Y;
+            y += togPitchY;
             Place(Button.ToggleUnfriendBats, y);
-            y += edTogPitch.Y;
+            y += togPitchY;
             Place(Button.ToggleFastWings, y);
-            y += edTogPitch.Y;
+            y += togPitchY;
         }
         Place(Button.HeaderOther, y);
-        y += edSecPitch.Y;
+        y += secPitchY;
         if (openSection == 3)
         {
             Place(Button.ToggleHardcoreWebs, y);
-            y += edTogPitch.Y;
+            y += togPitchY;
             Place(Button.ToggleAchievementToasts, y);
         }
     }
 
     private void ApplyEditorLayout()
     {
-        if (edSecTop.Y != lastTop || edSecPitch.Y != lastPitch || edTogPitch.Y != lastTog)
-        {
-            lastTop = edSecTop.Y;
-            lastPitch = edSecPitch.Y;
-            lastTog = edTogPitch.Y;
-            LayoutMenu();
-        }
-        touchMenu[Button.Back].Rectangle = new RectangleF(menuRect.Center.X + edBack.X - 35f, menuRect.Bottom + edBack.Y, 70f, 30f);
+        titleX = edTitle.X;
+        titleY = edTitle.Y;
+        secTopY = edSecTop.Y;
+        secPitchY = edSecPitch.Y;
+        togPitchY = edTogPitch.Y;
+        backX = edBack.X;
+        backY = edBack.Y;
+        LayoutMenu();
+        touchMenu[Button.Back].Rectangle = new RectangleF(menuRect.Center.X + backX - 35f, menuRect.Bottom + backY, 70f, 30f);
     }
 
     public override void Update()
@@ -249,7 +259,7 @@ public class CharacterModsState : State
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
         }
         base.core.Renderer["fg", 9000, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
-        base.core.Renderer["fg", 9000, false].DrawTextS("MODIFICATIONS", menuRect.TopLeft.Shift(edTitle.X, edTitle.Y + num2), new TextProfile
+        base.core.Renderer["fg", 9000, false].DrawTextS("MODIFICATIONS", menuRect.TopLeft.Shift(titleX, titleY + num2), new TextProfile
         {
             Width = (int)menuRect.Width - 10,
             Height = 44,
