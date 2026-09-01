@@ -40,6 +40,13 @@ public class BatEntity : Entity
 	private float avoid;
 
 	private float avoidTarget;
+	private bool hunting;
+
+    private Vector2 home;
+
+    private const float HuntRadiusSq = 9f;   // aggro within 3 tiles
+    private const float LeashSq = 16f;       // gives up beyond 4 tiles from home
+    private const float HuntSpeed = 0.03f;   // anchor drift per tick
 
 	private ParticleEmitter loveEmitter;
 
@@ -91,6 +98,7 @@ public class BatEntity : Entity
 		});
 		animation.SkipToRandomFrame();
 		spawn = new Vector2(x, y);
+		home = spawn;
 		avoid = 0f;
 		avoidTarget = 0f;
 		Dictionary<Skill, int> skillLevel = CharDescription.Get[base.core.ProfileData.Character].Levels[base.core.ProfileData.CurrentCharLevel - 1].Abilities.SkillLevel;
@@ -116,17 +124,18 @@ public class BatEntity : Entity
 	}
 
 	public override void Update()
-	{
-		idleSoundDelay--;
-		if (idleSoundDelay == 0)
-		{
-			SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
-			idleSoundDelay = Component._rnd(60, 120);
-		}
-		animation.Update();
-		if (!Fleeing)
+    {
+        idleSoundDelay--;
+        if (idleSoundDelay == 0)
+        {
+            SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
+            idleSoundDelay = Component._rnd(60, 120);
+        }
+        animation.Update();
+        if (!Fleeing)
         {
             unfriended = (base.core.OptionsData.UnfriendBats && base.core.CurrentPlayState != null && base.core.CurrentPlayState.Player is VampireChar && !base.core.CurrentPlayState.Player.Dead);
+            bool anchorMoved = false;
             if (unfriended)
             {
                 if (loveEmitter != null)
@@ -136,18 +145,24 @@ public class BatEntity : Entity
                 }
                 Vector2 target = base.core.CurrentPlayState.Player.WorldCoordinates;
                 Vector2 offset = target - new Vector2(x, y);
-                if (offset.LengthSquared() < 9f && IsLeadHunter())
+                if (offset.LengthSquared() < HuntRadiusSq && IsLeadHunter())
                 {
-                    offset.Normalize();
-                    Vector2 next = new Vector2(x, y) + offset * 0.035f;
-                    var tile = levelMap[next];
-                    if (tile != null && tile.IsPassableFor(this))
+                    if (!hunting)
                     {
-                        x = next.X;
-                        y = next.Y;
-                        UpdateTiles();
+                        hunting = true;
+                        SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
                     }
-                    else
+                    offset.Normalize();
+                    Vector2 next = spawn + offset * HuntSpeed;
+                    var tile = levelMap[next];
+                    bool blocked = tile == null || !tile.IsPassableFor(this);
+                    bool leashed = (next - home).LengthSquared() >= LeashSq;
+                    if (!blocked && !leashed)
+                    {
+                        spawn = next;
+                        anchorMoved = true;
+                    }
+                    else if (blocked)
                     {
                         Fleeing = true;
                         animation.Speed = 0.4f;
@@ -159,8 +174,12 @@ public class BatEntity : Entity
                         SuspendedStartFlying((int)away.X, (int)away.Y, 0.001f, ignoreObstacles: true);
                     }
                 }
+                else
+                {
+                    hunting = false;
+                }
             }
-            else if (Moving)
+            if (Moving)
             {
                 float num = ((xR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * xS) / (float)(10 * xR)) * (float)xD));
                 float num2 = ((yR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * yS) / (float)(10 * yR)) * (float)yD));
@@ -168,31 +187,39 @@ public class BatEntity : Entity
                 y = spawn.Y + num2;
                 UpdateTiles();
             }
+            else if (anchorMoved)
+            {
+                x = spawn.X;
+                y = spawn.Y;
+                UpdateTiles();
+            }
         }
-		else
-		{
-			fleeDelay--;
-			if (fleeDelay == 0)
-			{
-				FlightStep = 0.45f;
-				SendMessage(new SpawnEntityMessage(new EffectEntity(base.CenterCoordinates, "dust_", "1234"), CurrentPlatform));
-			}
-			fleeTimeout--;
-			if (fleeTimeout == 0)
-			{
-				SendMessage(new RemoveEntityMessage(this));
-			}
-		}
-		avoid += (avoidTarget - avoid) * 0.1f;
-		base.Update();
-	}
+        else
+        {
+            fleeDelay--;
+            if (fleeDelay == 0)
+            {
+                FlightStep = 0.45f;
+                SendMessage(new SpawnEntityMessage(new EffectEntity(base.CenterCoordinates, "dust_", "1234"), CurrentPlatform));
+            }
+            fleeTimeout--;
+            if (fleeTimeout == 0)
+            {
+                SendMessage(new RemoveEntityMessage(this));
+            }
+        }
+        avoid += (avoidTarget - avoid) * 0.1f;
+        base.Update();
+    }
 	private bool IsLeadHunter()
     {
+        Vector2 playerPos = base.core.CurrentPlayState.Player.WorldCoordinates;
+        float myDist = (playerPos - new Vector2(x, y)).LengthSquared();
         List<Entity> list = base.core.CurrentPlayState.EntityManager.GetEntitiesInRadius(new Vector2(x, y), 12f).FindAll((Entity e) => e is BatEntity && !e.IsBroken && !(e as BatEntity).Fleeing);
-        float myDist = (base.core.CurrentPlayState.Player.WorldCenter - new Vector2(x, y)).LengthSquared();
         foreach (Entity item in list)
         {
-            if (item != this && (item.WorldCenter - base.core.CurrentPlayState.Player.WorldCenter).LengthSquared() < myDist)
+            BatEntity other = item as BatEntity;
+            if (other != null && other != this && (new Vector2(other.x, other.y) - playerPos).LengthSquared() < myDist)
             {
                 return false;
             }
