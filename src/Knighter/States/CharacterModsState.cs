@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Knighter.Gameplay;
 using Knighter.Graphics;
@@ -25,6 +26,20 @@ public class CharacterModsState : State
         Back
     }
 
+    // ---- layout: defaults baked from UiLayoutEditor dump; editor still live (hold top-left corner ~0.7s) ----
+    private const float PanelDY = 0f;        // whole sign up/down (hand-edit only)
+    private const float TitleX = 5f;         // rel panel left
+    private const float TitleY = 57f;        // rel panel top
+    private const float SectionTopY = 80f;   // first header top, rel panel top
+    private const float SectionPitch = 19f;  // gap between stacked rows
+    private const float TogglePitch = 19f;   // gap between toggle rows inside a section
+    private const float HeaderDX = 8f;       // header left/right inset
+    private const float ToggleDX = 12f;      // toggle left inset
+    private const float LabelDX = 32f;       // toggle label offset from toggle top-left
+    private const float LabelDY = -7f;
+    private const float BackBtnX = 0f;       // rel panel center
+    private const float BackBtnY = 10f;      // below panel bottom
+
     private TouchMenu<Button> touchMenu;
 
     private RectangleF menuRect;
@@ -35,24 +50,42 @@ public class CharacterModsState : State
 
     private int openSection;
 
+    private UiLayoutEditor edLayout;
+
+    private UiLayoutEditor.Item edTitle;
+
+    private UiLayoutEditor.Item edSecTop;
+
+    private UiLayoutEditor.Item edSecPitch;
+
+    private UiLayoutEditor.Item edTogPitch;
+
+    private UiLayoutEditor.Item edBack;
+
+    private float lastTop = -1f;
+
+    private float lastPitch = -1f;
+
+    private float lastTog = -1f;
+
     public CharacterModsState()
     {
         base.TransDuration = 30;
         ShowCoins = false;
         IsOverlay = true;
-        menuRect = new RectangleF((float)(base.core.Renderer.ScreenWidth - 148) * 0.5f, (float)(base.core.Renderer.ScreenHeight - 233) * 0.5f, 148f, 233f);
+        menuRect = new RectangleF((float)(base.core.Renderer.ScreenWidth - 148) * 0.5f, (float)(base.core.Renderer.ScreenHeight - 233) * 0.5f + PanelDY, 148f, 233f);
         touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 10000);
         touchMenu.OnToggle = OnToggle;
-        float left = menuRect.Left + 12f;
-        touchMenu.SetupButton(Button.HeaderGylbard, new RectangleF(menuRect.Left + 8f, menuRect.Top, menuRect.Width - 16f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Gylbard +", null, icon: false, iconIsPicture: false);
+        float left = menuRect.Left + ToggleDX;
+        touchMenu.SetupButton(Button.HeaderGylbard, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Gylbard +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.ToggleThrust, new Vector2(left, menuRect.Top), base.core.OptionsData.DirectionalThrust, 120);
-        touchMenu.SetupButton(Button.HeaderBragg, new RectangleF(menuRect.Left + 8f, menuRect.Top, menuRect.Width - 16f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Bragg +", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupButton(Button.HeaderBragg, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Bragg +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.ToggleBraggAmmo, new Vector2(left, menuRect.Top), base.core.OptionsData.BraggAmmo, 120);
-        touchMenu.SetupButton(Button.HeaderVampire, new RectangleF(menuRect.Left + 8f, menuRect.Top, menuRect.Width - 16f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Vampire +", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupButton(Button.HeaderVampire, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Vampire +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.TogglePredator, new Vector2(left, menuRect.Top), base.core.OptionsData.VampirePredator, 120);
         touchMenu.SetupToggle(Button.ToggleUnfriendBats, new Vector2(left, menuRect.Top), base.core.OptionsData.UnfriendBats, 120);
-        touchMenu.SetupToggle(Button.ToggleFastWings, new Vector2(left, menuRect.Top + 160f), base.core.OptionsData.FastWings, 120);
-        touchMenu.SetupButton(Button.HeaderOther, new RectangleF(menuRect.Left + 8f, menuRect.Top, menuRect.Width - 16f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Other +", null, icon: false, iconIsPicture: false);
+        touchMenu.SetupToggle(Button.ToggleFastWings, new Vector2(left, menuRect.Top), base.core.OptionsData.FastWings, 120);
+        touchMenu.SetupButton(Button.HeaderOther, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Other +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.ToggleHardcoreWebs, new Vector2(left, menuRect.Top), base.core.OptionsData.HardcoreWebs, 120);
         touchMenu.SetupToggle(Button.ToggleAchievementToasts, new Vector2(left, menuRect.Top), base.core.OptionsData.AchievementToasts, 120);
         if (base.core.OptionsData.DailyRunEnabled)
@@ -65,11 +98,38 @@ public class CharacterModsState : State
             touchMenu[Button.ToggleHardcoreWebs].Disabled = true;
             touchMenu[Button.ToggleAchievementToasts].Disabled = true;
         }
-        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X - 35f, menuRect.Bottom + 10f, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
+        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X + BackBtnX - 35f, menuRect.Bottom + BackBtnY, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         LayoutMenu();
+        edLayout = new UiLayoutEditor("CharacterModsState");
+        edTitle = edLayout.Add("Title", TitleX, TitleY, () => new Vector2(menuRect.Left + edTitle.X + (menuRect.Width - 10f) * 0.5f, menuRect.Top + edTitle.Y + 22f));
+        edSecTop = edLayout.Add("SectionTopY", 0f, SectionTopY, () => touchMenu[Button.HeaderGylbard].Rectangle.Center, null, false, true);
+        edSecPitch = edLayout.Add("SectionPitch", 0f, SectionPitch, () => touchMenu[Button.HeaderBragg].Rectangle.Center, null, false, true);
+        edTogPitch = edLayout.Add("TogglePitch", 0f, TogglePitch, () => TogPitchAnchor(), null, false, true);
+        edBack = edLayout.Add("BackBtn", BackBtnX, BackBtnY, () => touchMenu[Button.Back].Rectangle.Center);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
+    }
+
+    private Vector2 TogPitchAnchor()
+    {
+        if (openSection == 0)
+        {
+            return touchMenu[Button.ToggleThrust].Rectangle.Center;
+        }
+        if (openSection == 1)
+        {
+            return touchMenu[Button.ToggleBraggAmmo].Rectangle.Center;
+        }
+        if (openSection == 2)
+        {
+            return touchMenu[Button.TogglePredator].Rectangle.Center;
+        }
+        if (openSection == 3)
+        {
+            return touchMenu[Button.ToggleHardcoreWebs].Rectangle.Center;
+        }
+        return touchMenu[Button.HeaderGylbard].Rectangle.Center.Shift(0f, edSecPitch.Y + edTogPitch.Y);
     }
 
     private void Place(Button button, float y)
@@ -90,41 +150,52 @@ public class CharacterModsState : State
         touchMenu[Button.ToggleFastWings].Hidden = openSection != 2;
         touchMenu[Button.ToggleHardcoreWebs].Hidden = openSection != 3;
         touchMenu[Button.ToggleAchievementToasts].Hidden = openSection != 3;
-        float y = menuRect.Top + 80f;
+        float y = menuRect.Top + edSecTop.Y;
         Place(Button.HeaderGylbard, y);
-        y += 19f;
+        y += edSecPitch.Y;
         if (openSection == 0)
         {
             Place(Button.ToggleThrust, y);
-            y += 19f;
+            y += edTogPitch.Y;
         }
         Place(Button.HeaderBragg, y);
-        y += 19f;
+        y += edSecPitch.Y;
         if (openSection == 1)
         {
             Place(Button.ToggleBraggAmmo, y);
-            y += 19f;
+            y += edTogPitch.Y;
         }
         Place(Button.HeaderVampire, y);
-        y += 19f;
+        y += edSecPitch.Y;
         if (openSection == 2)
         {
             Place(Button.TogglePredator, y);
-            y += 19f;
+            y += edTogPitch.Y;
             Place(Button.ToggleUnfriendBats, y);
-            y += 19f;
+            y += edTogPitch.Y;
             Place(Button.ToggleFastWings, y);
-            y += 19f;
+            y += edTogPitch.Y;
         }
         Place(Button.HeaderOther, y);
-        y += 19f;
+        y += edSecPitch.Y;
         if (openSection == 3)
         {
             Place(Button.ToggleHardcoreWebs, y);
-            y += 19f;
+            y += edTogPitch.Y;
             Place(Button.ToggleAchievementToasts, y);
-            y += 19f;
         }
+    }
+
+    private void ApplyEditorLayout()
+    {
+        if (edSecTop.Y != lastTop || edSecPitch.Y != lastPitch || edTogPitch.Y != lastTog)
+        {
+            lastTop = edSecTop.Y;
+            lastPitch = edSecPitch.Y;
+            lastTog = edTogPitch.Y;
+            LayoutMenu();
+        }
+        touchMenu[Button.Back].Rectangle = new RectangleF(menuRect.Center.X + edBack.X - 35f, menuRect.Bottom + edBack.Y, 70f, 30f);
     }
 
     public override void Update()
@@ -139,6 +210,11 @@ public class CharacterModsState : State
     {
         if (Transition == TransType.None)
         {
+            if (edLayout.HandleInput())
+            {
+                ApplyEditorLayout();
+                return;
+            }
             touchMenu.HandleInput();
             base.HandleInput();
         }
@@ -173,7 +249,7 @@ public class CharacterModsState : State
             base.core.Renderer["fg", 9000, false].DrawSpriteS(chain, new Vector2(menuRect.Right - 19f - (float)chain.Width, menuRect.Top + 21f + num2 - (float)i));
         }
         base.core.Renderer["fg", 9000, false].DrawSpriteS(block, menuRect.TopLeft.Shift(0f, num2));
-        base.core.Renderer["fg", 9000, false].DrawTextS("MODIFICATIONS", menuRect.TopLeft.Shift(5f, 57f + num2), new TextProfile
+        base.core.Renderer["fg", 9000, false].DrawTextS("MODIFICATIONS", menuRect.TopLeft.Shift(edTitle.X, edTitle.Y + num2), new TextProfile
         {
             Width = (int)menuRect.Width - 10,
             Height = 44,
@@ -196,23 +272,25 @@ public class CharacterModsState : State
         };
         if (openSection == 0)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.ToggleThrust].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.ToggleThrust].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         }
         if (openSection == 1)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("ammo (3 / 10m)", touchMenu[Button.ToggleBraggAmmo].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleBraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("ammo (3 / 10m)", touchMenu[Button.ToggleBraggAmmo].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         }
         if (openSection == 2)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("predator dives", touchMenu[Button.TogglePredator].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.TogglePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("unfriend bats", touchMenu[Button.ToggleUnfriendBats].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleUnfriendBats].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("fast wings x1.5", touchMenu[Button.ToggleFastWings].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleFastWings].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));        }
+            base.core.Renderer["fg", 9000, false].DrawTextS("predator dives", touchMenu[Button.TogglePredator].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.TogglePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("unfriend bats", touchMenu[Button.ToggleUnfriendBats].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleUnfriendBats].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("fast wings x1.5", touchMenu[Button.ToggleFastWings].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleFastWings].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+        }
         if (openSection == 3)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("hardcore webs", touchMenu[Button.ToggleHardcoreWebs].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleHardcoreWebs].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("achievement toasts", touchMenu[Button.ToggleAchievementToasts].Rectangle.TopLeft.Shift(32f, -7f), textProfile.Alter(touchMenu[Button.ToggleAchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("hardcore webs", touchMenu[Button.ToggleHardcoreWebs].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleHardcoreWebs].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("achievement toasts", touchMenu[Button.ToggleAchievementToasts].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleAchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         }
         touchMenu.Draw();
+        edLayout.Draw();
         base.Draw();
     }
 

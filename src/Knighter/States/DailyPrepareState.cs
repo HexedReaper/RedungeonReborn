@@ -21,7 +21,7 @@ public class DailyPrepareState : State
     }
 
     // ---- layout tuned on device via UiLayoutEditor (dump 2025-08-31) ----
-    private const float PanelDY = 136f;
+    private const float PanelDY = 0f;
     private const float CountdownX = 0f;
     private const float CountdownY = 54f;
     private const float TitleX = 0f;

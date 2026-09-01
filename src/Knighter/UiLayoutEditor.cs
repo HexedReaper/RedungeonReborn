@@ -18,6 +18,9 @@ public class UiLayoutEditor : Component
         public float Y;
         public Func<Vector2> Anchor;
         public Func<bool> Active;
+        public bool XOnly;
+        public bool YOnly;
+        
     }
 
     private const int Depth = 10500;
@@ -60,7 +63,7 @@ public class UiLayoutEditor : Component
     // name = const name used in the dump ("Countdown" -> CountdownX / CountdownY)
     // anchor = where the element currently renders on screen (for tap-select + marker), or null
     // active = false while the element is hidden this session (e.g. inactive mod rows), or null
-    public Item Add(string name, float x, float y, Func<Vector2> anchor = null, Func<bool> active = null)
+    public Item Add(string name, float x, float y, Func<Vector2> anchor = null, Func<bool> active = null, bool xOnly = false, bool yOnly = false)
     {
         Item item = new Item();
         item.Name = name;
@@ -68,6 +71,8 @@ public class UiLayoutEditor : Component
         item.Y = y;
         item.Anchor = anchor;
         item.Active = active;
+        item.XOnly = xOnly;
+        item.YOnly = yOnly;
         items.Add(item);
         return item;
     }
@@ -299,8 +304,19 @@ public class UiLayoutEditor : Component
         sb.Append("// ---- UiLayoutEditor dump: ").Append(tag).Append(" ----\n");
         for (int i = 0; i < items.Count; i++)
         {
-            sb.Append("private const float ").Append(items[i].Name).Append("X = ").Append(Fmt(items[i].X)).Append('\n');
-            sb.Append("private const float ").Append(items[i].Name).Append("Y = ").Append(Fmt(items[i].Y)).Append('\n');
+            if (items[i].XOnly)
+            {
+                sb.Append("private const float ").Append(items[i].Name).Append(" = ").Append(Fmt(items[i].X)).Append('\n');
+            }
+            else if (items[i].YOnly)
+            {
+                sb.Append("private const float ").Append(items[i].Name).Append(" = ").Append(Fmt(items[i].Y)).Append('\n');
+            }
+            else
+            {
+                sb.Append("private const float ").Append(items[i].Name).Append("X = ").Append(Fmt(items[i].X)).Append('\n');
+                sb.Append("private const float ").Append(items[i].Name).Append("Y = ").Append(Fmt(items[i].Y)).Append('\n');
+            }
         }
         Console.WriteLine(sb.ToString());
         SendMessage(new PlaySoundMessage(SoundName.paper_touch));
