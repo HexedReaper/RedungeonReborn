@@ -13,11 +13,30 @@ public static class DailyRun
 
     private static int seed;
 
+    // pre-daily snapshot so Begin()'s temporary unlock/max never becomes permanent
+    private static bool snapValid;
+
+    private static Character snapChar;
+
+    private static bool snapUnlocked;
+
+    private static int snapLevel;
+
+    private static Character snapSelected;
+
     public static void Begin(int s, Core core)
     {
         Active = true;
         seed = s;
         Character daily = DailyCharacter();
+        if (!snapValid)
+        {
+            snapValid = true;
+            snapChar = daily;
+            snapUnlocked = core.ProfileData.Characters[daily].Unlocked;
+            snapLevel = core.ProfileData.Characters[daily].Level;
+            snapSelected = core.ProfileData.Character;
+        }
         core.ProfileData.Character = daily;
         core.ProfileData.Characters[daily].Unlocked = true;
         core.ProfileData.Characters[daily].Level = CharDescription.Get[daily].Levels.Count;
@@ -26,6 +45,14 @@ public static class DailyRun
     public static void End()
     {
         Active = false;
+        if (snapValid)
+        {
+            snapValid = false;
+            ProfileData profile = Core.Instance.ProfileData;
+            profile.Character = snapSelected;
+            profile.Characters[snapChar].Unlocked = snapUnlocked;
+            profile.Characters[snapChar].Level = snapLevel;
+        }
     }
 
     public static string TodayKey()

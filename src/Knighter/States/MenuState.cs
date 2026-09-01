@@ -664,6 +664,8 @@ public class MenuState : State
             base.core.OptionsData.DailyRunEnabled = false;
             base.core.SaveOptions();
             DailyRun.End();
+            touchMenu[Button.ExitDaily].Disabled = true;
+            touchMenu[Button.ExitDaily].Label = "NORMAL MODE";
             SendMessage(new PlaySoundMessage(SoundName.piston_retract));
             break;
 		case Button.GPlay:

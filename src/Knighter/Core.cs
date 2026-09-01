@@ -538,6 +538,7 @@ public sealed class Core : Component
 				PopState();
 			}
 			SessionData session = CurrentPlayState.Session;
+			Character chosenChar = ProfileData.Character;
 			PushState(new MenuState(session));
 			ProfileData.LastDistance = session.Distance;
             if (DailyRun.Active)
@@ -586,6 +587,7 @@ public sealed class Core : Component
 			Event(AnalyticsCategory.Run, "cause-of-death", session.CauseOfDeath.ToString());
 			Event(AnalyticsCategory.Run, base.core.ProfileData.AdsRemoved ? "premium-revives" : "revives", session.Revives.ToString(), session.Revives);
 			Event(AnalyticsCategory.Run, "chosen-character", ProfileData.Character.ToString());
+			Event(AnalyticsCategory.Run, "chosen-character", chosenChar.ToString());
 			Event(AnalyticsCategory.Run, "time-seconds", SciHelper.GetVerboseRange(session.Ticks / 60, 10), session.Ticks / 60);
 			Cloud.Sync();
 			break;
