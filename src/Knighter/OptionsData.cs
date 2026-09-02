@@ -20,6 +20,8 @@ public class OptionsData : Component
 	public bool HardcoreWebs;
 	public bool DirectionalThrust;
 	public bool BraggAmmo;
+	public bool BraggFeathers;
+	public bool BraggJam;
 	public bool VampirePredator;
 	public bool UnfriendBats;
 	public bool FastWings;
@@ -40,6 +42,8 @@ public class OptionsData : Component
 		HardcoreWebs = false;
 		DirectionalThrust = false;
 		BraggAmmo = false;
+		BraggFeathers = false;
+		BraggJam = false;
 		VampirePredator = false;
 		UnfriendBats = false;
 		FastWings = false;
@@ -61,6 +65,8 @@ public class OptionsData : Component
         base.core.Storage.TryGetBool("hardcore-webs", ref HardcoreWebs);
 		base.core.Storage.TryGetBool("directional-thrust", ref DirectionalThrust);
 		base.core.Storage.TryGetBool("bragg-ammo", ref BraggAmmo);
+		base.core.Storage.TryGetBool("bragg-feathers", ref BraggFeathers);
+        base.core.Storage.TryGetBool("bragg-gunjam", ref BraggJam);
 		base.core.Storage.TryGetBool("vampire-predator", ref VampirePredator);
 		base.core.Storage.TryGetBool("unfriend-bats", ref UnfriendBats);
 		base.core.Storage.TryGetBool("fast-wings", ref FastWings);
@@ -82,6 +88,8 @@ public class OptionsData : Component
         base.core.Storage.SetBool("hardcore-webs", HardcoreWebs);
 		base.core.Storage.SetBool("directional-thrust", DirectionalThrust);
 		base.core.Storage.SetBool("bragg-ammo", BraggAmmo);
+		base.core.Storage.SetBool("bragg-feathers", BraggFeathers);
+        base.core.Storage.SetBool("bragg-gunjam", BraggJam);
 		base.core.Storage.SetBool("vampire-predator", VampirePredator);
 		base.core.Storage.SetBool("unfriend-bats", UnfriendBats);
 		base.core.Storage.SetBool("fast-wings", FastWings);

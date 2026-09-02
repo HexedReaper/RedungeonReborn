@@ -30,6 +30,7 @@ public class BraggsParrotEntity : Entity
 	private float dz = 15f;
 
 	private bool first;
+	private int featherGap = 10;
 
 	public static BagOf<SoundName> squawks;
 
@@ -113,12 +114,17 @@ public class BraggsParrotEntity : Entity
 		else
 		{
 			ticksEscaping++;
-			if (ticksEscaping == 600)
-			{
-				SendMessage(new RemoveEntityMessage(this));
-			}
-			num2 = 0f;
-			num3 = ((ticksEscaping < 90) ? 0f : (-0.3f));
+            if (base.core.OptionsData.BraggFeathers && player != null && !player.Dead && ticksEscaping >= 10 && ticksEscaping <= 240 && ticksEscaping >= featherGap)
+            {
+                featherGap = ticksEscaping + Component._rnd(4, 17);
+                SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y), null));
+            }
+            if (ticksEscaping == 600)
+            {
+                SendMessage(new RemoveEntityMessage(this));
+            }
+            num2 = 0f;
+            num3 = ((ticksEscaping < 90) ? 0f : (-0.3f));
 		}
 		x += num2;
 		y += num3;

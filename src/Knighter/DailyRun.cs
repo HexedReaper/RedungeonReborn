@@ -13,12 +13,55 @@ public static class DailyRun
 
     private static int seed;
 
+    // pre-daily snapshot so Begin()'s temporary unlock/max never becomes permanent
+    private static bool snapValid;
+
+    private static Character snapChar;
+
+    private static bool snapUnlocked;
+
+    private static int snapLevel;
+
+    private static Character snapSelected;
+
+    // attempts on the current daily (session-scope for now; persisted via ProfileData next)
+    private static string attemptsDayKey = "";
+
+    private static int attemptsToday;
+
+    public static int AttemptsToday
+    {
+        get
+        {
+            string key = TodayKey();
+            if (attemptsDayKey != key)
+            {
+                attemptsDayKey = key;
+                attemptsToday = 0;
+            }
+            return attemptsToday;
+        }
+    }
+
+    public static void CountAttempt()
+    {
+        _ = AttemptsToday;
+        attemptsToday++;
+    }
+
     public static void Begin(int s, Core core)
     {
         Active = true;
         seed = s;
         Character daily = DailyCharacter();
-        core.ProfileData.BeginDailyCharacterOverride(daily);
+        if (!snapValid)
+        {
+            snapValid = true;
+            snapChar = daily;
+            snapUnlocked = core.ProfileData.Characters[daily].Unlocked;
+            snapLevel = core.ProfileData.Characters[daily].Level;
+            snapSelected = core.ProfileData.Character;
+        }
         core.ProfileData.Character = daily;
         core.ProfileData.Characters[daily].Unlocked = true;
         core.ProfileData.Characters[daily].Level = CharDescription.Get[daily].Levels.Count;
@@ -27,14 +70,14 @@ public static class DailyRun
     public static void End()
     {
         Active = false;
-        Core.Instance.ProfileData.EndDailyCharacterOverride();
-    }
-
-    public static int AttemptsToday => Core.Instance.ProfileData.DailyAttemptsToday();
-
-    public static void CountAttempt()
-    {
-        Core.Instance.ProfileData.CountDailyAttempt();
+        if (snapValid)
+        {
+            snapValid = false;
+            ProfileData profile = Core.Instance.ProfileData;
+            profile.Character = snapSelected;
+            profile.Characters[snapChar].Unlocked = snapUnlocked;
+            profile.Characters[snapChar].Level = snapLevel;
+        }
     }
 
     public static string TodayKey()
@@ -52,7 +95,6 @@ public static class DailyRun
         }
         return hash;
     }
-
     public static Character DailyCharacter()
     {
         Array values = Enum.GetValues(typeof(Character));
@@ -68,6 +110,8 @@ public static class DailyRun
         h = h * 31 + (options.HardcoreWebs ? 1 : 0);
         h = h * 31 + ((dc == (int)Character.Knight && options.DirectionalThrust) ? 1 : 0);
         h = h * 31 + ((dc == (int)Character.Bragg && options.BraggAmmo) ? 1 : 0);
+        h = h * 31 + ((dc == (int)Character.Bragg && options.BraggFeathers) ? 1 : 0);
+        h = h * 31 + ((dc == (int)Character.Bragg && options.BraggJam) ? 1 : 0);
         h = h * 31 + ((dc == (int)Character.Vampire && options.VampirePredator) ? 1 : 0);
         h = h * 31 + ((dc == (int)Character.Vampire && options.UnfriendBats) ? 1 : 0);
         h = h * 31 + ((dc == (int)Character.Vampire && options.FastWings) ? 1 : 0);
@@ -105,6 +149,14 @@ public static class DailyRun
         {
             text = ((n > 0) ? (text + " · ") : text) + "bragg ammo";
             n++;
+        }
+        if (character == Character.Bragg && o.BraggFeathers) {
+            text = ((n > 0) ? (text + " · ") : text) + "feathers"; 
+            n++;
+        }
+        if (character == Character.Bragg && o.BraggJam) { 
+            text = ((n > 0) ? (text + " · ") : text) + "gun jam"; 
+            n++; 
         }
         if (character == Character.Vampire && o.VampirePredator)
         {

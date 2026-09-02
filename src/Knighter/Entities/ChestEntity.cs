@@ -173,8 +173,12 @@ public class ChestEntity : Entity
 			}
 			Looted = true;
 			_inc(Stat.ChestsLooted);
-			if (Contents != null && Contents.Item == ItemType.GoldCoin && player is BraggChar braggChar)
+			if (player is BraggChar braggChar)
             {
+                if (Contents != null && Contents.Item == ItemType.GoldCoin)
+                {
+                    braggChar.AddProgress(10);
+                }
                 braggChar.NotifyChestOpened();
             }
 		}

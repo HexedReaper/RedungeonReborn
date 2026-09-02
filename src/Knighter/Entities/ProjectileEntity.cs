@@ -138,6 +138,10 @@ public class ProjectileEntity : Entity
 		{
 			other.Break(this);
 			flag = other.IsBroken;
+			if (other is BatEntity || other is SlimeEntity || other is FollowerEntity || other is WispEntity || (other is SerpentEntity && !(other as SerpentEntity).IsChineseDragon && (other as SerpentEntity).Part == SerpentEntity.SerpentPart.Head))
+            {
+                (player as BraggChar)?.NotifyBulletKill();
+            }
 			if (killReward > 0 && (other is BatEntity || other is SlimeEntity || other is FollowerEntity || other is WispEntity || (other is SerpentEntity && !(other as SerpentEntity).IsChineseDragon && (other as SerpentEntity).Part == SerpentEntity.SerpentPart.Head)))
 			{
 				player.CollectCoins(killReward, other, Color.Orange);

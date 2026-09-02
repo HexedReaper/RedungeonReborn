@@ -165,6 +165,10 @@ public class ItemEntity : Entity
 				playerEntity.CollectCoins(5, this, default(Color).FromRgb(16755743));
 				break;
 			}
+			if (Type != ItemType.SkullKey && playerEntity is BraggChar braggPickup)
+            {
+                braggPickup.NotifyCoinItem();
+            }
 			int value = Type switch
 			{
 				ItemType.GreenCoin => 5891368, 

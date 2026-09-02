@@ -15,6 +15,8 @@ public class CharacterModsState : State
         ToggleThrust,
         HeaderBragg,
         ToggleBraggAmmo,
+        ToggleBraggFeathers,
+        ToggleBraggJam,
         HeaderVampire,
         TogglePredator,
         ToggleUnfriendBats,
@@ -62,6 +64,8 @@ public class CharacterModsState : State
         touchMenu.SetupToggle(Button.ToggleThrust, new Vector2(left, menuRect.Top), base.core.OptionsData.DirectionalThrust, 120);
         touchMenu.SetupButton(Button.HeaderBragg, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Bragg +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.ToggleBraggAmmo, new Vector2(left, menuRect.Top), base.core.OptionsData.BraggAmmo, 120);
+        touchMenu.SetupToggle(Button.ToggleBraggFeathers, new Vector2(left, menuRect.Top), base.core.OptionsData.BraggFeathers, 120);
+        touchMenu.SetupToggle(Button.ToggleBraggJam, new Vector2(left, menuRect.Top), base.core.OptionsData.BraggJam, 120);
         touchMenu.SetupButton(Button.HeaderVampire, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Vampire +", null, icon: false, iconIsPicture: false);
         touchMenu.SetupToggle(Button.TogglePredator, new Vector2(left, menuRect.Top), base.core.OptionsData.VampirePredator, 120);
         touchMenu.SetupToggle(Button.ToggleUnfriendBats, new Vector2(left, menuRect.Top), base.core.OptionsData.UnfriendBats, 120);
@@ -73,6 +77,8 @@ public class CharacterModsState : State
         {
             touchMenu[Button.ToggleThrust].Disabled = true;
             touchMenu[Button.ToggleBraggAmmo].Disabled = true;
+            touchMenu[Button.ToggleBraggFeathers].Disabled = true;
+            touchMenu[Button.ToggleBraggJam].Disabled = true;
             touchMenu[Button.TogglePredator].Disabled = true;
             touchMenu[Button.ToggleUnfriendBats].Disabled = true;
             touchMenu[Button.ToggleFastWings].Disabled = true;
@@ -99,6 +105,8 @@ public class CharacterModsState : State
         touchMenu[Button.HeaderOther].Label = "Other " + ((openSection == 3) ? "-" : "+");
         touchMenu[Button.ToggleThrust].Hidden = openSection != 0;
         touchMenu[Button.ToggleBraggAmmo].Hidden = openSection != 1;
+        touchMenu[Button.ToggleBraggFeathers].Hidden = openSection != 1;
+        touchMenu[Button.ToggleBraggJam].Hidden = openSection != 1;        
         touchMenu[Button.TogglePredator].Hidden = openSection != 2;
         touchMenu[Button.ToggleUnfriendBats].Hidden = openSection != 2;
         touchMenu[Button.ToggleFastWings].Hidden = openSection != 2;
@@ -118,6 +126,9 @@ public class CharacterModsState : State
         {
             Place(Button.ToggleBraggAmmo, y);
             y += TogglePitch;
+            Place(Button.ToggleBraggFeathers, y);
+            y += TogglePitch;
+            Place(Button.ToggleBraggJam, y);
         }
         Place(Button.HeaderVampire, y);
         y += SectionPitch;
@@ -164,6 +175,8 @@ public class CharacterModsState : State
         touchMenu[Button.ToggleThrust].Rectangle.Shift(0f, y);
         touchMenu[Button.HeaderBragg].Rectangle.Shift(0f, y);
         touchMenu[Button.ToggleBraggAmmo].Rectangle.Shift(0f, y);
+        touchMenu[Button.ToggleBraggFeathers].Rectangle.Shift(0f, y);
+        touchMenu[Button.ToggleBraggJam].Rectangle.Shift(0f, y);
         touchMenu[Button.HeaderVampire].Rectangle.Shift(0f, y);
         touchMenu[Button.TogglePredator].Rectangle.Shift(0f, y);
         touchMenu[Button.ToggleUnfriendBats].Rectangle.Shift(0f, y);
@@ -213,7 +226,9 @@ public class CharacterModsState : State
         }
         if (openSection == 1)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("ammo (3 / 10m)", touchMenu[Button.ToggleBraggAmmo].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("scavenger ammo", touchMenu[Button.ToggleBraggAmmo].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("feather trail", touchMenu[Button.ToggleBraggFeathers].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggFeathers].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("gun jam", touchMenu[Button.ToggleBraggJam].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggJam].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         }
         if (openSection == 2)
         {
@@ -241,6 +256,18 @@ public class CharacterModsState : State
         if (button == Button.ToggleBraggAmmo)
         {
             base.core.OptionsData.BraggAmmo = newValue;
+            base.core.SaveOptions();
+            SendMessage(new PlaySoundMessage(SoundName.bragg_gun_cock));
+        }
+        if (button == Button.ToggleBraggFeathers)
+        {
+            base.core.OptionsData.BraggFeathers = newValue;
+            base.core.SaveOptions();
+            SendMessage(new PlaySoundMessage(SoundName.bragg_parrot_voice_1));
+        }
+        if (button == Button.ToggleBraggJam)
+        {
+            base.core.OptionsData.BraggJam = newValue;
             base.core.SaveOptions();
             SendMessage(new PlaySoundMessage(SoundName.bragg_gun_cock));
         }

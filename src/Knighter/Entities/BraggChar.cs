@@ -21,12 +21,15 @@ public class BraggChar : PlayerEntity
 	private int shotCost = 15;
 
 	private const int AmmoMax = 3;
-    private const int KeysPerBullet = 2;
-    private const int CoinsPerBullet = 5;
+    private const int PointsPerBullet = 10;
+    private const int PointsPerKey = 5;
+    private const int PointsPerCoin = 2;
+    private const int PointsPerChest = 10;
 
     private int ammo;
-    private int coinCount;
-    private int keysLoaded;
+    private int progress;
+    private int shotsNoKill;
+    private bool jammed;
 	private bool shooting => shotAnim >= 0;
 
 	public int Keys { get; private set; }
@@ -104,6 +107,12 @@ public class BraggChar : PlayerEntity
 	{
 		if (!base.Falling)
 		{
+			if (base.core.OptionsData.BraggAmmo && base.core.OptionsData.BraggJam && jammed)
+            {
+                SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, "JAMMED", default(Color).FromRgb(16732240), 1.5f), CurrentPlatform));
+                SendMessage(new PlayWorldSoundMessage(SoundName.knight_step_2, base.WorldCenter));
+                return;
+            }
 			if (base.core.OptionsData.BraggAmmo)
             {
                 if (ammo <= 0)
@@ -145,6 +154,14 @@ public class BraggChar : PlayerEntity
             if (base.core.OptionsData.BraggAmmo)
             {
                 ammo--;
+                if (base.core.OptionsData.BraggJam)
+                {
+                    shotsNoKill++;
+                    if (shotsNoKill >= 2)
+                    {
+                        jammed = true;
+                    }
+                }
             }
             base.TryTriggerAbility();
 		}
@@ -266,9 +283,7 @@ public class BraggChar : PlayerEntity
             }
             else
             {
-                float keyFrac = (float)keysLoaded / (float)KeysPerBullet;
-                float coinFrac = (float)coinCount / (float)CoinsPerBullet;
-                Abilities.SkillCharge[Skill.Gunshot] = Component._m(Component._M(keyFrac, coinFrac), 1f);
+                Abilities.SkillCharge[Skill.Gunshot] = ((base.core.OptionsData.BraggJam && jammed) ? 0f : Component._m((float)progress / (float)PointsPerBullet, 1f));
             }
         }
         else
@@ -284,44 +299,54 @@ public class BraggChar : PlayerEntity
 	public void CollectKey(int count = 1)
     {
         Keys += count;
-        if (base.core.OptionsData.BraggAmmo && ammo < AmmoMax)
+        AddProgress(PointsPerKey * count);
+    }
+
+	public void NotifyCoinItem()
+    {
+        AddProgress(PointsPerCoin);
+    }
+
+	public void NotifyBulletKill()
+    {
+        if (base.core.OptionsData.BraggJam)
         {
-            keysLoaded += count;
-            if (keysLoaded >= KeysPerBullet)
-            {
-                keysLoaded -= KeysPerBullet;
-                LoadBullet();
-            }
+            shotsNoKill = 0;
+            jammed = false;
         }
     }
 
     public void NotifyChestOpened()
     {
-        if (base.core.OptionsData.BraggAmmo && ammo < AmmoMax)
+        if (base.core.OptionsData.BraggJam)
         {
-            LoadBullet();
+            shotsNoKill = 0;
+            jammed = false;
         }
+        AddProgress(PointsPerChest);
     }
 
-    public void NotifyCoinsCollected(int items)
+    public void AddProgress(int points)
     {
-        if (base.core.OptionsData.BraggAmmo && ammo < AmmoMax)
+        if (!base.core.OptionsData.BraggAmmo || base.Dead || ammo >= AmmoMax)
         {
-            coinCount += items;
-            if (coinCount >= CoinsPerBullet)
+            return;
+        }
+        progress += points;
+        if (progress >= PointsPerBullet)
+        {
+            progress -= PointsPerBullet;
+            bool wasEmpty = ammo == 0;
+            ammo++;
+            if (!wasEmpty)
             {
-                coinCount -= CoinsPerBullet;
-                LoadBullet();
+                SendMessage(new PlayWorldSoundMessage(SoundName.bragg_gun_cock, base.WorldCenter));
             }
+            SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, "AMMO " + ammo + "/" + AmmoMax, default(Color).FromRgb(15967806), 1f), CurrentPlatform));
         }
-    }
-
-    private void LoadBullet()
-    {
-        ammo++;
-        if (ammo > 1)
+        else
         {
-            SendMessage(new PlayWorldSoundMessage(SoundName.bragg_gun_cock, base.WorldCenter));
+            SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, progress + "/" + PointsPerBullet, default(Color).FromRgb(11216961), 1f), CurrentPlatform));
         }
     }
 
