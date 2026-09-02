@@ -361,11 +361,11 @@ public class VampireChar : PlayerEntity
         {
             if (flightTimer > 40)
             {
-                flightTimer = Math.Max(flightTimer, Math.Min(flightTimer + 45, flightDuration - 41));
+                flightTimer = Math.Max(flightTimer, Math.Min(flightTimer + 30, flightDuration - 41));
             }
             else
             {
-                flightBank = Math.Min(flightBank + 45, 180);
+                flightBank = Math.Min(flightBank + 30, 120);
             }
         }
         if (predatorKills < 10)
