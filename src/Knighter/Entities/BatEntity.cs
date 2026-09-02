@@ -58,7 +58,7 @@ public class BatEntity : Entity
     private const float HuntSpeed = 0.03f;   // anchor drift per tick
 
     // ---- bat debug logging: set false for shipping builds ----
-    private static readonly bool Log = true;
+    private static readonly bool Log = false; // disabled because no longer needed
 
     private static int nextId;
 

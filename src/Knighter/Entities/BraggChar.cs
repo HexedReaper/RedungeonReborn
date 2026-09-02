@@ -20,14 +20,13 @@ public class BraggChar : PlayerEntity
 
 	private int shotCost = 15;
 
-    private int ammo = 3;
+	private const int AmmoMax = 3;
+    private const int KeysPerBullet = 2;
+    private const int CoinsPerBullet = 5;
 
-    private float climbProgress;
-
-    private float bestY;
-
-    private bool climbStarted;
-
+    private int ammo;
+    private int coinCount;
+    private int keysLoaded;
 	private bool shooting => shotAnim >= 0;
 
 	public int Keys { get; private set; }
@@ -134,13 +133,14 @@ public class BraggChar : PlayerEntity
 			light.Die();
 			base.playState.Camera.Shake("shot");
 			SendMessage(new PlayWorldSoundMessage(SoundName.bragg_shot, base.WorldCenter));
-			int num = Abilities.SkillLevel[Skill.Gunshot];
-			SendMessage(new SpawnEntityMessage(new ProjectileEntity(base.WorldCenterCoordinates.X - FacingDirection.Y * 0.3f, base.WorldCenterCoordinates.Y, FacingDirection.Clone(), ProjectileEntity.ProjectileType.Bullet).SetKillReward(num switch
-			{
-				2 => 15, 
-				1 => 0, 
-				_ => 20, 
-			}, this), null));
+			            int num = Abilities.SkillLevel[Skill.Gunshot];
+            int reward = num switch
+            {
+                2 => 15,
+                1 => 0,
+                _ => 20,
+            };
+            SendMessage(new SpawnEntityMessage(new ProjectileEntity(base.WorldCenterCoordinates.X - FacingDirection.Y * 0.3f, base.WorldCenterCoordinates.Y, FacingDirection.Clone(), ProjectileEntity.ProjectileType.Bullet).SetKillReward(reward, this), null));
             _inc(Stat.BraggTimesFired);
             if (base.core.OptionsData.BraggAmmo)
             {
@@ -162,36 +162,14 @@ public class BraggChar : PlayerEntity
 	public override void Update()
 	{
 		base.playState.Hud.AbilitiesHud.skillPanels[Skill.TreasureHunt].Text = "× " + Keys;
-        if (base.core.OptionsData.BraggAmmo)
+		if (shooting)
         {
-            if (!climbStarted)
+            shotAnim++;
+            if (shotAnim >= shotAnimDuration)
             {
-                bestY = base.WorldCoordinates.Y;
-                climbStarted = true;
-            }
-            if (base.WorldCoordinates.Y < bestY)
-            {
-                float gained = bestY - base.WorldCoordinates.Y;
-                bestY = base.WorldCoordinates.Y;
-                if (ammo < 3)
-                {
-                    climbProgress += gained;
-                    if (climbProgress >= 10f)
-                    {
-                        climbProgress = 0f;
-                        ammo++;
-                    }
-                }
+                shotAnim = -1;
             }
         }
-        if (shooting)
-		{
-			shotAnim++;
-			if (shotAnim >= shotAnimDuration)
-			{
-				shotAnim = -1;
-			}
-		}
 		base.Update();
 	}
 
@@ -230,7 +208,7 @@ public class BraggChar : PlayerEntity
         if (base.core.OptionsData.BraggAmmo && base.core.GetCurrentState() is PlayState && base.playState.PlayerControl != null)
         {
             Vector2 center = base.playState.PlayerControl.SkillButtonCenter();
-            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
+            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo + "/" + AmmoMax, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
         }
     }
 
@@ -288,7 +266,9 @@ public class BraggChar : PlayerEntity
             }
             else
             {
-                Abilities.SkillCharge[Skill.Gunshot] = Component._m(climbProgress / 10f, 1f);
+                float keyFrac = (float)keysLoaded / (float)KeysPerBullet;
+                float coinFrac = (float)coinCount / (float)CoinsPerBullet;
+                Abilities.SkillCharge[Skill.Gunshot] = Component._m(Component._M(keyFrac, coinFrac), 1f);
             }
         }
         else
@@ -302,9 +282,48 @@ public class BraggChar : PlayerEntity
     }
 
 	public void CollectKey(int count = 1)
-	{
-		Keys += count;
-	}
+    {
+        Keys += count;
+        if (base.core.OptionsData.BraggAmmo && ammo < AmmoMax)
+        {
+            keysLoaded += count;
+            if (keysLoaded >= KeysPerBullet)
+            {
+                keysLoaded -= KeysPerBullet;
+                LoadBullet();
+            }
+        }
+    }
+
+    public void NotifyChestOpened()
+    {
+        if (base.core.OptionsData.BraggAmmo && ammo < AmmoMax)
+        {
+            LoadBullet();
+        }
+    }
+
+    public void NotifyCoinsCollected(int items)
+    {
+        if (base.core.OptionsData.BraggAmmo && ammo < AmmoMax)
+        {
+            coinCount += items;
+            if (coinCount >= CoinsPerBullet)
+            {
+                coinCount -= CoinsPerBullet;
+                LoadBullet();
+            }
+        }
+    }
+
+    private void LoadBullet()
+    {
+        ammo++;
+        if (ammo > 1)
+        {
+            SendMessage(new PlayWorldSoundMessage(SoundName.bragg_gun_cock, base.WorldCenter));
+        }
+    }
 
 	public bool SpendKeys(int number)
 	{
