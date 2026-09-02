@@ -46,6 +46,7 @@ public class BatEntity : Entity
     private int returnT;
     private int gateCooldown;
     private bool gatesOK;
+    private float damp = 1f;
 	private bool scatterFlee;
 	private int scatterT;
     private float scatterX;
@@ -57,7 +58,7 @@ public class BatEntity : Entity
     private const float HuntSpeed = 0.03f;   // anchor drift per tick
 
     // ---- bat debug logging: set false for shipping builds ----
-    private const bool Log = true;
+    private static readonly bool Log = true;
 
     private static int nextId;
 
@@ -168,7 +169,7 @@ public class BatEntity : Entity
                 loveEmitter = null;
             }
             Vector2 target = (unfriended ? vampire.WorldCoordinates : Vector2.Zero);
-            if (unfriended && base.core.OptionsData.VampirePredator && vampire.FlightActive && (target - new Vector2(x, y)).LengthSquared() < HuntRadiusSq)
+            if (unfriended && Moving && base.core.OptionsData.VampirePredator && vampire.FlightActive && (target - new Vector2(x, y)).LengthSquared() < HuntRadiusSq)
             {
                 Fleeing = true;
                 scatterFlee = true;
@@ -188,7 +189,7 @@ public class BatEntity : Entity
                     gateCooldown = 10;
                     gatesOK = (unfriended && vampire.CurrentPlatform == null && FairToHunt(vampire, target));
                 }
-                float rangeSq = (target - spawn).LengthSquared();
+                float rangeSq = (target - new Vector2(x, y)).LengthSquared();
                 if (huntT > 0)
                 {
                     huntT--;
@@ -228,9 +229,9 @@ public class BatEntity : Entity
                     returnT--;
                     anchorMoved = DriftHome();
                 }
-                else if (unfriended && rangeSq < HuntRadiusSq && gatesOK && CanClaim())
+                else if (unfriended && Moving && rangeSq < HuntRadiusSq && gatesOK && CanClaim())
                 {
-                    huntT = 90;
+                    huntT = 150;
                     LogLine("CLAIM dSpawn=" + F0(rangeSq) + " dPos=" + F0((target - new Vector2(x, y)).LengthSquared()) + " gates=" + gatesOK);
                     SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
                 }
@@ -241,8 +242,9 @@ public class BatEntity : Entity
             }
             if (Moving)
             {
-                float num = ((xR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * xS) / (float)(10 * xR)) * (float)xD));
-                float num2 = ((yR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * yS) / (float)(10 * yR)) * (float)yD));
+                damp += (((huntT > 0) ? 0.35f : 1f) - damp) * 0.08f;
+                float num = ((xR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * xS) / (float)(10 * xR)) * (float)xD * damp));
+                float num2 = ((yR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * yS) / (float)(10 * yR)) * (float)yD * damp));
                 x = spawn.X + num;
                 y = spawn.Y + num2;
                 UpdateTiles();
