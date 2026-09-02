@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using Knighter.Gameplay;
 using Knighter.Graphics;
@@ -55,6 +56,15 @@ public class BatEntity : Entity
     private const float LeashSq = 16f;       // gives up beyond 4 tiles from home
     private const float HuntSpeed = 0.03f;   // anchor drift per tick
 
+    // ---- bat debug logging: set false for shipping builds ----
+    private const bool Log = true;
+
+    private static int nextId;
+
+    private readonly int id = nextId++;
+
+    private string dbgState = "PATROL";
+
 	private ParticleEmitter loveEmitter;
 
 	private int idleSoundDelay;
@@ -76,6 +86,10 @@ public class BatEntity : Entity
 		{
 			Init((float)x + 0.4f, (float)y + 0.4f, desc["delay"], desc["x-r"], desc["y-r"], desc["x-d"], desc["y-d"], desc["x-s"], desc["y-s"], desc.Flipped);
 		}
+        if (Log)
+        {
+            Console.WriteLine("[BAT#" + id + "] t=0 SPAWN moving=" + Moving + " at=" + x + "," + y + ((Moving) ? (" delay=" + delay + " xR=" + xR + " yR=" + yR + " xD=" + xD + " yD=" + yD + " xS=" + xS + " yS=" + yS) : ""));
+        }
 	}
 
 	private void Init(float x, float y, int delay, int xR, int yR, int xD, int yD, int xS, int yS, bool flipped = false)
@@ -127,6 +141,10 @@ public class BatEntity : Entity
 			loveEmitter.Start(20);
 		}
 		idleSoundDelay = Component._rnd(60, 120);
+        if (Log)
+        {
+            Console.WriteLine("[BAT#" + id + "] t=" + base.worldTicks + " LOAD home=" + home.X + "," + home.Y + " avoidPlayer=" + avoidPlayer);
+        }
 		base.Load();
 	}
 
@@ -156,6 +174,7 @@ public class BatEntity : Entity
                 scatterFlee = true;
                 scatterT = 240;
                 scatterX = x;
+                LogLine("SCATTER start dPos=" + F0((target - new Vector2(x, y)).LengthSquared()));
                 huntT = 0;
                 returnT = 0;
                 animation.Speed = 0.4f;
@@ -177,6 +196,7 @@ public class BatEntity : Entity
                     {
                         huntT = 0;
                         returnT = 90;
+                        LogLine("HUNT-CANCEL platform");
                     }
                     else if (rangeSq < HuntRadiusSq)
                     {
@@ -191,10 +211,15 @@ public class BatEntity : Entity
                                 spawn = next;
                                 anchorMoved = true;
                             }
+                            else if ((base.worldTicks + id) % 30 == 0)
+                            {
+                                LogLine("HUNT-BLOCKED tileOK=" + (tile != null && tile.IsPassableFor(this)) + " leash=" + ((next - home).LengthSquared() >= LeashSq) + " next=" + F1(next.X) + "," + F1(next.Y));
+                            }
                         }
                     }
                     if (huntT == 0 && returnT == 0)
                     {
+                        LogLine("HUNT-EXPIRED -> RETURN");
                         returnT = 90;
                     }
                 }
@@ -206,6 +231,7 @@ public class BatEntity : Entity
                 else if (unfriended && rangeSq < HuntRadiusSq && gatesOK && CanClaim())
                 {
                     huntT = 90;
+                    LogLine("CLAIM dSpawn=" + F0(rangeSq) + " dPos=" + F0((target - new Vector2(x, y)).LengthSquared()) + " gates=" + gatesOK);
                     SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
                 }
                 else
@@ -245,6 +271,7 @@ public class BatEntity : Entity
                 {
                     scatterFlee = false;
                     Fleeing = false;
+                    LogLine("REARM at=" + F1(tilePos.X) + "," + F1(tilePos.Y));
                     spawn = tilePos;
                     home = spawn;
                     huntT = 0;
@@ -254,6 +281,7 @@ public class BatEntity : Entity
                 }
                 else
                 {
+                    LogLine("SCATTER-DESPAWN safe=" + safeSpot + " clear=" + clearOfPlayer + " at=" + F1(tilePos.X) + "," + F1(tilePos.Y));
                     SendMessage(new RemoveEntityMessage(this));
                 }
             }
@@ -269,9 +297,11 @@ public class BatEntity : Entity
             fleeTimeout--;
             if (fleeTimeout == 0)
             {
+                LogLine("FLEE-TIMEOUT removed");
                 SendMessage(new RemoveEntityMessage(this));
             }
         }
+        DebugTick();
         avoid += (avoidTarget - avoid) * 0.1f;
         base.Update();
     }
@@ -322,10 +352,71 @@ public class BatEntity : Entity
         var tile = levelMap[next];
         if (tile == null || !tile.IsPassableFor(this))
         {
+            if ((base.worldTicks + id) % 30 == 0)
+            {
+                LogLine("HOME-BLOCKED at=" + F1(spawn.X) + "," + F1(spawn.Y) + " toward=" + F1(home.X) + "," + F1(home.Y));
+            }
             return false;
         }
         spawn = next;
         return true;
+    }
+
+    private void LogLine(string msg)
+    {
+        if (Log)
+        {
+            Console.WriteLine("[BAT#" + id + "] t=" + base.worldTicks + " " + msg);
+        }
+    }
+
+    private static string F1(float v)
+    {
+        return v.ToString("0.0", CultureInfo.InvariantCulture);
+    }
+
+    private static string F0(float v)
+    {
+        return ((int)v).ToString(CultureInfo.InvariantCulture);
+    }
+
+    private VampireChar DbgVampire()
+    {
+        return ((base.core.CurrentPlayState != null) ? (base.core.CurrentPlayState.Player as VampireChar) : null);
+    }
+
+    private string Trace()
+    {
+        VampireChar v = DbgVampire();
+        Vector2 pp = ((v != null) ? v.WorldCoordinates : Vector2.Zero);
+        string s = " x=" + F1(x) + " y=" + F1(y) + " sx=" + F1(spawn.X) + " sy=" + F1(spawn.Y) + " hx=" + F1(home.X) + " hy=" + F1(home.Y) + " huntT=" + huntT + " retT=" + returnT + " gates=" + gatesOK + " plat=" + ((v != null && v.CurrentPlatform != null) ? 1 : 0) + " dPos=" + F0((pp - new Vector2(x, y)).LengthSquared()) + " dSpawn=" + F0((pp - spawn).LengthSquared()) + " px=" + F1(pp.X) + " py=" + F1(pp.Y);
+        if (Moving)
+        {
+            float wx = ((xR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * xS) / (float)(10 * xR)) * (float)xD));
+            float wy = ((yR == 0) ? 0f : ((float)Math.Sin((float)(base.worldTicks + delay + 10 * yS) / (float)(10 * yR)) * (float)yD));
+            s += " wob=" + F1(wx) + "," + F1(wy);
+        }
+        return s;
+    }
+
+    private void DebugTick()
+    {
+        if (!Log)
+        {
+            return;
+        }
+        string st = ((!Fleeing) ? ((huntT > 0) ? "HUNT" : ((returnT > 0) ? "RETURN" : "PATROL")) : (scatterFlee ? "SCATTER" : "FLEE"));
+        if (st != dbgState)
+        {
+            VampireChar v = DbgVampire();
+            Vector2 pp = ((v != null) ? v.WorldCoordinates : Vector2.Zero);
+            Console.WriteLine("[BAT#" + id + "] t=" + base.worldTicks + " STATE " + dbgState + "->" + st + " at=" + F1(x) + "," + F1(y) + " spawn=" + F1(spawn.X) + "," + F1(spawn.Y) + " home=" + F1(home.X) + "," + F1(home.Y) + " player=" + F1(pp.X) + "," + F1(pp.Y) + " plat=" + ((v != null && v.CurrentPlatform != null) ? 1 : 0) + " dPos=" + F0((pp - new Vector2(x, y)).LengthSquared()) + " dSpawn=" + F0((pp - spawn).LengthSquared()) + " gates=" + gatesOK);
+            dbgState = st;
+        }
+        else if ((base.worldTicks + id) % 15 == 0)
+        {
+            Console.WriteLine("[BAT#" + id + "] t=" + base.worldTicks + " st=" + st + Trace());
+        }
     }
 
 	public override void Draw()
@@ -340,6 +431,7 @@ public class BatEntity : Entity
 
 	public override void Break(Entity offender)
 	{
+        LogLine("BREAK by=" + ((offender != null) ? offender.GetType().Name : "null") + " fleeing=" + Fleeing);
 		if (offender is CreepChar)
 		{
 			if (Fleeing)
@@ -389,6 +481,7 @@ public class BatEntity : Entity
 		{
 			if (other is PlayerEntity playerEntity && (!avoidPlayer || unfriended))
             {
+                LogLine("HURT-PLAYER at=" + F1(x) + "," + F1(y));
                 playerEntity.Hurt(InjuryType.Bat, this);
             }
 			base.CollideWith(other);
