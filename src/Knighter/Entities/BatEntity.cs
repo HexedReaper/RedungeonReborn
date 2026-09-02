@@ -40,7 +40,11 @@ public class BatEntity : Entity
 	private float avoid;
 
 	private float avoidTarget;
-	private bool hunting;
+
+	private int huntT;
+    private int returnT;
+    private int gateCooldown;
+    private bool gatesOK;
 	private bool scatterFlee;
 	private int scatterT;
     private float scatterX;
@@ -140,56 +144,74 @@ public class BatEntity : Entity
             VampireChar vampire = ((base.core.CurrentPlayState != null) ? (base.core.CurrentPlayState.Player as VampireChar) : null);
             unfriended = (base.core.OptionsData.UnfriendBats && vampire != null && !vampire.Dead);
             bool anchorMoved = false;
-            if (unfriended)
+            if (unfriended && loveEmitter != null)
             {
-                if (loveEmitter != null)
-                {
-                    loveEmitter.Stop();
-                    loveEmitter = null;
-                }
-                Vector2 target = vampire.WorldCoordinates;
-                Vector2 offset = target - new Vector2(x, y);
-                if (base.core.OptionsData.VampirePredator && vampire.FlightActive && offset.LengthSquared() < HuntRadiusSq)
-                {
-                    Fleeing = true;
-                    scatterFlee = true;
-                    scatterT = 240;
-                    scatterX = x;
-                    hunting = false;
-                    animation.Speed = 0.4f;
-                    SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
-                }
-                else if (offset.LengthSquared() < HuntRadiusSq && IsLeadHunter() && FairToHunt(vampire, target))
-                {
-                    if (!hunting)
-                    {
-                        hunting = true;
-                        SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
-                    }
-                    offset.Normalize();
-                    Vector2 next = spawn + offset * HuntSpeed;
-                    var tile = levelMap[next];
-                    if (tile != null && tile.IsPassableFor(this) && (next - home).LengthSquared() < LeashSq)
-                    {
-                        spawn = next;
-                        anchorMoved = true;
-                    }
-                }
-                else
-                {
-                    hunting = false;
-                }
+                loveEmitter.Stop();
+                loveEmitter = null;
+            }
+            Vector2 target = (unfriended ? vampire.WorldCoordinates : Vector2.Zero);
+            if (unfriended && base.core.OptionsData.VampirePredator && vampire.FlightActive && (target - new Vector2(x, y)).LengthSquared() < HuntRadiusSq)
+            {
+                Fleeing = true;
+                scatterFlee = true;
+                scatterT = 240;
+                scatterX = x;
+                huntT = 0;
+                returnT = 0;
+                animation.Speed = 0.4f;
+                SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
             }
             else
             {
-                hunting = false;
-            }
-            if (!hunting && (spawn.X != home.X || spawn.Y != home.Y))
-            {
-                Vector2 back = home - spawn;
-                float dist = back.Length();
-                spawn = ((dist <= HuntSpeed) ? home : (spawn + back / dist * HuntSpeed));
-                anchorMoved = true;
+                gateCooldown--;
+                if (gateCooldown <= 0)
+                {
+                    gateCooldown = 10;
+                    gatesOK = (unfriended && vampire.CurrentPlatform == null && FairToHunt(vampire, target));
+                }
+                float rangeSq = (target - spawn).LengthSquared();
+                if (huntT > 0)
+                {
+                    huntT--;
+                    if (vampire != null && vampire.CurrentPlatform != null)
+                    {
+                        huntT = 0;
+                        returnT = 90;
+                    }
+                    else if (rangeSq < HuntRadiusSq)
+                    {
+                        Vector2 offset = target - spawn;
+                        if (offset.LengthSquared() > 0.001f)
+                        {
+                            offset.Normalize();
+                            Vector2 next = spawn + offset * HuntSpeed;
+                            var tile = levelMap[next];
+                            if (tile != null && tile.IsPassableFor(this) && (next - home).LengthSquared() < LeashSq)
+                            {
+                                spawn = next;
+                                anchorMoved = true;
+                            }
+                        }
+                    }
+                    if (huntT == 0 && returnT == 0)
+                    {
+                        returnT = 90;
+                    }
+                }
+                else if (returnT > 0)
+                {
+                    returnT--;
+                    anchorMoved = DriftHome();
+                }
+                else if (unfriended && rangeSq < HuntRadiusSq && gatesOK && CanClaim())
+                {
+                    huntT = 90;
+                    SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
+                }
+                else
+                {
+                    anchorMoved = DriftHome();
+                }
             }
             if (Moving)
             {
@@ -225,7 +247,9 @@ public class BatEntity : Entity
                     Fleeing = false;
                     spawn = tilePos;
                     home = spawn;
-                    hunting = false;
+                    huntT = 0;
+                    returnT = 0;
+                    gateCooldown = 0;
                     animation.Speed = 0.15f;
                 }
                 else
@@ -272,19 +296,35 @@ public class BatEntity : Entity
         return tile != null && tile.IsPassableFor(base.core.CurrentPlayState.Player);
     }
 
-	private bool IsLeadHunter()
+	private bool CanClaim()
     {
-        Vector2 playerPos = base.core.CurrentPlayState.Player.WorldCoordinates;
-        float myDist = (playerPos - new Vector2(x, y)).LengthSquared();
         List<Entity> list = base.core.CurrentPlayState.EntityManager.GetEntitiesInRadius(new Vector2(x, y), 12f).FindAll((Entity e) => e is BatEntity && !e.IsBroken && !(e as BatEntity).Fleeing);
         foreach (Entity item in list)
         {
             BatEntity other = item as BatEntity;
-            if (other != null && other != this && (new Vector2(other.x, other.y) - playerPos).LengthSquared() < myDist)
+            if (other != null && other != this && other.huntT > 0)
             {
                 return false;
             }
         }
+        return true;
+    }
+
+    private bool DriftHome()
+    {
+        if (spawn.X == home.X && spawn.Y == home.Y)
+        {
+            return false;
+        }
+        Vector2 back = home - spawn;
+        float dist = back.Length();
+        Vector2 next = ((dist <= HuntSpeed) ? home : (spawn + back / dist * HuntSpeed));
+        var tile = levelMap[next];
+        if (tile == null || !tile.IsPassableFor(this))
+        {
+            return false;
+        }
+        spawn = next;
         return true;
     }
 
