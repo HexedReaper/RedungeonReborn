@@ -129,6 +129,7 @@ public class CharacterModsState : State
             Place(Button.ToggleBraggFeathers, y);
             y += TogglePitch;
             Place(Button.ToggleBraggJam, y);
+            y += TogglePitch;
         }
         Place(Button.HeaderVampire, y);
         y += SectionPitch;

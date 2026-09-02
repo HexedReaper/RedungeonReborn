@@ -489,6 +489,7 @@ public class FollowerEntity : Entity, IPushableEntity
 			{
 				int num4 = ((num2 >= 4) ? 4 : ((num2 >= 3) ? 3 : ((num2 < 2) ? 1 : 2)));
 				ItemEntity itemEntity = new ItemEntity(base.WorldCenterCoordinates.X + 0.5f * Component._cos((float)i * ((float)Math.PI * 2f / (float)num3)) - 0.5f, base.WorldCenterCoordinates.Y + 0.5f * Component._sin((float)i * ((float)Math.PI * 2f / (float)num3)) - 0.5f, ItemEntity.ValueToType(num4));
+				itemEntity.FromContainer = true;
 				num2 -= num4;
 				SendMessage(new SpawnEntityMessage(itemEntity, null), (ichitaka == null) ? (i * 5) : 0);
 				itemEntity.SetTarget(base.core.CurrentPlayState.Player, 40);

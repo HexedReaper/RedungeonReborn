@@ -20,11 +20,11 @@ public class BraggChar : PlayerEntity
 
 	private int shotCost = 15;
 
-	private const int AmmoMax = 3;
-    private const int PointsPerBullet = 10;
-    private const int PointsPerKey = 5;
+	private const int AmmoMax = 6;
+    private const int PointsPerBullet = 16;
+    private const int PointsPerKey = 4;
     private const int PointsPerCoin = 2;
-    private const int PointsPerChest = 10;
+    private const int PointsPerChest = 8;
 
     private int ammo;
     private int progress;
@@ -157,9 +157,11 @@ public class BraggChar : PlayerEntity
                 if (base.core.OptionsData.BraggJam)
                 {
                     shotsNoKill++;
-                    if (shotsNoKill >= 2)
+                    if (shotsNoKill >= 2 && !jammed)
                     {
                         jammed = true;
+                        base.playState.Hud.ShowAlert("gun-jammed", "GUN JAMMED - OPEN A CHEST", default(Color).FromRgb(16732240), 150, SpriteName.bragg_gun);
+                        SendMessage(new PlayWorldSoundMessage(SoundName.web_1, base.WorldCenter));
                     }
                 }
             }
@@ -186,6 +188,21 @@ public class BraggChar : PlayerEntity
             {
                 shotAnim = -1;
             }
+        }
+		if (base.core.OptionsData.BraggAmmo && base.core.OptionsData.BraggJam && jammed && !Dead && base.worldTicks % 40 == 0)
+        {
+            base.core.ParticleManager.AddEmitter(inWorld: true, base.WorldCenter.Shift(0f, -16f), 2f).OnSpawn(delegate(Particle p)
+            {
+                p.Velocity = SciHelper.GetRandomVectorInCircle(0.25f);
+                p.Velocity.Y -= 0.12f;
+            }).OnUpdate(delegate(Particle p)
+            {
+                p.Position += p.Velocity;
+                p.Dead = p.Age > 45;
+            }).OnDraw(delegate(Particle p)
+            {
+                base.core.Renderer[base.Z + 2].DrawSpriteW(_(SpriteName.spark), p.Position, Color.Gray * ((float)(45 - p.Age) / 45f * 0.7f), new Vector2(0.6f + (float)p.Age * 0.015f), (float)p.Age * 0.08f, SpriteFlip.None, SpriteOrigin.Center);
+            }).Emit(3, 3, once: true, 1);
         }
 		base.Update();
 	}
@@ -226,13 +243,14 @@ public class BraggChar : PlayerEntity
         {
             Vector2 center = base.playState.PlayerControl.SkillButtonCenter();
             bool jammedNow = base.core.OptionsData.BraggJam && jammed;
+            float blink = (jammedNow ? (0.55f + 0.45f * Component._sin((float)base.worldTicks * 0.25f)) : 1f);
             string label = jammedNow ? "JAMMED" : ("× " + ammo + "/" + AmmoMax);
-            base.core.Renderer["fg", 1002, false].DrawTextS(label, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: jammedNow ? default(Color).FromRgb(16732240) : default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
+            base.core.Renderer["fg", 1002, false].DrawTextS(label, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: (jammedNow ? default(Color).FromRgb(14040624) : default(Color).FromRgb(15967806)) * blink, secondColor: default(Color).FromRgb(3939629)));
             float barW = 34f;
             float frac = (jammedNow ? 0f : Component._m((float)progress / (float)PointsPerBullet, 1f));
             Vector2 barPos = center.Shift(-barW / 2f, 36f / Settings.GuiScale);
-            base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X - 1f, barPos.Y - 1f, barW + 2f, 6f), Color.Black * 0.6f);
-            base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X, barPos.Y, barW * frac, 4f), default(Color).FromRgb(15967806));
+            base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X - 1f, barPos.Y - 1f, barW + 2f, 6f), Color.Black * 0.6f * blink);
+            base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X, barPos.Y, barW * frac, 4f), default(Color).FromRgb(15967806) * blink);
         }
     }
 
@@ -321,6 +339,11 @@ public class BraggChar : PlayerEntity
             shotsNoKill = 0;
             jammed = false;
         }
+    }
+
+	public void NotifyFeather()
+    {
+        AddProgress(PointsPerCoin);
     }
 
     public void NotifyChestOpened()

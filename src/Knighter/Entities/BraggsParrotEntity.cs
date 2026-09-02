@@ -116,12 +116,12 @@ public class BraggsParrotEntity : Entity
 			ticksEscaping++;
             if (base.core.OptionsData.BraggFeathers && player != null && !player.Dead && ticksEscaping >= 90 && ticksEscaping <= 240 && ticksEscaping >= featherGap)
             {
-                var tileHere = levelMap[new Vector2(x, y)];
-                if (tileHere != null && tileHere.IsPassableFor(this))
+                float landingY;
+                if (TryFindLandingY(out landingY))
                 {
                     featherGap = ticksEscaping + Component._rnd(4, 17);
                     float away = ((x < player.WorldCoordinates.X) ? (-1f) : 1f);
-                    SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y, away * (float)Component._rnd(2, 5) * 0.01f), null));
+                    SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y, away * (float)Component._rnd(1, 3) * 0.01f, landingY), null));
                 }
             }
             if (ticksEscaping == 600)
@@ -144,6 +144,30 @@ public class BraggsParrotEntity : Entity
 		flip = num2 > 0f;
 		base.Update();
 	}
+
+	private bool TryFindLandingY(out float landingY)
+    {
+        landingY = 0f;
+        for (float ty = y + 1f; ty < y + 40f; ty += 1f)
+        {
+            var t = levelMap[new Vector2(x, ty)];
+            if (t == null)
+            {
+                return false;
+            }
+            if (!t.IsPassableFor(player))
+            {
+                var t2 = levelMap[new Vector2(x, ty - 1f)];
+                if (t2 != null && t2.IsPassableFor(player))
+                {
+                    landingY = ty - 0.5f;
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
 
 	public override void Draw()
 	{

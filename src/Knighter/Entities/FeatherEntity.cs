@@ -1,3 +1,4 @@
+using System;
 using Knighter.Graphics;
 using Knighter.Helpers;
 using Knighter.Messages;
@@ -11,10 +12,13 @@ public class FeatherEntity : Entity
 
     private float vx;
 
-    public FeatherEntity(float x, float y, float vx)
+    private float landingY;
+
+    public FeatherEntity(float x, float y, float vx, float landingY)
         : base(x, y, 0.3f, 0.3f)
     {
         this.vx = vx;
+        this.landingY = landingY;
     }
 
     public override void Load()
@@ -28,8 +32,17 @@ public class FeatherEntity : Entity
     public override void Update()
     {
         anim.Update();
-        y += 0.08f;
+        if (y < landingY)
+        {
+            y = Math.Min(y + 0.08f, landingY);
+        }
         x += vx + Component._sin((float)base.worldTicks * 0.1f) * 0.02f;
+        var tile = levelMap[new Vector2(x, y)];
+        if (tile == null || !tile.IsPassableFor(base.core.CurrentPlayState.Player))
+        {
+            SendMessage(new RemoveEntityMessage(this));
+            return;
+        }
         UpdateTiles();
         if (base.Age > 420)
         {
@@ -48,7 +61,7 @@ public class FeatherEntity : Entity
     {
         if (base.Age >= 5 && other is BraggChar braggChar && !braggChar.Dead)
         {
-            braggChar.AddProgress(2);
+            braggChar.NotifyFeather();
             SendMessage(new PlayWorldSoundMessage(SoundName.coin, base.WorldCenter));
             SendMessage(new RemoveEntityMessage(this));
         }
