@@ -231,7 +231,7 @@ public class BatEntity : Entity
                 }
                 else if (unfriended && Moving && rangeSq < HuntRadiusSq && gatesOK && CanClaim())
                 {
-                    huntT = 150;
+                    huntT = 300;
                     LogLine("CLAIM dSpawn=" + F0(rangeSq) + " dPos=" + F0((target - new Vector2(x, y)).LengthSquared()) + " gates=" + gatesOK);
                     SendMessage(new PlayWorldSoundMessage(Squeaks.DrawDifferent(), base.WorldCenter));
                 }

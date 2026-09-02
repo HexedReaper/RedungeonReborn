@@ -361,7 +361,7 @@ public class VampireChar : PlayerEntity
         {
             if (flightTimer > 40)
             {
-                flightTimer += 45;
+                flightTimer = Math.Max(flightTimer, Math.Min(flightTimer + 45, flightDuration - 41));
             }
             else
             {
