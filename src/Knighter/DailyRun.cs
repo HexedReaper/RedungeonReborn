@@ -147,7 +147,7 @@ public static class DailyRun
         }
         if (character == Character.Bragg && o.BraggAmmo)
         {
-            text = ((n > 0) ? (text + " · ") : text) + "bragg ammo";
+            text = ((n > 0) ? (text + " · ") : text) + "scavenger ammo";
             n++;
         }
         if (character == Character.Bragg && o.BraggFeathers) {

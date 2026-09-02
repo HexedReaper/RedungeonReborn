@@ -28,6 +28,7 @@ public class ItemEntity : Entity
 	public Vector2 InitialPos;
 
 	public bool Dancing;
+	public bool FromContainer;
 
 	public bool HasTarget { get; private set; }
 

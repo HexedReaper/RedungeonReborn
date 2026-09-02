@@ -209,6 +209,7 @@ public class ChestEntity : Entity
 				num5 = 1;
 			}
 			ItemEntity itemEntity = new ItemEntity(base.WorldCenterCoordinates.X, base.WorldCenterCoordinates.Y, ItemEntity.ValueToType(num5));
+			itemEntity.FromContainer = true;
 			num2 -= num5;
 			SendMessage(new SpawnEntityMessage(itemEntity, null));
 			if (base.core.CurrentPlayState.Player is IchitakaChar ichitakaChar)

@@ -114,10 +114,15 @@ public class BraggsParrotEntity : Entity
 		else
 		{
 			ticksEscaping++;
-            if (base.core.OptionsData.BraggFeathers && player != null && !player.Dead && ticksEscaping >= 10 && ticksEscaping <= 240 && ticksEscaping >= featherGap)
+            if (base.core.OptionsData.BraggFeathers && player != null && !player.Dead && ticksEscaping >= 90 && ticksEscaping <= 240 && ticksEscaping >= featherGap)
             {
-                featherGap = ticksEscaping + Component._rnd(4, 17);
-                SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y), null));
+                var tileHere = levelMap[new Vector2(x, y)];
+                if (tileHere != null && tileHere.IsPassableFor(this))
+                {
+                    featherGap = ticksEscaping + Component._rnd(4, 17);
+                    float away = ((x < player.WorldCoordinates.X) ? (-1f) : 1f);
+                    SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y, away * (float)Component._rnd(2, 5) * 0.01f), null));
+                }
             }
             if (ticksEscaping == 600)
             {

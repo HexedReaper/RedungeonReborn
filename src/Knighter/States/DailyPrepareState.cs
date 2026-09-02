@@ -194,7 +194,7 @@ public class DailyPrepareState : State
         }
         if (c == Character.Bragg && o.BraggAmmo)
         {
-            list.Add("bragg ammo");
+            list.Add("scavenger ammo");
         }
         if (c == Character.Vampire && o.VampirePredator)
         {

@@ -9,9 +9,12 @@ public class FeatherEntity : Entity
 {
     private Animation anim;
 
-    public FeatherEntity(float x, float y)
+    private float vx;
+
+    public FeatherEntity(float x, float y, float vx)
         : base(x, y, 0.3f, 0.3f)
     {
+        this.vx = vx;
     }
 
     public override void Load()
@@ -26,7 +29,7 @@ public class FeatherEntity : Entity
     {
         anim.Update();
         y += 0.08f;
-        x += Component._sin((float)base.worldTicks * 0.1f) * 0.02f;
+        x += vx + Component._sin((float)base.worldTicks * 0.1f) * 0.02f;
         UpdateTiles();
         if (base.Age > 420)
         {
@@ -45,15 +48,10 @@ public class FeatherEntity : Entity
     {
         if (base.Age >= 5 && other is BraggChar braggChar && !braggChar.Dead)
         {
-            braggChar.AddProgress(PointsPerCoin());
+            braggChar.AddProgress(2);
             SendMessage(new PlayWorldSoundMessage(SoundName.coin, base.WorldCenter));
             SendMessage(new RemoveEntityMessage(this));
         }
         base.CollideWith(other);
-    }
-
-    private static int PointsPerCoin()
-    {
-        return 2;
     }
 }

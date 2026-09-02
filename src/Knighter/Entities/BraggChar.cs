@@ -225,7 +225,14 @@ public class BraggChar : PlayerEntity
         if (base.core.OptionsData.BraggAmmo && base.core.GetCurrentState() is PlayState && base.playState.PlayerControl != null)
         {
             Vector2 center = base.playState.PlayerControl.SkillButtonCenter();
-            base.core.Renderer["fg", 1002, false].DrawTextS("× " + ammo + "/" + AmmoMax, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
+            bool jammedNow = base.core.OptionsData.BraggJam && jammed;
+            string label = jammedNow ? "JAMMED" : ("× " + ammo + "/" + AmmoMax);
+            base.core.Renderer["fg", 1002, false].DrawTextS(label, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: jammedNow ? default(Color).FromRgb(16732240) : default(Color).FromRgb(15967806), secondColor: default(Color).FromRgb(3939629)));
+            float barW = 34f;
+            float frac = (jammedNow ? 0f : Component._m((float)progress / (float)PointsPerBullet, 1f));
+            Vector2 barPos = center.Shift(-barW / 2f, 36f / Settings.GuiScale);
+            base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X - 1f, barPos.Y - 1f, barW + 2f, 6f), Color.Black * 0.6f);
+            base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X, barPos.Y, barW * frac, 4f), default(Color).FromRgb(15967806));
         }
     }
 
@@ -342,11 +349,6 @@ public class BraggChar : PlayerEntity
             {
                 SendMessage(new PlayWorldSoundMessage(SoundName.bragg_gun_cock, base.WorldCenter));
             }
-            SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, "AMMO " + ammo + "/" + AmmoMax, default(Color).FromRgb(15967806), 1f), CurrentPlatform));
-        }
-        else
-        {
-            SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, progress + "/" + PointsPerBullet, default(Color).FromRgb(11216961), 1f), CurrentPlatform));
         }
     }
 
