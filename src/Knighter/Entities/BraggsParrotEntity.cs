@@ -115,15 +115,17 @@ public class BraggsParrotEntity : Entity
 		{
 			ticksEscaping++;
             if (base.core.OptionsData.BraggFeathers && player != null && !player.Dead && ticksEscaping >= 90 && ticksEscaping <= 240 && ticksEscaping >= featherGap)
-            {
-                float landingY;
-                if (TryFindLandingY(out landingY))
-                {
-                    featherGap = ticksEscaping + Component._rnd(4, 17);
-                    float away = ((x < player.WorldCoordinates.X) ? (-1f) : 1f);
-                    SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y, away * (float)Component._rnd(1, 3) * 0.01f, landingY), null));
-                }
-            }
+			{
+				// Always advance the gap timer so failure to find a tile doesn't stall execution
+				featherGap = ticksEscaping + Component._rnd(4, 17);
+
+				float landingY;
+				if (TryFindLandingY(out landingY))
+				{
+					float away = ((x < player.WorldCoordinates.X) ? (-1f) : 1f);
+					SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y, away * (float)Component._rnd(1, 3) * 0.01f, landingY), null));
+				}
+			}
             if (ticksEscaping == 600)
             {
                 SendMessage(new RemoveEntityMessage(this));

@@ -6,9 +6,9 @@ using Android.Runtime;
 
 [assembly: ResourceDesigner("KnighterAndroid.Resource", IsApplication = true)]
 [assembly: AssemblyTitle("KnighterAndroid")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Modded by LordAcid, aka. Xellite")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Eneminds")]
+[assembly: AssemblyCompany("Eneminds / Modded by LordAcid, aka. Xellite")]
 [assembly: AssemblyProduct("")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]

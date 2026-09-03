@@ -4,3 +4,9 @@ src/bin/
 src/obj/
 build/
 crash.log
+
+.DS_Store
+.idea/
+.vscode/
+
+*.apk

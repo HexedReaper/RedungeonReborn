@@ -30,7 +30,8 @@ public class MenuState : State
 		SubMenu,
 		NoAds,
 		MoreNitrome,
-		GPlay
+		GPlay,
+		ModCredits
 	}
 
 	private enum TitleTrans
@@ -110,6 +111,7 @@ public class MenuState : State
 			touchMenu.SetupButton(Button.SubMenu, new RectangleF(base.core.Renderer.ScreenWidth - 23 - ((base.topSafeArea != 0) ? 5 : 0), (base.topSafeArea != 0) ? 7 : 0, 23f, 23f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Purple, "", _(SpriteName.icon_submenu), icon: true, iconIsPicture: false, blink: false, null, null, -3f, 0f, 1f, "", 0.095f, drawShadow: false, SoundName.button_down, SoundName.piston_extend);
 			touchMenu.SetupButton(Button.GPlay, new RectangleF(0f, 0f, 29f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Purple, "", _(SpriteName.icon_gplay));
             touchMenu.SetupButton(Button.Daily, new RectangleF(31f, 0f, 50f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "DAILY", null, icon: false, iconIsPicture: false);
+			touchMenu.SetupButton(Button.ModCredits, new RectangleF(83f, 0f, 60f, 26f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Purple, "CREDITS", null, icon: false, iconIsPicture: false);
 		}
 		if (GameOver)
 		{
@@ -324,6 +326,7 @@ public class MenuState : State
 			touchMenu[Button.Shop].Rectangle.Shift(0f, (float)Tween.CircEaseOut(num, screenHeight, -screenHeight, 15.0));
 			touchMenu[Button.SubMenu].Rectangle.Shift(0f, (float)Tween.CircEaseOut(num, -screenHeight, screenHeight, 15.0));
 			touchMenu[Button.GPlay].Rectangle.Shift(0f, (float)Tween.CircEaseOut(num, -screenHeight, screenHeight, 15.0));
+			touchMenu[Button.ModCredits].Rectangle.Shift(0f, (float)Tween.CircEaseOut(Component._M(base.Trans - (base.TransDuration - 15), 0f), -screenHeight, screenHeight, 15.0));
 		}
 		base.UpdateTransition();
 	}
@@ -660,6 +663,14 @@ public class MenuState : State
 		case Button.Daily:
             SendMessage(new PushStateMessage(new DailyPrepareState()));
             break;
+		case Button.ModCredits:
+			SendMessage(new PlaySoundMessage(SoundName.button_down));
+			new AlertDialog.Builder(Game.Activity)
+				.SetTitle("Mod Credits")
+				.SetMessage("Modded by: Xellite (aka. LordAcid)\nSpecial thanks to Eneminds - the developers of the game and Nitrome - game publisher, my GF, and the community!")
+				.SetPositiveButton("OK", (sender, args) => {})
+				.Show();
+			break;
         case Button.ExitDaily:
             base.core.OptionsData.DailyRunEnabled = false;
             base.core.SaveOptions();
