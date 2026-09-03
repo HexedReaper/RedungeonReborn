@@ -175,9 +175,12 @@ public class GolemChar : PlayerEntity
 				offender.Break(this);
 				break;
 			case InjuryType.Crushed:
-				offender.Break(this);
-				(base.playState.TileMap[base.WorldTile.Coordinates + LastMovementDir]?.Entities.Find((Entity e) => e is PistonEntity && !e.IsBroken))?.Break(this);
-				break;
+                offender?.Break(this);
+                if (base.WorldTile != null)
+                {
+                    (base.playState.TileMap[base.WorldTile.Coordinates + LastMovementDir]?.Entities.Find((Entity e) => e is PistonEntity && !e.IsBroken))?.Break(this);
+                }
+                break;
 			}
 		}
 		return flag;

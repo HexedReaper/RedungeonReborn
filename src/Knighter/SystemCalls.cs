@@ -6,6 +6,7 @@ using Android.Net;
 using Android.OS;
 using Android.Support.V4.Content;
 using Java.IO;
+using Java.Interop;
 using Microsoft.Xna.Framework;
 
 namespace Knighter;
@@ -99,17 +100,43 @@ public class SystemCalls : Component, ISystemCalls
 			screenshot.Texture.SaveAsPng(stream, screenshot.Texture.Width, screenshot.Texture.Height);
 		}
 		Intent intent = new Intent("android.intent.action.SEND");
-		intent.SetType("plain/text");
-		intent.PutExtra("android.intent.extra.TEXT", text);
-		if (file2 != null && file2.Exists())
-		{
-			Android.Net.Uri uriForFile = FileProvider.GetUriForFile(applicationContext, "com.nitrome.redungeon.provider", file2);
-			intent.SetType("image/png");
-			intent.PutExtra("android.intent.extra.STREAM", uriForFile);
-		}
-		intent.AddFlags(ActivityFlags.GrantReadUriPermission);
-		return intent;
+        intent.SetType("plain/text");
+        intent.PutExtra("android.intent.extra.TEXT", text);
+        string[] shareLines = text.Split('\n');
+        string shareTitle = string.Join(" — ", shareLines, 0, Math.Min(3, shareLines.Length));
+        intent.PutExtra("android.intent.extra.TITLE", shareTitle);
+        if (file2 != null && file2.Exists())
+        {
+            Android.Net.Uri uriForFile = FileProvider.GetUriForFile(applicationContext, "com.nitrome.redungeon.provider", file2);
+            intent.SetType("image/png");
+            intent.PutExtra("android.intent.extra.STREAM", uriForFile);
+        }
+		CopyToClipboard(text);
+        intent.AddFlags(ActivityFlags.GrantReadUriPermission);
+        return intent;
 	}
+
+	private void CopyToClipboard(string text)
+    {
+        try
+        {
+            Java.Lang.Object clipboard = Game.Activity.GetSystemService("clipboard");
+            if (clipboard == null)
+            {
+                return;
+            }
+            IntPtr clipClass = Android.Runtime.JNIEnv.FindClass("android/content/ClipData");
+            IntPtr newPlainText = Android.Runtime.JNIEnv.GetStaticMethodID(clipClass, "NewPlainText", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Landroid/content/ClipData;");
+            IntPtr clip = Android.Runtime.JNIEnv.CallStaticObjectMethod(clipClass, newPlainText, new Android.Runtime.JValue(Android.Runtime.JNIEnv.NewString("Redungeon Daily")), new Android.Runtime.JValue(Android.Runtime.JNIEnv.NewString(text)));
+            IntPtr cbPtr = clipboard.Handle;
+            IntPtr cbClass = Android.Runtime.JNIEnv.GetObjectClass(cbPtr);
+            IntPtr setPrimary = Android.Runtime.JNIEnv.GetMethodID(cbClass, "setPrimaryClip", "(Landroid/content/ClipData;)V");
+            Android.Runtime.JNIEnv.CallVoidMethod(cbPtr, setPrimary, new Android.Runtime.JValue(clip));
+        }
+        catch
+        {
+        }
+    }
 
 	public static bool IsRunningOnDevice()
 	{
