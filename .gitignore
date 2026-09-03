@@ -4,6 +4,7 @@ src/bin/
 src/obj/
 build/
 crash.log
+release/
 
 .DS_Store
 .idea/
