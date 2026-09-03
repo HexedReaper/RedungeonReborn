@@ -166,7 +166,7 @@ public class ItemEntity : Entity
 				playerEntity.CollectCoins(5, this, default(Color).FromRgb(16755743));
 				break;
 			}
-			if (Type != ItemType.SkullKey && playerEntity is BraggChar braggPickup)
+			if (Type != ItemType.SkullKey && !FromContainer && playerEntity is BraggChar braggPickup)
             {
                 braggPickup.NotifyCoinItem();
             }
