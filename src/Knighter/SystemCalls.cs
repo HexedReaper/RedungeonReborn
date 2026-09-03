@@ -120,21 +120,46 @@ public class SystemCalls : Component, ISystemCalls
     {
         try
         {
+            Console.WriteLine("[SHARE] clipboard: start");
             Java.Lang.Object clipboard = Game.Activity.GetSystemService("clipboard");
-            if (clipboard == null)
+            Console.WriteLine("[SHARE] svc handle=" + ((clipboard != null) ? clipboard.Handle : IntPtr.Zero));
+            if (clipboard == null || clipboard.Handle == IntPtr.Zero)
             {
+                Console.WriteLine("[SHARE] clipboard service null - abort");
                 return;
             }
             IntPtr clipClass = Android.Runtime.JNIEnv.FindClass("android/content/ClipData");
-            IntPtr newPlainText = Android.Runtime.JNIEnv.GetStaticMethodID(clipClass, "NewPlainText", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Landroid/content/ClipData;");
+            Console.WriteLine("[SHARE] clipClass=" + clipClass);
+            IntPtr newPlainText = Android.Runtime.JNIEnv.GetStaticMethodID(clipClass, "newPlainText", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Landroid/content/ClipData;");
             IntPtr clip = Android.Runtime.JNIEnv.CallStaticObjectMethod(clipClass, newPlainText, new Android.Runtime.JValue(Android.Runtime.JNIEnv.NewString("Redungeon Daily")), new Android.Runtime.JValue(Android.Runtime.JNIEnv.NewString(text)));
+            Console.WriteLine("[SHARE] clip=" + clip);
             IntPtr cbPtr = clipboard.Handle;
             IntPtr cbClass = Android.Runtime.JNIEnv.GetObjectClass(cbPtr);
             IntPtr setPrimary = Android.Runtime.JNIEnv.GetMethodID(cbClass, "setPrimaryClip", "(Landroid/content/ClipData;)V");
             Android.Runtime.JNIEnv.CallVoidMethod(cbPtr, setPrimary, new Android.Runtime.JValue(clip));
+            Console.WriteLine("[SHARE] clipboard OK");
+            ShowToast("Daily stats copied - paste into post");
         }
-        catch
+        catch (Exception e)
         {
+            Console.WriteLine("[SHARE] clipboard FAILED: " + e);
+        }
+    }
+
+    private void ShowToast(string message)
+    {
+        try
+        {
+            IntPtr toastClass = Android.Runtime.JNIEnv.FindClass("android/widget/Toast");
+            IntPtr makeText = Android.Runtime.JNIEnv.GetStaticMethodID(toastClass, "makeText", "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;");
+            IntPtr toast = Android.Runtime.JNIEnv.CallStaticObjectMethod(toastClass, makeText, new Android.Runtime.JValue(Game.Activity.Handle), new Android.Runtime.JValue(Android.Runtime.JNIEnv.NewString(message)), new Android.Runtime.JValue(1));
+            IntPtr tClass = Android.Runtime.JNIEnv.GetObjectClass(toast);
+            IntPtr show = Android.Runtime.JNIEnv.GetMethodID(tClass, "show", "()V");
+            Android.Runtime.JNIEnv.CallVoidMethod(toast, show);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("[SHARE] toast FAILED: " + e);
         }
     }
 
