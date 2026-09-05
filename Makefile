@@ -7,7 +7,7 @@ PACKAGE  := com.nitrome.redungeon
 .PHONY: build ship install launch log clean
 
 build:
-	dotnet build src -c Release
+	dotnet build src -c Release --no-incremental
 
 ship: build
 	mkdir -p build/assemblies
