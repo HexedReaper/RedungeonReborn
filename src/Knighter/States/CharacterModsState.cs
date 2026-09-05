@@ -25,7 +25,7 @@ public class CharacterModsState : State
             Label = label;
             FieldName = fieldName;
             ToggleSound = toggleSound;
-            Field = typeof(OptionsData).GetField(fieldName);
+            Field = typeof(OptionsData).GetField(fieldName) ?? throw new Exception("OptionsData field missing: " + fieldName);
         }
 
         public bool GetValue(OptionsData data) => (bool)Field.GetValue(data);
@@ -117,9 +117,12 @@ public class CharacterModsState : State
 
         if (base.core.OptionsData.DailyRunEnabled)
         {
-            for (int i = 0; i < id; i++)
+            for (int s = 0; s < sections.Count; s++)
             {
-                touchMenu[i].Disabled = true;
+                for (int m = 0; m < sections[s].Mods.Count; m++)
+                {
+                    touchMenu[GetToggleId(s, m)].Disabled = true;
+                }
             }
         }
 
