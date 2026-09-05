@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace Knighter;
 
 public class OptionsData : Component
@@ -25,6 +27,8 @@ public class OptionsData : Component
 	public bool VampirePredator;
 	public bool UnfriendBats;
 	public bool FastWings;
+	public bool CreepEscapeJump;
+	public bool CreepGlideMovingPlatforms;
 	public bool AchievementToasts;
 	public bool DailyIconAnimated;
 	public bool DailyRunEnabled;
@@ -47,6 +51,8 @@ public class OptionsData : Component
 		VampirePredator = false;
 		UnfriendBats = false;
 		FastWings = false;
+		CreepEscapeJump = false;
+		CreepGlideMovingPlatforms = false;
 		AchievementToasts = true;
 		DailyIconAnimated = false;
 		DailyRunEnabled = false;
@@ -70,6 +76,8 @@ public class OptionsData : Component
 		base.core.Storage.TryGetBool("vampire-predator", ref VampirePredator);
 		base.core.Storage.TryGetBool("unfriend-bats", ref UnfriendBats);
 		base.core.Storage.TryGetBool("fast-wings", ref FastWings);
+		base.core.Storage.TryGetBool("creep-escape-jump", ref CreepEscapeJump);
+		base.core.Storage.TryGetBool("creep-glide-moving-platforms", ref CreepGlideMovingPlatforms);
 		base.core.Storage.TryGetBool("achievement-toasts", ref AchievementToasts);
 		base.core.Storage.TryGetBool("daily-icon-animated", ref DailyIconAnimated);
 		base.core.Storage.TryGetBool("daily-run", ref DailyRunEnabled);
@@ -93,6 +101,8 @@ public class OptionsData : Component
 		base.core.Storage.SetBool("vampire-predator", VampirePredator);
 		base.core.Storage.SetBool("unfriend-bats", UnfriendBats);
 		base.core.Storage.SetBool("fast-wings", FastWings);
+		base.core.Storage.SetBool("creep-escape-jump", CreepEscapeJump);
+		base.core.Storage.SetBool("creep-glide-moving-platforms", CreepGlideMovingPlatforms);
 		base.core.Storage.SetBool("achievement-toasts", AchievementToasts);
 		base.core.Storage.SetBool("daily-icon-animated", DailyIconAnimated);
 		base.core.Storage.SetBool("daily-run", DailyRunEnabled);
