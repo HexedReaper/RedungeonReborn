@@ -6,6 +6,7 @@ using Knighter.Helpers;
 using Knighter.Localization;
 using Knighter.Messages;
 using Knighter.Tiles;
+using Knighter.States;
 using Microsoft.Xna.Framework;
 
 namespace Knighter.Entities;
@@ -23,6 +24,16 @@ public class CreepChar : PlayerEntity
 	private bool slideFrameReached;
 
 	private bool frozen;
+
+	private int scaredForEscape;
+
+	private bool escapeCharged;
+
+	private bool escaping;
+
+	private int escapeTimer;
+
+	private const int EscapeChargeScares = 10;
 
 	[Preserve]
 	public CreepChar(int x, int y)
@@ -60,6 +71,18 @@ public class CreepChar : PlayerEntity
 		{
 			animation.FrameBack();
 			animation.FrameBack();
+		}
+		if (escapeTimer > 0)
+		{
+			escapeTimer--;
+			if (escapeTimer == 60)
+			{
+				StartEscapeFlight();
+			}
+			if (escapeTimer == 0)
+			{
+				escaping = false;
+			}
 		}
 		if (scareDuration > 0)
 		{
@@ -130,6 +153,21 @@ public class CreepChar : PlayerEntity
 				SendMessage(new SpawnEntityMessage(itemEntity, null));
 				num++;
 			}
+			if (base.core.OptionsData.CreepEscapeJump && !escapeCharged)
+			{
+				scaredForEscape += list.Count;
+				if (scaredForEscape >= EscapeChargeScares)
+				{
+					scaredForEscape = 0;
+					escapeCharged = true;
+					base.core.CurrentPlayState.Hud.ShowAlert("escape-jump", "escape jump ready", CharDescription.Get[Character.Creep].Color1, 90, Abilities.SkillDesc[Skill.ScareCreatures].HudMainIcon);
+					SendMessage(new PlaySoundMessage(SoundName.creep_scare));
+				}
+				else
+				{
+					SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, scaredForEscape + "/" + EscapeChargeScares, default(Color).FromRgb(15902269), 1f, 30), CurrentPlatform));
+				}
+			}
 			base.playState.Camera.Shake("scaring", 1f, maxScareDuration);
 			SendMessage(new PlaySoundMessage(SoundName.creep_scare));
 			base.SpellEffects[SpellType.Ice].Deactivate();
@@ -152,7 +190,7 @@ public class CreepChar : PlayerEntity
 		if (Abilities.SkillLevel[Skill.Bridger] > 0 && (base.playState.TileMap[base.WorldCoordinates - FacingDirection].WorldCoordinates - tileBeforeJump.WorldCoordinates).IsEqualTo(Vector2.Zero) && base.worldTicks - lastJumpTick < 2)
 		{
 			Tile tile = base.playState.TileMap[base.WorldCoordinates + FacingDirection];
-			if (tile != null && tile.IsPassableFor(this) && (tile.Type != TileType.Pit || tile.ContainsPlatform()))
+			if (tile != null && tile.IsPassableFor(this) && (tile.Type != TileType.Pit || tile.ContainsPlatform() || PlatformNearby(tile)))
 			{
 				flag = true;
 				SuspendedStartFlying((int)FacingDirection.X, (int)FacingDirection.Y, 0.04f, ignoreObstacles: false, changeCourse: true);
@@ -175,12 +213,31 @@ public class CreepChar : PlayerEntity
 					.Emit(4, 2);
 			}
 		}
-		if (!flag)
-		{
-			return base.TryResistFall();
-		}
-		return true;
+		if (!flag && base.core.OptionsData.CreepGlideMovingPlatforms && !Dead && !base.Falling)
+        {
+            Tile current = base.playState.TileMap[base.WorldCoordinates];
+            if (current != null && current.Type == TileType.Pit && PlatformNearby(current))
+            {
+                flag = true;
+                Console.WriteLine("[GLIDE] hover over pit, platform nearby");
+            }
+        }
+        if (!flag)
+        {
+            return base.TryResistFall();
+        }
+        return true;
 	}
+
+	private bool PlatformNearby(Tile tile)
+    {
+        if (!base.core.OptionsData.CreepGlideMovingPlatforms)
+        {
+            return false;
+        }
+        List<Entity> list = base.playState.EntityManager.GetEntitiesInRadius(tile.WorldCoordinates, 2.5f).FindAll((Entity e) => e is PlatformEntity && !e.IsBroken);
+        return list.Count > 0;
+    }
 
 	public override bool TryResist(InjuryType injuryType, Entity offender = null)
 	{
@@ -188,11 +245,55 @@ public class CreepChar : PlayerEntity
 		{
 			return true;
 		}
+		if (escaping)
+		{
+			return true;
+		}
+		if (base.core.OptionsData.CreepEscapeJump && escapeCharged && CanEscapeFrom(injuryType))
+		{
+			StartEscape();
+			return true;
+		}
 		return base.TryResist(injuryType, offender);
 	}
 
+	public override bool Paralized()
+	{
+		if (!escaping)
+		{
+			return base.Paralized();
+		}
+		return true;
+	}
+
+	private void StartEscape()
+	{
+		escapeCharged = false;
+		escaping = true;
+		escapeTimer = 100;
+		scareDuration = maxScareDuration - 2;
+		DeactivateSpellEffects();
+		SendMessage(new PlaySoundMessage(SoundName.creep_scare));
+		base.playState.Camera.Shake("scaring", 1f, maxScareDuration);
+	}
+
+	private void StartEscapeFlight()
+	{
+		Vector2 vector = base.core.CurrentPlayState.LevelGenerator.NextSafePoint(base.WorldCoordinates);
+		int num = (int)(vector.X - base.WorldCoordinates.X);
+		int num2 = (int)(vector.Y - base.WorldCoordinates.Y);
+		SuspendedStartFlying(num, num2, 0.07f, ignoreObstacles: true);
+		FacingDirection = new Vector2(0f, 1f);
+	}
+
+	private static bool CanEscapeFrom(InjuryType injuryType)
+    {
+        return injuryType != InjuryType.Flame;
+    }
+
 	public override void Draw()
 	{
+		DrawCustomHUD();
 		if (scareDuration > 0)
 		{
 			float num = Component._m(Component._sin((float)scareDuration * (float)Math.PI / (float)maxScareDuration) * 2f, 1f);
@@ -227,6 +328,24 @@ public class CreepChar : PlayerEntity
 		}
 		DrawBurningFlame();
 	}
+
+	private void DrawCustomHUD()
+    {
+        if (!base.core.OptionsData.CreepEscapeJump || base.core.GetCurrentState() is not PlayState || base.playState.PlayerControl == null)
+        {
+            return;
+        }
+        Vector2 center = base.playState.PlayerControl.SkillButtonCenter();
+        bool charged = escapeCharged;
+        float blink = (charged ? (0.55f + 0.45f * Component._sin((float)base.worldTicks * 0.25f)) : 1f);
+        string label = (charged ? "ESCAPE!" : ("scared " + scaredForEscape + "/" + EscapeChargeScares));
+        base.core.Renderer["fg", 1002, false].DrawTextS(label, center.Shift(0f, 26f / Settings.GuiScale), TextProfile.OrangeBoldText.Alter(font: Font.Bold, textAlignment: Alignment2D.Middle, boxAlignment: Alignment2D.Middle, decoration: TextDecoration.Extrude1, color: (charged ? default(Color).FromRgb(14040624) : default(Color).FromRgb(15902269)) * blink, secondColor: default(Color).FromRgb(3939629)));
+        float barW = 34f;
+        float frac = (charged ? 1f : Component._m((float)scaredForEscape / (float)EscapeChargeScares, 1f));
+        Vector2 barPos = center.Shift(-barW / 2f, 36f / Settings.GuiScale);
+        base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X - 1f, barPos.Y - 1f, barW + 2f, 6f), Color.Black * 0.6f * blink);
+        base.core.Renderer["fg", 1002, false].DrawRectangleS(new RectangleF(barPos.X, barPos.Y, barW * frac, 4f), default(Color).FromRgb(15902269) * blink);
+    }
 
 	public override bool SpawnFragments(bool bolt = false)
 	{
