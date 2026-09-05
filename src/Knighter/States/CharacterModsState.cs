@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Knighter.Gameplay;
 using Knighter.Graphics;
 using Knighter.Helpers;
@@ -9,39 +11,51 @@ namespace Knighter.States;
 
 public class CharacterModsState : State
 {
-    private enum Button
+    private class ModDef
     {
-        HeaderGylbard,
-        ToggleThrust,
-        HeaderBragg,
-        ToggleBraggAmmo,
-        ToggleBraggFeathers,
-        ToggleBraggJam,
-        HeaderVampire,
-        TogglePredator,
-        ToggleUnfriendBats,
-        ToggleFastWings,
-        HeaderOther,
-        ToggleHardcoreWebs,
-        ToggleAchievementToasts,
-        Back
+        public string Section;
+        public string Label;
+        public string FieldName;
+        public SoundName ToggleSound;
+        public FieldInfo Field;
+
+        public ModDef(string section, string label, string fieldName, SoundName toggleSound)
+        {
+            Section = section;
+            Label = label;
+            FieldName = fieldName;
+            ToggleSound = toggleSound;
+            Field = typeof(OptionsData).GetField(fieldName);
+        }
+
+        public bool GetValue(OptionsData data) => (bool)Field.GetValue(data);
+        public void SetValue(OptionsData data, bool value) => Field.SetValue(data, value);
     }
 
-    // ---- layout tuned on device via UiLayoutEditor (dump 2025-09-01) ----
-    private const float PanelDY = 0f;        // (hand-edit only)
-    private const float TitleX = 6f;         // rel panel left
-    private const float TitleY = 34f;        // rel panel top
-    private const float SectionTopY = 67f;   // first header top, rel panel top
-    private const float SectionPitch = 17f;  // gap between stacked rows
-    private const float TogglePitch = 16f;   // gap between toggle rows inside a section (raise to 20f if taps double-flip)
-    private const float HeaderDX = 8f;       // header left/right inset
-    private const float ToggleDX = 12f;      // toggle left inset
-    private const float LabelDX = 32f;       // toggle label offset from toggle top-left
-    private const float LabelDY = -7f;
-    private const float BackBtnX = 0f;       // rel panel center
-    private const float BackBtnY = 8f;       // below panel bottom
+    private static readonly ModDef[] AllMods = new ModDef[]
+    {
+        new ModDef("Gylbard", "directional thrust", "DirectionalThrust", SoundName.gylbard_sword),
+        new ModDef("Bragg", "scavenger ammo", "BraggAmmo", SoundName.bragg_gun_cock),
+        new ModDef("Bragg", "feather trail", "BraggFeathers", SoundName.bragg_parrot_voice_1),
+        new ModDef("Bragg", "gun jam", "BraggJam", SoundName.bragg_gun_cock),
+        new ModDef("Vampire", "predator dives", "VampirePredator", SoundName.kazhan_turn),
+        new ModDef("Vampire", "unfriend bats", "UnfriendBats", SoundName.kazhan_flap_1),
+        new ModDef("Vampire", "fast wings x1.5", "FastWings", SoundName.kazhan_flap_2),
+        new ModDef("Creep", "escape jump", "CreepEscapeJump", SoundName.creep_scare),
+        new ModDef("Creep", "moving platform glide", "CreepGlideMovingPlatforms", SoundName.swoosh_1),
+        new ModDef("Other", "hardcore webs", "HardcoreWebs", SoundName.web_1),
+        new ModDef("Other", "achievement toasts", "AchievementToasts", SoundName.coin),
+    };
 
-    private TouchMenu<Button> touchMenu;
+    private class SectionDef
+    {
+        public string Name;
+        public List<ModDef> Mods = new List<ModDef>();
+    }
+
+    private List<SectionDef> sections;
+
+    private TouchMenu<int> touchMenu;
 
     private RectangleF menuRect;
 
@@ -51,104 +65,115 @@ public class CharacterModsState : State
 
     private int openSection;
 
+    private int backButtonId;
+
+    private const float PanelDY = 0f;
+    private const float TitleX = 6f;
+    private const float TitleY = 34f;
+    private const float SectionTopY = 67f;
+    private const float SectionPitch = 17f;
+    private const float TogglePitch = 16f;
+    private const float HeaderDX = 8f;
+    private const float ToggleDX = 12f;
+    private const float LabelDX = 32f;
+    private const float LabelDY = -7f;
+    private const float BackBtnX = 0f;
+    private const float BackBtnY = 8f;
+
     public CharacterModsState()
     {
         base.TransDuration = 30;
         ShowCoins = false;
         IsOverlay = true;
         menuRect = new RectangleF((float)(base.core.Renderer.ScreenWidth - 148) * 0.5f, (float)(base.core.Renderer.ScreenHeight - 233) * 0.5f + PanelDY, 148f, 233f);
-        touchMenu = new TouchMenu<Button>(null, OnButtonRelease, "fg", 10000);
+
+        sections = new List<SectionDef>();
+        foreach (ModDef mod in AllMods)
+        {
+            SectionDef section = sections.Find(s => s.Name == mod.Section);
+            if (section == null)
+            {
+                section = new SectionDef { Name = mod.Section };
+                sections.Add(section);
+            }
+            section.Mods.Add(mod);
+        }
+
+        touchMenu = new TouchMenu<int>(null, OnButtonRelease, "fg", 10000);
         touchMenu.OnToggle = OnToggle;
         float left = menuRect.Left + ToggleDX;
-        touchMenu.SetupButton(Button.HeaderGylbard, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Gylbard +", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupToggle(Button.ToggleThrust, new Vector2(left, menuRect.Top), base.core.OptionsData.DirectionalThrust, 120);
-        touchMenu.SetupButton(Button.HeaderBragg, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Bragg +", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupToggle(Button.ToggleBraggAmmo, new Vector2(left, menuRect.Top), base.core.OptionsData.BraggAmmo, 120);
-        touchMenu.SetupToggle(Button.ToggleBraggFeathers, new Vector2(left, menuRect.Top), base.core.OptionsData.BraggFeathers, 120);
-        touchMenu.SetupToggle(Button.ToggleBraggJam, new Vector2(left, menuRect.Top), base.core.OptionsData.BraggJam, 120);
-        touchMenu.SetupButton(Button.HeaderVampire, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Vampire +", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupToggle(Button.TogglePredator, new Vector2(left, menuRect.Top), base.core.OptionsData.VampirePredator, 120);
-        touchMenu.SetupToggle(Button.ToggleUnfriendBats, new Vector2(left, menuRect.Top), base.core.OptionsData.UnfriendBats, 120);
-        touchMenu.SetupToggle(Button.ToggleFastWings, new Vector2(left, menuRect.Top), base.core.OptionsData.FastWings, 120);
-        touchMenu.SetupButton(Button.HeaderOther, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, "Other +", null, icon: false, iconIsPicture: false);
-        touchMenu.SetupToggle(Button.ToggleHardcoreWebs, new Vector2(left, menuRect.Top), base.core.OptionsData.HardcoreWebs, 120);
-        touchMenu.SetupToggle(Button.ToggleAchievementToasts, new Vector2(left, menuRect.Top), base.core.OptionsData.AchievementToasts, 120);
+
+        int id = 0;
+        for (int s = 0; s < sections.Count; s++)
+        {
+            touchMenu.SetupButton(id, new RectangleF(menuRect.Left + HeaderDX, menuRect.Top, menuRect.Width - HeaderDX * 2f, 18f), null, null, null, stretch: false, SpriteFlip.None, ButtonColor.Orange, sections[s].Name + " +", null, icon: false, iconIsPicture: false);
+            id++;
+            for (int m = 0; m < sections[s].Mods.Count; m++)
+            {
+                touchMenu.SetupToggle(id, new Vector2(left, menuRect.Top), sections[s].Mods[m].GetValue(base.core.OptionsData), 120);
+                id++;
+            }
+        }
+
         if (base.core.OptionsData.DailyRunEnabled)
         {
-            touchMenu[Button.ToggleThrust].Disabled = true;
-            touchMenu[Button.ToggleBraggAmmo].Disabled = true;
-            touchMenu[Button.ToggleBraggFeathers].Disabled = true;
-            touchMenu[Button.ToggleBraggJam].Disabled = true;
-            touchMenu[Button.TogglePredator].Disabled = true;
-            touchMenu[Button.ToggleUnfriendBats].Disabled = true;
-            touchMenu[Button.ToggleFastWings].Disabled = true;
-            touchMenu[Button.ToggleHardcoreWebs].Disabled = true;
-            touchMenu[Button.ToggleAchievementToasts].Disabled = true;
+            for (int i = 0; i < id; i++)
+            {
+                touchMenu[i].Disabled = true;
+            }
         }
-        touchMenu.SetupButton(Button.Back, new RectangleF(menuRect.Center.X + BackBtnX - 35f, menuRect.Bottom + BackBtnY, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
+
+        backButtonId = id;
+        touchMenu.SetupButton(backButtonId, new RectangleF(menuRect.Center.X + BackBtnX - 35f, menuRect.Bottom + BackBtnY, 70f, 30f), _(SpriteName.button_back), _(SpriteName.button_back_down));
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         LayoutMenu();
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
     }
 
-    private void Place(Button button, float y)
+    private int GetHeaderId(int sectionIndex)
     {
-        touchMenu[button].Rectangle.Y = y;
+        int id = 0;
+        for (int s = 0; s < sectionIndex; s++)
+        {
+            id += 1 + sections[s].Mods.Count;
+        }
+        return id;
+    }
+
+    private int GetToggleId(int sectionIndex, int modIndex)
+    {
+        return GetHeaderId(sectionIndex) + 1 + modIndex;
+    }
+
+    private void Place(int id, float y)
+    {
+        touchMenu[id].Rectangle.Y = y;
     }
 
     private void LayoutMenu()
     {
-        touchMenu[Button.HeaderGylbard].Label = "Gylbard " + ((openSection == 0) ? "-" : "+");
-        touchMenu[Button.HeaderBragg].Label = "Bragg " + ((openSection == 1) ? "-" : "+");
-        touchMenu[Button.HeaderVampire].Label = "Vampire " + ((openSection == 2) ? "-" : "+");
-        touchMenu[Button.HeaderOther].Label = "Other " + ((openSection == 3) ? "-" : "+");
-        touchMenu[Button.ToggleThrust].Hidden = openSection != 0;
-        touchMenu[Button.ToggleBraggAmmo].Hidden = openSection != 1;
-        touchMenu[Button.ToggleBraggFeathers].Hidden = openSection != 1;
-        touchMenu[Button.ToggleBraggJam].Hidden = openSection != 1;        
-        touchMenu[Button.TogglePredator].Hidden = openSection != 2;
-        touchMenu[Button.ToggleUnfriendBats].Hidden = openSection != 2;
-        touchMenu[Button.ToggleFastWings].Hidden = openSection != 2;
-        touchMenu[Button.ToggleHardcoreWebs].Hidden = openSection != 3;
-        touchMenu[Button.ToggleAchievementToasts].Hidden = openSection != 3;
+        for (int s = 0; s < sections.Count; s++)
+        {
+            touchMenu[GetHeaderId(s)].Label = sections[s].Name + " " + ((openSection == s) ? "-" : "+");
+            for (int m = 0; m < sections[s].Mods.Count; m++)
+            {
+                touchMenu[GetToggleId(s, m)].Hidden = openSection != s;
+            }
+        }
         float y = menuRect.Top + SectionTopY;
-        Place(Button.HeaderGylbard, y);
-        y += SectionPitch;
-        if (openSection == 0)
+        for (int s = 0; s < sections.Count; s++)
         {
-            Place(Button.ToggleThrust, y);
-            y += TogglePitch;
-        }
-        Place(Button.HeaderBragg, y);
-        y += SectionPitch;
-        if (openSection == 1)
-        {
-            Place(Button.ToggleBraggAmmo, y);
-            y += TogglePitch;
-            Place(Button.ToggleBraggFeathers, y);
-            y += TogglePitch;
-            Place(Button.ToggleBraggJam, y);
-            y += TogglePitch;
-        }
-        Place(Button.HeaderVampire, y);
-        y += SectionPitch;
-        if (openSection == 2)
-        {
-            Place(Button.TogglePredator, y);
-            y += TogglePitch;
-            Place(Button.ToggleUnfriendBats, y);
-            y += TogglePitch;
-            Place(Button.ToggleFastWings, y);
-            y += TogglePitch;
-        }
-        Place(Button.HeaderOther, y);
-        y += SectionPitch;
-        if (openSection == 3)
-        {
-            Place(Button.ToggleHardcoreWebs, y);
-            y += TogglePitch;
-            Place(Button.ToggleAchievementToasts, y);
+            Place(GetHeaderId(s), y);
+            y += SectionPitch;
+            if (openSection == s)
+            {
+                for (int m = 0; m < sections[s].Mods.Count; m++)
+                {
+                    Place(GetToggleId(s, m), y);
+                    y += TogglePitch;
+                }
+            }
         }
     }
 
@@ -172,20 +197,18 @@ public class CharacterModsState : State
     public override void UpdateTransition()
     {
         float y = (float)Tween.BackEaseOut(base.Trans, -base.core.Renderer.ScreenHeight, base.core.Renderer.ScreenHeight, base.TransDuration);
-        touchMenu[Button.HeaderGylbard].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleThrust].Rectangle.Shift(0f, y);
-        touchMenu[Button.HeaderBragg].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleBraggAmmo].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleBraggFeathers].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleBraggJam].Rectangle.Shift(0f, y);
-        touchMenu[Button.HeaderVampire].Rectangle.Shift(0f, y);
-        touchMenu[Button.TogglePredator].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleUnfriendBats].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleFastWings].Rectangle.Shift(0f, y);
-        touchMenu[Button.HeaderOther].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleHardcoreWebs].Rectangle.Shift(0f, y);
-        touchMenu[Button.ToggleAchievementToasts].Rectangle.Shift(0f, y);
-        touchMenu[Button.Back].Rectangle.Shift(0f, y);
+        int id = 0;
+        for (int s = 0; s < sections.Count; s++)
+        {
+            touchMenu[id].Rectangle.Shift(0f, y);
+            id++;
+            for (int m = 0; m < sections[s].Mods.Count; m++)
+            {
+                touchMenu[id].Rectangle.Shift(0f, y);
+                id++;
+            }
+        }
+        touchMenu[backButtonId].Rectangle.Shift(0f, y);
         base.UpdateTransition();
     }
 
@@ -221,116 +244,53 @@ public class CharacterModsState : State
             Font = Font.Thin,
             Scale = 0.75f
         };
-        if (openSection == 0)
+        if (openSection >= 0 && openSection < sections.Count)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("directional thrust", touchMenu[Button.ToggleThrust].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleThrust].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        }
-        if (openSection == 1)
-        {
-            base.core.Renderer["fg", 9000, false].DrawTextS("scavenger ammo", touchMenu[Button.ToggleBraggAmmo].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggAmmo].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("feather trail", touchMenu[Button.ToggleBraggFeathers].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggFeathers].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("gun jam", touchMenu[Button.ToggleBraggJam].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleBraggJam].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        }
-        if (openSection == 2)
-        {
-            base.core.Renderer["fg", 9000, false].DrawTextS("predator dives", touchMenu[Button.TogglePredator].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.TogglePredator].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("unfriend bats", touchMenu[Button.ToggleUnfriendBats].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleUnfriendBats].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("fast wings x1.5", touchMenu[Button.ToggleFastWings].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleFastWings].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-        }
-        if (openSection == 3)
-        {
-            base.core.Renderer["fg", 9000, false].DrawTextS("hardcore webs", touchMenu[Button.ToggleHardcoreWebs].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleHardcoreWebs].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS("achievement toasts", touchMenu[Button.ToggleAchievementToasts].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[Button.ToggleAchievementToasts].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            SectionDef openSec = sections[openSection];
+            for (int m = 0; m < openSec.Mods.Count; m++)
+            {
+                ModDef mod = openSec.Mods[m];
+                base.core.Renderer["fg", 9000, false].DrawTextS(mod.Label, touchMenu[GetToggleId(openSection, m)].Rectangle.TopLeft.Shift(LabelDX, LabelDY), textProfile.Alter(touchMenu[GetToggleId(openSection, m)].ToggleValue ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
+            }
         }
         touchMenu.Draw();
         base.Draw();
     }
 
-    private void OnToggle(Button button, bool newValue)
+    private void OnToggle(int id, bool newValue)
     {
-        if (button == Button.ToggleThrust)
+        for (int s = 0; s < sections.Count; s++)
         {
-            base.core.OptionsData.DirectionalThrust = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.gylbard_sword));
-        }
-        if (button == Button.ToggleBraggAmmo)
-        {
-            base.core.OptionsData.BraggAmmo = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.bragg_gun_cock));
-        }
-        if (button == Button.ToggleBraggFeathers)
-        {
-            base.core.OptionsData.BraggFeathers = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.bragg_parrot_voice_1));
-        }
-        if (button == Button.ToggleBraggJam)
-        {
-            base.core.OptionsData.BraggJam = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.bragg_gun_cock));
-        }
-        if (button == Button.TogglePredator)
-        {
-            base.core.OptionsData.VampirePredator = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.kazhan_turn));
-        }
-        if (button == Button.ToggleUnfriendBats)
-        {
-            base.core.OptionsData.UnfriendBats = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.kazhan_flap_1));
-        }
-        if (button == Button.ToggleFastWings)
-        {
-            base.core.OptionsData.FastWings = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.kazhan_flap_2));
-        }
-        if (button == Button.ToggleHardcoreWebs)
-        {
-            base.core.OptionsData.HardcoreWebs = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.web_1));
-        }
-        if (button == Button.ToggleAchievementToasts)
-        {
-            base.core.OptionsData.AchievementToasts = newValue;
-            base.core.SaveOptions();
-            SendMessage(new PlaySoundMessage(SoundName.coin));
+            for (int m = 0; m < sections[s].Mods.Count; m++)
+            {
+                if (GetToggleId(s, m) == id)
+                {
+                    ModDef mod = sections[s].Mods[m];
+                    mod.SetValue(base.core.OptionsData, newValue);
+                    base.core.SaveOptions();
+                    SendMessage(new PlaySoundMessage(mod.ToggleSound));
+                    return;
+                }
+            }
         }
     }
 
-    private void OnButtonRelease(Button button)
+    private void OnButtonRelease(int id)
     {
-        switch (button)
+        if (id == backButtonId)
         {
-        case Button.HeaderGylbard:
-            openSection = ((openSection == 0) ? (-1) : 0);
-            LayoutMenu();
-            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
-            break;
-        case Button.HeaderBragg:
-            openSection = ((openSection == 1) ? (-1) : 1);
-            LayoutMenu();
-            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
-            break;
-        case Button.HeaderVampire:
-            openSection = ((openSection == 2) ? (-1) : 2);
-            LayoutMenu();
-            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
-            break;
-        case Button.HeaderOther:
-            openSection = ((openSection == 3) ? (-1) : 3);
-            LayoutMenu();
-            SendMessage(new PlaySoundMessage(SoundName.piston_retract));
-            break;
-        case Button.Back:
             OnBackButtonPressed();
-            break;
+            return;
+        }
+        for (int s = 0; s < sections.Count; s++)
+        {
+            if (GetHeaderId(s) == id)
+            {
+                openSection = ((openSection == s) ? (-1) : s);
+                LayoutMenu();
+                SendMessage(new PlaySoundMessage(SoundName.piston_retract));
+                return;
+            }
         }
     }
 
