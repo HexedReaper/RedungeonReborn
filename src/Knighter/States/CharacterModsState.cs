@@ -41,8 +41,6 @@ public class CharacterModsState : State
         new ModDef("Vampire", "predator dives", "VampirePredator", SoundName.kazhan_turn),
         new ModDef("Vampire", "unfriend bats", "UnfriendBats", SoundName.kazhan_flap_1),
         new ModDef("Vampire", "fast wings x1.5", "FastWings", SoundName.kazhan_flap_2),
-        new ModDef("Creep", "escape jump", "CreepEscapeJump", SoundName.creep_scare),
-        new ModDef("Creep", "moving platform glide", "CreepGlideMovingPlatforms", SoundName.swoosh_1),
         new ModDef("Other", "hardcore webs", "HardcoreWebs", SoundName.web_1),
         new ModDef("Other", "achievement toasts", "AchievementToasts", SoundName.coin),
     };
