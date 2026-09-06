@@ -38,12 +38,12 @@ then run the game and do the bug.
 
 ## How to contribute?
 Suggestions and feature requests are welcome! Share your ideas on r/RedungeonGame or open an issue on GitHub.
-Want to make your own mod? Clone this repository and change what you need. Build it:
+Want to make your own mod? Clone this repository and change what you need. Build it and get a signed apk, installed on your device and opened with:
 ```shell
 cd src
 make install && make launch
 ```
-then use the Makefile to get a signed apk, installed on your device and opened. Test a lot, so nothing breaks.
+Test a lot, so nothing breaks.
 
 
 ## How to support?
