@@ -329,6 +329,9 @@ public class ProfileData : Component
 
 	public void SaveIntoStorage()
 	{
+		base.core.Storage.SetInt("coins", Coins);
+        base.core.Storage.SetInt("last-distance", LastDistance);
+        base.core.Storage.SetInt("best-distance", BestDistance);
 		base.core.Storage.SetInt("daily-best-coins", DailyBestCoins);
         base.core.Storage.SetInt("daily-best-seed", DailyBestSeed);
         base.core.Storage.SetInt("daily-best-character", DailyBestCharacter);
