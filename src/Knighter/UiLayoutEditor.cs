@@ -7,6 +7,7 @@ using Knighter.Helpers;
 using Knighter.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input.Touch;
+
 namespace Knighter;
 
 public class UiLayoutEditor : Component
@@ -20,18 +21,26 @@ public class UiLayoutEditor : Component
         public Func<bool> Active;
         public bool XOnly;
         public bool YOnly;
-        
+        public bool IsScale;
+        public bool HasSize;
+        public float W;
+        public float H;
     }
 
     private const int Depth = 10500;
     private const int HoldFrames = 40;
     private const float GrabRadius = 20f;
+    private const float ScaleMin = 0.6f;
+    private const float ScaleMax = 1.3f;
 
     private readonly string tag;
 
     private readonly List<Item> items = new List<Item>();
 
-    private static readonly string[] slots = { "Y+1", "Y-1", "Y+5", "Y-5", "X+1", "X-1", "sel+", "sel-", "DUMP", "EXIT" };
+    private static readonly string[] slots = { "Y+1", "Y-1", "Y+5", "Y-5", "X+1", "X-1", "W+.1", "W-.1", "H+.1", "H-.1", "sel+", "sel-", "DUMP", "EXIT" };
+
+    // host sets this so drag deltas convert screen px -> panel-space px (1/panelScale)
+    public float DragScale = 1f;
 
     public bool Edit { get; private set; }
 
@@ -63,7 +72,12 @@ public class UiLayoutEditor : Component
     // name = const name used in the dump ("Countdown" -> CountdownX / CountdownY)
     // anchor = where the element currently renders on screen (for tap-select + marker), or null
     // active = false while the element is hidden this session (e.g. inactive mod rows), or null
-    public Item Add(string name, float x, float y, Func<Vector2> anchor = null, Func<bool> active = null, bool xOnly = false, bool yOnly = false)
+    // x, y = initial position coordinates
+    // xOnly, yOnly = restricts position editing to a single axis
+    // isScale = indicates whether the values represent scale multipliers rather than screen position
+    // hasSize, w, h = optional explicit width and height dimensions for selection bounds
+    // Returns the newly created and added Item instance
+    public Item Add(string name, float x, float y, Func<Vector2> anchor = null, Func<bool> active = null, bool xOnly = false, bool yOnly = false, bool isScale = false, bool hasSize = false, float w = 0f, float h = 0f)
     {
         Item item = new Item();
         item.Name = name;
@@ -73,6 +87,10 @@ public class UiLayoutEditor : Component
         item.Active = active;
         item.XOnly = xOnly;
         item.YOnly = yOnly;
+        item.IsScale = isScale;
+        item.HasSize = hasSize;
+        item.W = w;
+        item.H = h;
         items.Add(item);
         return item;
     }
@@ -189,8 +207,15 @@ public class UiLayoutEditor : Component
                     }
                     if (tool < 0 && Sel >= 0)
                     {
-                        items[Sel].X = (float)Math.Round(origX + d.X);
-                        items[Sel].Y = (float)Math.Round(origY + d.Y);
+                        if (items[Sel].IsScale)
+                        {
+                            items[Sel].Y = ClampScale(origY + d.Y * 0.005f);
+                        }
+                        else
+                        {
+                            items[Sel].X = (float)Math.Round(origX + d.X * DragScale);
+                            items[Sel].Y = (float)Math.Round(origY + d.Y * DragScale);
+                        }
                     }
                 }
                 else if (tl.State == TouchLocationState.Released)
@@ -274,15 +299,27 @@ public class UiLayoutEditor : Component
             Nudge(-1f, 0f);
             break;
         case 6:
-            CycleSel(1);
+            Adjust(true, 0.1f);
             break;
         case 7:
-            CycleSel(-1);
+            Adjust(true, -0.1f);
             break;
         case 8:
-            Dump();
+            Adjust(false, 0.1f);
             break;
         case 9:
+            Adjust(false, -0.1f);
+            break;
+        case 10:
+            CycleSel(1);
+            break;
+        case 11:
+            CycleSel(-1);
+            break;
+        case 12:
+            Dump();
+            break;
+        case 13:
             SetEdit(false);
             break;
         }
@@ -294,8 +331,46 @@ public class UiLayoutEditor : Component
         {
             return;
         }
-        items[Sel].X += dx;
-        items[Sel].Y += dy;
+        Item it = items[Sel];
+        if (it.IsScale)
+        {
+            if (dy != 0f)
+            {
+                it.Y = ClampScale(it.Y + dy * 0.01f);
+            }
+            return;
+        }
+        it.X += dx;
+        it.Y += dy;
+    }
+
+    private void Adjust(bool width, float amount)
+    {
+        if (Sel < 0)
+        {
+            return;
+        }
+        Item it = items[Sel];
+        if (it.IsScale)
+        {
+            it.Y = ClampScale(it.Y + amount);
+        }
+        else if (it.HasSize)
+        {
+            if (width)
+            {
+                it.W = Math.Max(8f, it.W + amount * 20f);
+            }
+            else
+            {
+                it.H = Math.Max(8f, it.H + amount * 20f);
+            }
+        }
+    }
+
+    private static float ClampScale(float v)
+    {
+        return Math.Max(ScaleMin, Math.Min(ScaleMax, v));
     }
 
     private void Dump()
@@ -304,18 +379,28 @@ public class UiLayoutEditor : Component
         sb.Append("// ---- UiLayoutEditor dump: ").Append(tag).Append(" ----\n");
         for (int i = 0; i < items.Count; i++)
         {
-            if (items[i].XOnly)
+            Item it = items[i];
+            if (it.IsScale)
             {
-                sb.Append("private const float ").Append(items[i].Name).Append(" = ").Append(Fmt(items[i].X)).Append('\n');
+                sb.Append("private const float ").Append(it.Name).Append(" = ").Append(FmtScale(it.Y)).Append('\n');
             }
-            else if (items[i].YOnly)
+            else if (it.XOnly)
             {
-                sb.Append("private const float ").Append(items[i].Name).Append(" = ").Append(Fmt(items[i].Y)).Append('\n');
+                sb.Append("private const float ").Append(it.Name).Append(" = ").Append(Fmt(it.X)).Append('\n');
+            }
+            else if (it.YOnly)
+            {
+                sb.Append("private const float ").Append(it.Name).Append(" = ").Append(Fmt(it.Y)).Append('\n');
             }
             else
             {
-                sb.Append("private const float ").Append(items[i].Name).Append("X = ").Append(Fmt(items[i].X)).Append('\n');
-                sb.Append("private const float ").Append(items[i].Name).Append("Y = ").Append(Fmt(items[i].Y)).Append('\n');
+                sb.Append("private const float ").Append(it.Name).Append("X = ").Append(Fmt(it.X)).Append('\n');
+                sb.Append("private const float ").Append(it.Name).Append("Y = ").Append(Fmt(it.Y)).Append('\n');
+            }
+            if (it.HasSize)
+            {
+                sb.Append("private const float ").Append(it.Name).Append("W = ").Append(Fmt(it.W)).Append('\n');
+                sb.Append("private const float ").Append(it.Name).Append("H = ").Append(Fmt(it.H)).Append('\n');
             }
         }
         Console.WriteLine(sb.ToString());
@@ -325,6 +410,11 @@ public class UiLayoutEditor : Component
     private static string Fmt(float v)
     {
         return Math.Round(v).ToString("0", CultureInfo.InvariantCulture) + "f;";
+    }
+
+    private static string FmtScale(float v)
+    {
+        return v.ToString("0.00", CultureInfo.InvariantCulture) + "f;";
     }
 
     private TextProfile SlotProfile()
@@ -367,7 +457,24 @@ public class UiLayoutEditor : Component
             base.core.Renderer["fg", Depth, false].DrawTextS(slots[i], new Vector2(r.Center.X, r.Center.Y), SlotProfile().Alter(down ? TextProfile.OrangeMiddle : default(Color).FromRgb(16777215)));
         }
         base.core.Renderer["fg", Depth, false].DrawTextS("LAYOUT EDIT: " + tag, new Vector2(sw, 12f), HeadProfile(0.7f).Alter(TextProfile.OrangeMiddle));
-        string info = ((Sel < 0) ? "tap a row on the menu" : ("sel: " + items[Sel].Name + "  X=" + items[Sel].X + " Y=" + items[Sel].Y));
+        string info;
+        if (Sel < 0)
+        {
+            info = "tap a row on the menu";
+        }
+        else
+        {
+            Item it = items[Sel];
+            info = "sel: " + it.Name + "  X=" + Fmt(it.X) + " Y=" + Fmt(it.Y);
+            if (it.IsScale)
+            {
+                info += " scale=" + FmtScale(it.Y);
+            }
+            if (it.HasSize)
+            {
+                info += " W=" + Fmt(it.W) + " H=" + Fmt(it.H);
+            }
+        }
         base.core.Renderer["fg", Depth, false].DrawTextS(info, new Vector2(sw, 26f), HeadProfile(0.55f).Alter(default(Color).FromRgb(11216961)));
         base.core.Renderer["fg", Depth, false].DrawTextS("drag to move - DUMP prints consts - EXIT done", new Vector2(sw, 38f), HeadProfile(0.45f).Alter(default(Color).FromRgb(9462096)));
         if (Sel >= 0 && items[Sel].Anchor != null && Component._sin((float)base.ticks * 0.25f) > -0.3f)
