@@ -37,19 +37,13 @@ public class DailyPrepareState : State
     private const float ModsX = -1f;
     private const float ModsY = 139f;
     private const float ModsPitch = 13f;
-    private const float Mods0Y = 139f;
-    private const float Mods1X = 0f;
-    private const float Mods1Y = 174f;
-    private const float Mods2X = 0f;
-    private const float Mods2Y = 186f;
-    private const float Mods3X = 0f;
-    private const float Mods3Y = 198f;
     private const float CounterX = -40f;
     private const float CounterY = 199f;
     private const float TodayX = -36f;
     private const float TodayY = 212f;
     private const float HeartX = -1f;      // rel panel center
     private const float HeartY = 214f;
+    private const float StatsY = 225f;
     private const float GhostX = 119f;     // rel panel left
     private const float GhostY = 189f;
     private const float StartBtnX = 2f;
@@ -161,6 +155,34 @@ public class DailyPrepareState : State
         };
     }
 
+    private TextProfile LeftProfile(float scale)
+    {
+        return new TextProfile
+        {
+            Width = 64,
+            Height = 13,
+            BoxAlignment = Alignment2D.Left,
+            TextAlignment = Alignment2D.Left,
+            Decoration = TextDecoration.None,
+            Font = Font.Thin,
+            Scale = scale
+        };
+    }
+
+    private TextProfile RightProfile(float scale)
+    {
+        return new TextProfile
+        {
+            Width = 64,
+            Height = 13,
+            BoxAlignment = Alignment2D.Right,
+            TextAlignment = Alignment2D.Right,
+            Decoration = TextDecoration.None,
+            Font = Font.Thin,
+            Scale = scale
+        };
+    }
+
     private Vector2 SwingPoint(Vector2 p, float swingSin, float swingCos)
     {
         float dx = p.X - menuRect.Center.X;
@@ -224,6 +246,13 @@ public class DailyPrepareState : State
         string todayText = (heartLit ? "played today!" : "not played yet");
         base.core.Renderer["fg", 9000, false].DrawTextS(todayText, new Vector2(cx + TodayX, topS + TodayY), CenteredProfile(0.75f).Alter(heartLit ? TextProfile.OrangeMiddle : default(Color).FromRgb(6910328)));
         base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(cx + HeartX, topS + HeartY), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse, 0f, SpriteFlip.None, SpriteOrigin.Center);
+        string streakDate = base.core.ProfileData.DailyStreakDate;
+        int streakShown = ((streakDate == DailyRun.TodayKey() || streakDate == DailyRun.TodayKeyMinus(1)) ? base.core.ProfileData.DailyStreak : 0);
+        base.core.Renderer["fg", 9000, false].DrawTextS("streak: " + streakShown, new Vector2(menuRect.Left + 10f, topS + StatsY), LeftProfile(0.7f).Alter((streakShown > 0) ? TextProfile.OrangeMiddle : default(Color).FromRgb(9462096)));
+        if (heartLit && base.core.ProfileData.DailyBestDistance > 0)
+        {
+            base.core.Renderer["fg", 9000, false].DrawTextS("best: " + base.core.ProfileData.DailyBestDistance + "m", new Vector2(menuRect.Right - 10f, topS + StatsY), RightProfile(0.7f).Alter(TextProfile.OrangeMiddle));
+        }
         if (base.core.ProfileData.DailyBestDistance > 0 && base.core.ProfileData.DailyBestDate != DailyRun.TodayKey())
         {
             float bob = Component._sin((float)base.ticks * 0.05f) * 2f;
