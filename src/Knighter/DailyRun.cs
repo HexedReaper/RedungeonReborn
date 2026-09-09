@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Collections.Generic;
 using Knighter.Entities;
 using Knighter.Helpers;
 
@@ -29,24 +30,11 @@ public static class DailyRun
 
     private static int attemptsToday;
 
-    public static int AttemptsToday
-    {
-        get
-        {
-            string key = TodayKey();
-            if (attemptsDayKey != key)
-            {
-                attemptsDayKey = key;
-                attemptsToday = 0;
-            }
-            return attemptsToday;
-        }
-    }
+    public static int AttemptsToday => Core.Instance.ProfileData.DailyAttemptsToday();
 
     public static void CountAttempt()
     {
-        _ = AttemptsToday;
-        attemptsToday++;
+        Core.Instance.ProfileData.CountDailyAttempt();
     }
 
     public static void Begin(int s, Core core)
@@ -54,14 +42,7 @@ public static class DailyRun
         Active = true;
         seed = s;
         Character daily = DailyCharacter();
-        if (!snapValid)
-        {
-            snapValid = true;
-            snapChar = daily;
-            snapUnlocked = core.ProfileData.Characters[daily].Unlocked;
-            snapLevel = core.ProfileData.Characters[daily].Level;
-            snapSelected = core.ProfileData.Character;
-        }
+        core.ProfileData.BeginDailyCharacterOverride(daily);
         core.ProfileData.Character = daily;
         core.ProfileData.Characters[daily].Unlocked = true;
         core.ProfileData.Characters[daily].Level = CharDescription.Get[daily].Levels.Count;
@@ -70,14 +51,7 @@ public static class DailyRun
     public static void End()
     {
         Active = false;
-        if (snapValid)
-        {
-            snapValid = false;
-            ProfileData profile = Core.Instance.ProfileData;
-            profile.Character = snapSelected;
-            profile.Characters[snapChar].Unlocked = snapUnlocked;
-            profile.Characters[snapChar].Level = snapLevel;
-        }
+        Core.Instance.ProfileData.EndDailyCharacterOverride();
     }
 
     public static string TodayKey()
@@ -131,53 +105,52 @@ public static class DailyRun
         return h;
     }
 
-    public static string ModsString(OptionsData o, Character character)
+    public static List<string> CollectMods(OptionsData o, Character character)
     {
-        string text = "";
-        int n = 0;
+        List<string> list = new List<string>();
         if (o.HardcoreWebs)
         {
-            text = ((n > 0) ? (text + " · ") : text) + "hardcore webs";
-            n++;
+            list.Add("hardcore webs");
         }
         if (character == Character.Knight && o.DirectionalThrust)
         {
-            text = ((n > 0) ? (text + " · ") : text) + "dir thrust";
-            n++;
+            list.Add("dir thrust");
         }
         if (character == Character.Bragg && o.BraggAmmo)
         {
-            text = ((n > 0) ? (text + " · ") : text) + "scavenger ammo";
-            n++;
+            list.Add("scavenger ammo");
         }
-        if (character == Character.Bragg && o.BraggFeathers) {
-            text = ((n > 0) ? (text + " · ") : text) + "feathers"; 
-            n++;
+        if (character == Character.Bragg && o.BraggFeathers)
+        {
+            list.Add("feathers");
         }
-        if (character == Character.Bragg && o.BraggJam) { 
-            text = ((n > 0) ? (text + " · ") : text) + "gun jam"; 
-            n++; 
+        if (character == Character.Bragg && o.BraggJam)
+        {
+            list.Add("gun jam");
         }
         if (character == Character.Vampire && o.VampirePredator)
         {
-            text = ((n > 0) ? (text + " · ") : text) + "predator";
-            n++;
+            list.Add("predator");
         }
         if (character == Character.Vampire && o.UnfriendBats)
         {
-            text = ((n > 0) ? (text + " · ") : text) + "unfriend bats";
-            n++;
+            list.Add("unfriend bats");
         }
         if (character == Character.Vampire && o.FastWings)
         {
-            text = ((n > 0) ? (text + " · ") : text) + "fast wings";
-            n++;
+            list.Add("fast wings");
         }
-        if (n == 0)
+        return list;
+    }
+
+    public static string ModsString(OptionsData o, Character character)
+    {
+        List<string> list = CollectMods(o, character);
+        if (list.Count == 0)
         {
             return "vanilla";
         }
-        return text;
+        return string.Join(" · ", list);
     }
 
     public static int Next(int channel, int index, int from, int to)
