@@ -45,7 +45,10 @@ public class DailyPrepareState : State
     private const float TodayY = 212f;
     private const float HeartX = -1f;      // rel panel center
     private const float HeartY = 214f;
-    private const float StatsY = 225f;
+    private const float StatsX = 10f;   // left text inset from panel left
+    private const float StatsY = 225f;  // stats row Y
+    private const float StatsW = 10f;   // right text inset from panel right
+    private const float StatsH = 20f;   // stats text size (20 = 0.7 scale)
     private const float GhostX = 119f;     // rel panel left
     private const float GhostY = 189f;
     private const float StartBtnX = 2f;
@@ -107,7 +110,10 @@ public class DailyPrepareState : State
     private float todayY = TodayY;
     private float heartX = HeartX;
     private float heartY = HeartY;
+    private float statsX = StatsX;
     private float statsY = StatsY;
+    private float statsW = StatsW;
+    private float statsH = StatsH;
     private float ghostX = GhostX;
     private float ghostY = GhostY;
     private float startBtnX = StartBtnX;
@@ -223,7 +229,7 @@ public class DailyPrepareState : State
         edCounter = edLayout.Add("Counter", counterX, counterY, () => new Vector2(menuRect.Center.X + S(counterX), menuRect.Top + S(counterY)));
         edToday = edLayout.Add("Today", todayX, todayY, () => new Vector2(menuRect.Center.X + S(todayX), menuRect.Top + S(todayY)));
         edHeart = edLayout.Add("Heart", heartX, heartY, () => new Vector2(menuRect.Center.X + S(heartX), menuRect.Top + S(heartY)));
-        edStats = edLayout.Add("Stats", 0f, statsY, () => new Vector2(menuRect.Left + S(10f), menuRect.Top + S(statsY)), null, false, true);
+        edStats = edLayout.Add("Stats", statsX, statsY, () => new Vector2(menuRect.Left + S(statsX), menuRect.Top + S(statsY)), null, false, false, false, true, statsW, statsH);
         edGhost = edLayout.Add("Ghost", ghostX, ghostY, () => new Vector2(menuRect.Left + S(ghostX), menuRect.Top + S(ghostY)));
         edStart = edLayout.Add("StartBtn", startBtnX, startBtnY, () => touchMenu[Button.Start].Rectangle.Center, null, false, false, false, true, startBtnW, startBtnH);
         edShare = edLayout.Add("ShareBtn", shareBtnX, shareBtnY, () => touchMenu[Button.Share].Rectangle.Center, null, false, false, false, true, shareBtnW, shareBtnH);
@@ -257,7 +263,10 @@ public class DailyPrepareState : State
         todayY = edToday.Y;
         heartX = edHeart.X;
         heartY = edHeart.Y;
+        statsX = edStats.X;
         statsY = edStats.Y;
+        statsW = edStats.W;
+        statsH = edStats.H;
         ghostX = edGhost.X;
         ghostY = edGhost.Y;
         startBtnX = edStart.X;
@@ -426,12 +435,14 @@ public class DailyPrepareState : State
         base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(cx + S(heartX), topT + S(heartY)), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse * panelScale, 0f, SpriteFlip.None, SpriteOrigin.Center);
         string streakDate = base.core.ProfileData.DailyStreakDate;
         int streakShown = ((streakDate == DailyRun.TodayKey() || streakDate == DailyRun.TodayKeyMinus(1)) ? base.core.ProfileData.DailyStreak : 0);
-        base.core.Renderer["fg", 9000, false].DrawTextS("streak: " + streakShown, new Vector2(menuRect.Left + S(10f), topT + S(statsY)), LeftProfile(0.7f).Alter((streakShown > 0) ? TextProfile.OrangeMiddle : default(Color).FromRgb(9462096)));
+        float statsScale = statsH * 0.035f;
+        base.core.Renderer["fg", 9000, false].DrawTextS("streak: " + streakShown, new Vector2(menuRect.Left + S(statsX), topT + S(statsY)), LeftProfile(statsScale).Alter((streakShown > 0) ? TextProfile.OrangeMiddle : default(Color).FromRgb(9462096)));
         if (heartLit && base.core.ProfileData.DailyBestDistance > 0)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("best: " + base.core.ProfileData.DailyBestDistance + "m", new Vector2(menuRect.Right - S(10f), topT + S(statsY)), RightProfile(0.7f).Alter(TextProfile.OrangeMiddle));
+            base.core.Renderer["fg", 9000, false].DrawTextS("best: " + base.core.ProfileData.DailyBestDistance + "m", new Vector2(menuRect.Right - S(statsW), topT + S(statsY)), RightProfile(statsScale).Alter(TextProfile.OrangeMiddle));
         }
-        if (base.core.ProfileData.DailyBestDistance > 0 && base.core.ProfileData.DailyBestDate != DailyRun.TodayKey())
+        bool editMode = (EditorEnabled && edLayout != null && edLayout.Edit);
+        if (base.core.ProfileData.DailyBestDistance > 0 && (editMode || base.core.ProfileData.DailyBestDate != DailyRun.TodayKey()))
         {
             float bob = Component._sin((float)base.ticks * 0.05f) * 2f;
             float gx = menuRect.Left + S(ghostX);

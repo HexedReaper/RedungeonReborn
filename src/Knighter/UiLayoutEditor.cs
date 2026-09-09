@@ -25,6 +25,7 @@ public class UiLayoutEditor : Component
         public bool HasSize;
         public float W;
         public float H;
+        public bool Locked;
     }
 
     private const int Depth = 10500;
@@ -37,7 +38,7 @@ public class UiLayoutEditor : Component
 
     private readonly List<Item> items = new List<Item>();
 
-    private static readonly string[] slots = { "Y+1", "Y-1", "Y+5", "Y-5", "X+1", "X-1", "W+.1", "W-.1", "H+.1", "H-.1", "sel+", "sel-", "DUMP", "EXIT" };
+    private static readonly string[] slots = { "Y+1", "Y-1", "Y+5", "Y-5", "X+1", "X-1", "W+.1", "W-.1", "H+.1", "H-.1", "sel+", "sel-", "LOCK", "DESEL", "DUMP", "EXIT" };
 
     // host sets this so drag deltas convert screen px -> panel-space px (1/panelScale)
     public float DragScale = 1f;
@@ -156,7 +157,9 @@ public class UiLayoutEditor : Component
 
     private RectangleF SlotRect(int i)
     {
-        return new RectangleF(base.core.Renderer.ScreenWidth - 29f, 6f + (float)i * 17f, 27f, 15f);
+        int col = i / 8;
+        int row = i % 8;
+        return new RectangleF(base.core.Renderer.ScreenWidth - 58f + (float)col * 30f, 6f + (float)row * 18f, 27f, 15f);
     }
 
     private int SlotAt(Vector2 p)
@@ -185,7 +188,7 @@ public class UiLayoutEditor : Component
                     downSlot = tool;
                     touch = tl.Id;
                 }
-                else
+                else if (Sel < 0)
                 {
                     SelectAt(tl.Position);
                     if (Sel >= 0)
@@ -194,6 +197,12 @@ public class UiLayoutEditor : Component
                         origX = items[Sel].X;
                         origY = items[Sel].Y;
                     }
+                }
+                else if (!items[Sel].Locked)
+                {
+                    touch = tl.Id;
+                    origX = items[Sel].X;
+                    origY = items[Sel].Y;
                 }
             }
             else if (tl.Id == touch)
@@ -205,7 +214,7 @@ public class UiLayoutEditor : Component
                     {
                         moved = true;
                     }
-                    if (tool < 0 && Sel >= 0)
+                    if (tool < 0 && Sel >= 0 && !items[Sel].Locked)
                     {
                         if (items[Sel].IsScale)
                         {
@@ -317,9 +326,20 @@ public class UiLayoutEditor : Component
             CycleSel(-1);
             break;
         case 12:
-            Dump();
+            if (Sel >= 0)
+            {
+                items[Sel].Locked = !items[Sel].Locked;
+                SendMessage(new PlaySoundMessage(items[Sel].Locked ? SoundName.knight_step_2 : SoundName.unlock_lock));
+            }
             break;
         case 13:
+            Sel = -1;
+            SendMessage(new PlaySoundMessage(SoundName.paper_touch));
+            break;
+        case 14:
+            Dump();
+            break;
+        case 15:
             SetEdit(false);
             break;
         }
@@ -327,7 +347,7 @@ public class UiLayoutEditor : Component
 
     private void Nudge(float dx, float dy)
     {
-        if (Sel < 0)
+        if (Sel < 0 || items[Sel].Locked)
         {
             return;
         }
@@ -346,7 +366,7 @@ public class UiLayoutEditor : Component
 
     private void Adjust(bool width, float amount)
     {
-        if (Sel < 0)
+        if (Sel < 0 || items[Sel].Locked)
         {
             return;
         }
@@ -365,6 +385,10 @@ public class UiLayoutEditor : Component
             {
                 it.H = Math.Max(8f, it.H + amount * 20f);
             }
+        }
+        else if (it.YOnly)
+        {
+            it.Y += amount * 20f;
         }
     }
 
@@ -449,23 +473,24 @@ public class UiLayoutEditor : Component
     {
         Sprite btn = _(SpriteName.button);
         float sw = base.core.Renderer.ScreenWidth * 0.5f;
+        Vector2 fit = new Vector2(25f / (float)btn.Width, 13f / (float)btn.Height);
         for (int i = 0; i < slots.Length; i++)
         {
             RectangleF r = SlotRect(i);
             bool down = downSlot == i;
-            base.core.Renderer["fg", Depth, false].DrawSpriteS(btn, new Vector2(r.Left, r.Top), (down ? default(Color).FromRgb(11216961) : Color.White) * 0.9f);
+            base.core.Renderer["fg", Depth, false].DrawSpriteS(btn, new Vector2(r.Left + 1f, r.Top + 1f), (down ? default(Color).FromRgb(11216961) : Color.White) * 0.9f, fit);
             base.core.Renderer["fg", Depth, false].DrawTextS(slots[i], new Vector2(r.Center.X, r.Center.Y), SlotProfile().Alter(down ? TextProfile.OrangeMiddle : default(Color).FromRgb(16777215)));
         }
         base.core.Renderer["fg", Depth, false].DrawTextS("LAYOUT EDIT: " + tag, new Vector2(sw, 12f), HeadProfile(0.7f).Alter(TextProfile.OrangeMiddle));
         string info;
         if (Sel < 0)
         {
-            info = "tap a row on the menu";
+            info = "tap a row to select it";
         }
         else
         {
             Item it = items[Sel];
-            info = "sel: " + it.Name + "  X=" + Fmt(it.X) + " Y=" + Fmt(it.Y);
+            info = "sel: " + it.Name + "  X=" + Fmt(it.X) + " Y=" + Fmt(it.Y) + (it.Locked ? "  [LOCKED]" : "");
             if (it.IsScale)
             {
                 info += " scale=" + FmtScale(it.Y);
@@ -476,8 +501,8 @@ public class UiLayoutEditor : Component
             }
         }
         base.core.Renderer["fg", Depth, false].DrawTextS(info, new Vector2(sw, 26f), HeadProfile(0.55f).Alter(default(Color).FromRgb(11216961)));
-        base.core.Renderer["fg", Depth, false].DrawTextS("drag to move - DUMP prints consts - EXIT done", new Vector2(sw, 38f), HeadProfile(0.45f).Alter(default(Color).FromRgb(9462096)));
-        if (Sel >= 0 && items[Sel].Anchor != null && Component._sin((float)base.ticks * 0.25f) > -0.3f)
+        base.core.Renderer["fg", Depth, false].DrawTextS((Sel < 0) ? "tap a row - DUMP prints consts - EXIT done" : "DESEL to pick another - LOCK stops accidents", new Vector2(sw, 38f), HeadProfile(0.45f).Alter(default(Color).FromRgb(9462096)));
+        if (Sel >= 0 && items[Sel].Anchor != null && !items[Sel].Locked && Component._sin((float)base.ticks * 0.25f) > -0.3f)
         {
             base.core.Renderer["fg", Depth, false].DrawTextS("+", items[Sel].Anchor(), HeadProfile(0.7f).Alter(TextProfile.OrangeMiddle));
         }
