@@ -93,6 +93,9 @@ public class ProfileData : Component
 
     public int DailyAttempts;
 
+	public int DailyStreak;
+	public string DailyStreakDate;
+
 	public Language Locale;
 
 	public bool LanguageSelectorPending;
@@ -143,6 +146,8 @@ public class ProfileData : Component
         DailySnapSelected = 0;
         DailyAttemptsDate = string.Empty;
         DailyAttempts = 0;
+		DailyStreak = 0;
+		DailyStreakDate = string.Empty;
 		Locale = Language.en_US;
 		LanguageSelectorPending = true;
 	}
@@ -310,6 +315,8 @@ public class ProfileData : Component
         base.core.Storage.TryGetInt("daily-snap-selected", ref DailySnapSelected);
         base.core.Storage.TryGetString("daily-attempts-date", ref DailyAttemptsDate);
         base.core.Storage.TryGetInt("daily-attempts", ref DailyAttempts);
+		base.core.Storage.TryGetInt("daily-streak", ref DailyStreak);
+        base.core.Storage.TryGetString("daily-streak-date", ref DailyStreakDate);
 		string result6 = string.Empty;
 		base.core.Storage.TryGetString("locale", ref result6);
 		if (result6.Equals(string.Empty))
@@ -386,6 +393,8 @@ public class ProfileData : Component
         base.core.Storage.SetInt("daily-snap-selected", DailySnapSelected);
         base.core.Storage.SetString("daily-attempts-date", DailyAttemptsDate);
         base.core.Storage.SetInt("daily-attempts", DailyAttempts);
+		base.core.Storage.SetInt("daily-streak", DailyStreak);
+        base.core.Storage.SetString("daily-streak-date", DailyStreakDate);
 		base.core.Storage.SetString("locale", Locale.ToString());
 		base.core.Storage.SetBool("language-selector-pending", LanguageSelectorPending);
 		base.core.Storage.Save();
@@ -433,5 +442,16 @@ public class ProfileData : Component
     {
         DailyAttemptsToday();
         DailyAttempts++;
+    }
+
+	public void RegisterDailyPlay()
+    {
+        string today = DailyRun.TodayKey();
+        if (DailyStreakDate == today)
+        {
+            return;
+        }
+        DailyStreak = ((DailyStreakDate == DailyRun.TodayKeyMinus(1)) ? (DailyStreak + 1) : 1);
+        DailyStreakDate = today;
     }
 }
