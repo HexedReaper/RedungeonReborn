@@ -34,7 +34,9 @@ public class DailyPrepareState : State
     private const float CodeY = 114f;
     private const float ModsLabelX = -1f;
     private const float ModsLabelY = 128f;
-    private const float Mods0X = -1f;
+    private const float ModsX = -1f;
+    private const float ModsY = 139f;
+    private const float ModsPitch = 13f;
     private const float Mods0Y = 139f;
     private const float Mods1X = 0f;
     private const float Mods1Y = 174f;
@@ -88,7 +90,7 @@ public class DailyPrepareState : State
         dailyChar = DailyRun.DailyCharacter();
         desc = CharDescription.Get[dailyChar];
         sessionSeed = DailyRun.SessionSeed(base.core.OptionsData);
-        mods = CollectMods(base.core.OptionsData, dailyChar);
+        mods = DailyRun.CollectMods(base.core.OptionsData, dailyChar);
         string[] seq = desc.AnimSequence.Split('|');
         charAnim = new Animation(desc.AnimSpeed);
         charAnim.Add("live", seq[0], seq[1]);
@@ -103,28 +105,6 @@ public class DailyPrepareState : State
         block = _(SpriteName.options_block);
         chain = _(SpriteName.gui_chain);
         SendMessage(new PlaySoundMessage(SoundName.trans_2));
-    }
-
-    private static float ModsX(int i)
-    {
-        switch (i)
-        {
-        case 0: return Mods0X;
-        case 1: return Mods1X;
-        case 2: return Mods2X;
-        default: return Mods3X;
-        }
-    }
-
-    private static float ModsY(int i)
-    {
-        switch (i)
-        {
-        case 0: return Mods0Y;
-        case 1: return Mods1Y;
-        case 2: return Mods2Y;
-        default: return Mods3Y;
-        }
     }
 
     public override void Update()
@@ -181,36 +161,6 @@ public class DailyPrepareState : State
         };
     }
 
-    private static List<string> CollectMods(OptionsData o, Character c)
-    {
-        List<string> list = new List<string>();
-        if (o.HardcoreWebs)
-        {
-            list.Add("hardcore webs");
-        }
-        if (c == Character.Knight && o.DirectionalThrust)
-        {
-            list.Add("directional thrust");
-        }
-        if (c == Character.Bragg && o.BraggAmmo)
-        {
-            list.Add("scavenger ammo");
-        }
-        if (c == Character.Vampire && o.VampirePredator)
-        {
-            list.Add("predator dives");
-        }
-        if (c == Character.Vampire && o.UnfriendBats)
-        {
-            list.Add("unfriend bats");
-        }
-        if (c == Character.Vampire && o.FastWings)
-        {
-            list.Add("fast wings");
-        }
-        return list;
-    }
-
     private Vector2 SwingPoint(Vector2 p, float swingSin, float swingCos)
     {
         float dx = p.X - menuRect.Center.X;
@@ -262,11 +212,11 @@ public class DailyPrepareState : State
         base.core.Renderer["fg", 9000, false].DrawTextS("mods (" + mods.Count + ")", new Vector2(cx + ModsLabelX, topS + ModsLabelY), CenteredProfile(0.7f).Alter(default(Color).FromRgb(9462096)));
         if (mods.Count == 0)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("none (vanilla)", new Vector2(cx + Mods0X, topS + Mods0Y), CenteredProfile(0.7f).Alter(default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS("none (vanilla)", new Vector2(cx + ModsX, topS + ModsY), CenteredProfile(0.7f).Alter(default(Color).FromRgb(6910328)));
         }
         for (int j = 0; j < mods.Count; j++)
         {
-            base.core.Renderer["fg", 9000, false].DrawTextS("- " + mods[j], new Vector2(cx + ModsX(j), topS + ModsY(j)), CenteredProfile(0.7f).Alter(TextProfile.OrangeMiddle));
+            base.core.Renderer["fg", 9000, false].DrawTextS("- " + mods[j], new Vector2(cx + ModsX, topS + ModsY + ModsPitch * (float)j), CenteredProfile(0.7f).Alter(TextProfile.OrangeMiddle));
         }
         bool heartLit = (base.core.ProfileData.DailyBestDate == DailyRun.TodayKey() && base.core.ProfileData.DailyBestDistance >= 20);
         float heartPulse = (heartLit ? (1f + 0.12f * Component._sin((float)base.ticks * 0.1f)) : 1f);
