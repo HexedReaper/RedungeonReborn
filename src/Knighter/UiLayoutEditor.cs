@@ -26,6 +26,8 @@ public class UiLayoutEditor : Component
         public float W;
         public float H;
         public bool Locked;
+        public bool HasScale;
+        public float TextScale = 1f;
     }
 
     private const int Depth = 10500;
@@ -386,6 +388,10 @@ public class UiLayoutEditor : Component
                 it.H = Math.Max(8f, it.H + amount * 20f);
             }
         }
+        else if (it.HasScale)
+        {
+            it.TextScale = Math.Max(0.3f, Math.Min(2f, it.TextScale + amount * 0.5f));
+        }
         else if (it.YOnly)
         {
             it.Y += amount * 20f;
@@ -425,6 +431,10 @@ public class UiLayoutEditor : Component
             {
                 sb.Append("private const float ").Append(it.Name).Append("W = ").Append(Fmt(it.W)).Append('\n');
                 sb.Append("private const float ").Append(it.Name).Append("H = ").Append(Fmt(it.H)).Append('\n');
+            }
+            if (it.HasScale)
+            {
+                sb.Append("private const float ").Append(it.Name).Append("Scale = ").Append(FmtScale(it.TextScale)).Append('\n');
             }
         }
         Console.WriteLine(sb.ToString());
@@ -498,6 +508,10 @@ public class UiLayoutEditor : Component
             if (it.HasSize)
             {
                 info += " W=" + Fmt(it.W) + " H=" + Fmt(it.H);
+            }
+            if (it.HasScale)
+            {
+                info += " text=" + FmtScale(it.TextScale);
             }
         }
         base.core.Renderer["fg", Depth, false].DrawTextS(info, new Vector2(sw, 26f), HeadProfile(0.55f).Alter(default(Color).FromRgb(11216961)));
