@@ -18,6 +18,23 @@ A mod of Redungeon (by Nitrome / Eneminds) that brings the old 2016 game back to
 3. Install the downloaded `.apk` file and launch the game.
 
 
+## How to back up old data?
+
+### No Root Method
+1. Enable Developer Options in your phone settings (this process varies based on what device you have, you'll have to look it up on the internet)
+2. Go to Developer Options > Enable USB Debugging
+3. Connect ur phone to computer, when you see message like "Allow this device to use USB debugging" tick "Always allow " and tap "Yes".
+4. Open terminal. Using `adb devices` check if device is detected by computer.
+5. Create `.ab` backup of the game using `adb backup -f redungeon_save.ab -noapk com.nitrome.redungeon`
+6. To restore backup use `adb restore redungeon_save.ab`
+
+### Root Method
+1. You can use [AppManager](https://github.com/MuntashirAkon/AppManager). Provide root access.
+2. Go to: AppManager > `3 dots icon` > Settings > Backup/restore
+3. Enable `Back up apps with Android Keystore`
+4. Return back to main menu in App Manager and find Redungeon > `3 dots icon` > Backup/Restore  
+
+
 ---
 
 ## Troubleshooting & Bug Reporting
