@@ -20,79 +20,80 @@ public class DailyPrepareState : State
         Back
     }
 
-    // ---- jst pasting DUMP over these, then setting EditorEnabled to false ----
-    private const bool EditorEnabled = true;
-    private const float PanelDY = 0f;
+    // ---- layout baked from on-device UiLayoutEditor dump (2026-09-10) ----
+    // to re-tune: set EditorEnabled = true, hold top-left corner and dump
+    private const bool EditorEnabled = false;
+    private const float PanelDY = -25f;
     private const float PanelScale = 1.1f;
     private const float CountdownX = 0f;
-    private const float CountdownY = 54f;
+    private const float CountdownY = 62f;
+    private const float CountdownScale = 0.65f;
+    private const float CountdownAlign = 0f;
+    private const float CountdownColor = 16732240f;
     private const float TitleX = 0f;
-    private const float TitleY = 68f;
-    private const float IconX = 2f;
-    private const float IconY = 85f;
-    private const float NameX = 0f;
-    private const float NameY = 102f;
+    private const float TitleY = 51f;
+    private const float TitleScale = 1f;
+    private const float TitleAlign = 0f;
+    private const float TitleColor = 16732240f;
+    private const float IconX = 1f;
+    private const float IconY = 95f;
+    private const float IconScaleX = 1f;
+    private const float IconScaleY = 1f;
+    private const float NameX = 1f;
+    private const float NameY = 77f;
+    private const float NameScale = 0.8f;
+    private const float NameAlign = 0f;
+    private const float NameColor = 16732240f;
     private const float CodeX = -1f;
     private const float CodeY = 114f;
+    private const float CodeScale = 0.7f;
+    private const float CodeAlign = 0f;
+    private const float CodeColor = 6910328f;
     private const float ModsLabelX = -1f;
-    private const float ModsLabelY = 128f;
-    private const float ModsX = -1f;
-    private const float ModsY = 139f;
+    private const float ModsLabelY = 127f;
+    private const float ModsLabelScale = 0.7f;
+    private const float ModsLabelAlign = 0f;
+    private const float ModsLabelColor = 7536463f;
+    private const float ModsX = -2f;
+    private const float ModsY = 137f;
+    private const float ModsScale = 0.7f;
+    private const float ModsAlign = 0f;
+    private const float ModsColor = 5215487f;
     private const float ModsPitch = 13f;
     private const float CounterX = -40f;
-    private const float CounterY = 199f;
+    private const float CounterY = 193f;
+    private const float CounterScale = 0.75f;
+    private const float CounterAlign = 0f;
+    private const float CounterColor = 6910328f;
     private const float TodayX = -36f;
-    private const float TodayY = 212f;
-    private const float HeartX = -1f;
-    private const float HeartY = 214f;
-    private const float StatsX = 10f;
-    private const float StatsY = 225f;
+    private const float TodayY = 204f;
+    private const float TodayScale = 0.75f;
+    private const float TodayAlign = 0f;
+    private const float TodayColor = 6910328f;
+    private const float HeartX = -3f;
+    private const float HeartY = 206f;
+    private const float HeartScaleX = 1f;
+    private const float HeartScaleY = 1f;
+    private const float StatsX = 13f;
+    private const float StatsY = 217f;
     private const float StatsW = 10f;
     private const float StatsH = 20f;
     private const float GhostX = 119f;
-    private const float GhostY = 189f;
-    private const float GhostTextX = -4f;
-    private const float GhostTextY = -16f;
-    private const float CountdownScale = 0.7f;
-    private const float TitleScale = 1f;
-    private const float NameScale = 0.8f;
-    private const float CodeScale = 0.8f;
-    private const float ModsLabelScale = 0.7f;
-    private const float ModsScale = 0.7f;
-    private const float CounterScale = 0.75f;
-    private const float TodayScale = 0.75f;
-    private const float GhostScale = 1f;
-    private const float GhostTextScale = 0.5f;
-    private const float IconScaleX = 1f;
-    private const float IconScaleY = 1f;
-    private const float HeartScaleX = 1f;
-    private const float HeartScaleY = 1f;
-    private const float CountdownAlign = 0f;
-    private const float TitleAlign = 0f;
-    private const float NameAlign = 0f;
-    private const float CodeAlign = 0f;
-    private const float ModsLabelAlign = 0f;
-    private const float ModsAlign = 0f;
-    private const float CounterAlign = 0f;
-    private const float TodayAlign = 0f;
-    private const float CountdownColor = 9462096f;
-    private const float TitleColor = 9462096f;
-    private const float NameColor = 16732240f;
-    private const float CodeColor = 6910328f;
-    private const float ModsLabelColor = 9462096f;
-    private const float ModsColor = 16732240f;
-    private const float CounterColor = 15967806f;
-    private const float TodayColor = 6910328f;
-    private const float StartBtnX = 2f;
-    private const float StartBtnY = 5f;
-    private const float StartBtnW = 104f;
-    private const float StartBtnH = 26f;
-    private const float ShareBtnX = 4f;
-    private const float ShareBtnY = 44f;
-    private const float ShareBtnW = 92f;
-    private const float ShareBtnH = 18f;
-    private const float BackBtnX = 4f;
-    private const float BackBtnY = 63f;
+    private const float GhostY = 180f;
+    private const float GhostScale = 0.9f;
+    private const float GhostTextX = 0f;
+    private const float GhostTextY = 15f;
+    private const float GhostTextScale = 0.55f;
+    private const float StartBtnX = 29f;
+    private const float StartBtnY = 2f;
+    private const float StartBtnW = 72f;
+    private const float StartBtnH = 30f;
+    private const float ShareBtnX = -37f;
+    private const float ShareBtnY = 1f;
+    private const float ShareBtnW = 56f;
+    private const float ShareBtnH = 34f;
+    private const float BackBtnX = -1f;
+    private const float BackBtnY = 34f;
     private const float BackBtnW = 70f;
     private const float BackBtnH = 30f;
 
@@ -418,14 +419,14 @@ public class DailyPrepareState : State
         modsAlign = edMods.Align;
         counterAlign = edCounter.Align;
         todayAlign = edToday.Align;
-        countdownColor = edCountdown.ColorRgb;
-        titleColor = edTitle.ColorRgb;
-        nameColor = edName.ColorRgb;
-        codeColor = edCode.ColorRgb;
-        modsLabelColor = edModsLabel.ColorRgb;
-        modsColor = edMods.ColorRgb;
-        counterColor = edCounter.ColorRgb;
-        todayColor = edToday.ColorRgb;
+        countdownColor = SanitizeRgb(edCountdown.ColorRgb, "Countdown");
+        titleColor = SanitizeRgb(edTitle.ColorRgb, "Title");
+        nameColor = SanitizeRgb(edName.ColorRgb, "Name");
+        codeColor = SanitizeRgb(edCode.ColorRgb, "Code");
+        modsLabelColor = SanitizeRgb(edModsLabel.ColorRgb, "ModsLabel");
+        modsColor = SanitizeRgb(edMods.ColorRgb, "Mods");
+        counterColor = SanitizeRgb(edCounter.ColorRgb, "Counter");
+        todayColor = SanitizeRgb(edToday.ColorRgb, "Today");
         startBtnX = edStart.X;
         startBtnY = edStart.Y;
         startBtnW = edStart.W;
@@ -527,6 +528,17 @@ public class DailyPrepareState : State
             Font = Font.Thin,
             Scale = scale * panelScale
         };
+    }
+
+    private static float SanitizeRgb(float rgb, string who)
+    {
+        int v = (int)rgb;
+        if (v < 0 || v > 16777215)
+        {
+            Console.WriteLine("[LAYOUT] " + who + " color out of range: " + v + " - clamped to white");
+            v = 16777215;
+        }
+        return v;
     }
 
     private Color Col(float rgb)
