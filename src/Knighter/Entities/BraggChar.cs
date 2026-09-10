@@ -30,6 +30,8 @@ public class BraggChar : PlayerEntity
     private int progress;
     private int shotsNoKill;
     private bool jammed;
+    private bool jamPending;
+    private int jamGen;
 	private bool shooting => shotAnim >= 0;
 
 	public int Keys { get; private set; }
@@ -107,7 +109,7 @@ public class BraggChar : PlayerEntity
 	{
 		if (!base.Falling)
 		{
-			if (base.core.OptionsData.BraggAmmo && base.core.OptionsData.BraggJam && jammed)
+			if (base.core.OptionsData.BraggJam && jammed)
             {
                 SendMessage(new SpawnEntityMessage(new FloatingTextEntity(base.CenterCoordinates, "JAMMED", default(Color).FromRgb(16732240), 1.5f), CurrentPlatform));
                 SendMessage(new PlayWorldSoundMessage(SoundName.knight_step_2, base.WorldCenter));
@@ -154,15 +156,24 @@ public class BraggChar : PlayerEntity
             if (base.core.OptionsData.BraggAmmo)
             {
                 ammo--;
-                if (base.core.OptionsData.BraggJam)
+            }
+            if (base.core.OptionsData.BraggJam)
+            {
+                shotsNoKill++;
+                if (shotsNoKill >= 2 && !jammed && !jamPending)
                 {
-                    shotsNoKill++;
-                    if (shotsNoKill >= 2 && !jammed)
+                    jamPending = true;
+                    int gen = ++jamGen;
+                    base.core.TimerManager.RunOnce(60, delegate
                     {
-                        jammed = true;
-                        base.playState.Hud.ShowAlert("gun-jammed", "GUN JAMMED - OPEN A CHEST", default(Color).FromRgb(16732240), 150, SpriteName.bragg_gun);
-                        SendMessage(new PlayWorldSoundMessage(SoundName.web_1, base.WorldCenter));
-                    }
+                        if (gen == jamGen && !jammed && !Dead)
+                        {
+                            jammed = true;
+                            base.playState.Hud.ShowAlert("gun-jammed", "GUN JAMMED - OPEN A CHEST", default(Color).FromRgb(16732240), 150, SpriteName.bragg_gun);
+                            SendMessage(new PlayWorldSoundMessage(SoundName.web_1, base.WorldCenter));
+                        }
+                        jamPending = false;
+                    });
                 }
             }
             base.TryTriggerAbility();
@@ -189,7 +200,7 @@ public class BraggChar : PlayerEntity
                 shotAnim = -1;
             }
         }
-		if (base.core.OptionsData.BraggAmmo && base.core.OptionsData.BraggJam && jammed && !Dead && base.worldTicks % 40 == 0)
+		if (base.core.OptionsData.BraggJam && jammed && !Dead && base.worldTicks % 40 == 0)
         {
             base.core.ParticleManager.AddEmitter(inWorld: true, base.WorldCenter.Shift(0f, -16f), 2f).OnSpawn(delegate(Particle p)
             {
@@ -313,7 +324,7 @@ public class BraggChar : PlayerEntity
         }
         else
         {
-            Abilities.SkillCharge[Skill.Gunshot] = Component._m((float)base.playState.Session.CollectedCoins / (float)shotCost, 1f);
+            Abilities.SkillCharge[Skill.Gunshot] = ((base.core.OptionsData.BraggJam && jammed) ? 0f : Component._m((float)base.playState.Session.CollectedCoins / (float)shotCost, 1f));
         }
         if (Abilities.SkillCharge[Skill.Gunshot].IsEqualTo(1f) && num < 1f)
         {
@@ -337,6 +348,8 @@ public class BraggChar : PlayerEntity
         if (base.core.OptionsData.BraggJam)
         {
             shotsNoKill = 0;
+            jamGen++;
+            jamPending = false;
             jammed = false;
         }
     }
@@ -351,6 +364,8 @@ public class BraggChar : PlayerEntity
         if (base.core.OptionsData.BraggJam)
         {
             shotsNoKill = 0;
+            jamGen++;
+            jamPending = false;
             jammed = false;
         }
         AddProgress(PointsPerChest);

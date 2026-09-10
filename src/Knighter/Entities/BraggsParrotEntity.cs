@@ -1,3 +1,4 @@
+using System;
 using Knighter.Graphics;
 using Knighter.Helpers;
 using Knighter.Messages;
@@ -114,6 +115,10 @@ public class BraggsParrotEntity : Entity
 		else
 		{
 			ticksEscaping++;
+			if (ticksEscaping == 90)
+            {
+                Console.WriteLine("[FEATHER] window opens, trail=" + base.core.OptionsData.BraggFeathers);
+            }
             if (base.core.OptionsData.BraggFeathers && player != null && !player.Dead && ticksEscaping >= 90 && ticksEscaping <= 240 && ticksEscaping >= featherGap)
 			{
 				// Always advance the gap timer so failure to find a tile doesn't stall execution
@@ -123,8 +128,13 @@ public class BraggsParrotEntity : Entity
 				if (TryFindLandingY(out landingY))
 				{
 					float away = ((x < player.WorldCoordinates.X) ? (-1f) : 1f);
+					Console.WriteLine("[FEATHER] spawn x=" + x + " y=" + y + " land=" + landingY);
 					SendMessage(new SpawnEntityMessage(new FeatherEntity(x, y, away * (float)Component._rnd(1, 3) * 0.01f, landingY), null));
 				}
+				else
+                {
+                    Console.WriteLine("[FEATHER] landing search failed at esc=" + ticksEscaping);
+                }
 			}
             if (ticksEscaping == 600)
             {
