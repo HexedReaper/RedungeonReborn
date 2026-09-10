@@ -20,10 +20,10 @@ public class DailyPrepareState : State
         Back
     }
 
-    // ---- layout tuned on device via UiLayoutEditor; paste DUMP over these, then set EditorEnabled = false ----
+    // ---- jst pasting DUMP over these, then setting EditorEnabled to false ----
     private const bool EditorEnabled = true;
     private const float PanelDY = 0f;
-    private const float PanelScale = 1.1f;   // whole-assembly scale; 1.19 max fits narrowest screens
+    private const float PanelScale = 1.1f;
     private const float CountdownX = 0f;
     private const float CountdownY = 54f;
     private const float TitleX = 0f;
@@ -39,6 +39,18 @@ public class DailyPrepareState : State
     private const float ModsX = -1f;
     private const float ModsY = 139f;
     private const float ModsPitch = 13f;
+    private const float CounterX = -40f;
+    private const float CounterY = 199f;
+    private const float TodayX = -36f;
+    private const float TodayY = 212f;
+    private const float HeartX = -1f;
+    private const float HeartY = 214f;
+    private const float StatsX = 10f;
+    private const float StatsY = 225f;
+    private const float StatsW = 10f;
+    private const float StatsH = 20f;
+    private const float GhostX = 119f;
+    private const float GhostY = 189f;
     private const float CountdownScale = 0.7f;
     private const float TitleScale = 1f;
     private const float NameScale = 0.8f;
@@ -47,9 +59,12 @@ public class DailyPrepareState : State
     private const float ModsScale = 0.7f;
     private const float CounterScale = 0.75f;
     private const float TodayScale = 0.75f;
-    private const float GhostScale = 0.5f;
-    private const float IconScale = 1f;
-    private const float HeartScale = 1f;
+    private const float GhostScale = 1f;
+    private const float GhostTextScale = 0.5f;
+    private const float IconScaleX = 1f;
+    private const float IconScaleY = 1f;
+    private const float HeartScaleX = 1f;
+    private const float HeartScaleY = 1f;
     private const float CountdownAlign = 0f;
     private const float TitleAlign = 0f;
     private const float NameAlign = 0f;
@@ -66,20 +81,8 @@ public class DailyPrepareState : State
     private const float ModsColor = 16732240f;
     private const float CounterColor = 9462096f;
     private const float TodayColor = 6910328f;
-    private const float CounterX = -40f;
-    private const float CounterY = 199f;
-    private const float TodayX = -36f;
-    private const float TodayY = 212f;
-    private const float HeartX = -1f;      // rel panel center
-    private const float HeartY = 214f;
-    private const float StatsX = 10f;   // left text inset from panel left
-    private const float StatsY = 225f;  // stats row Y
-    private const float StatsW = 10f;   // right text inset from panel right
-    private const float StatsH = 20f;   // stats text size (20 = 0.7 scale)
-    private const float GhostX = 119f;     // rel panel left
-    private const float GhostY = 189f;
     private const float StartBtnX = 2f;
-    private const float StartBtnY = 5f;    // below panel bottom
+    private const float StartBtnY = 5f;
     private const float StartBtnW = 104f;
     private const float StartBtnH = 26f;
     private const float ShareBtnX = 4f;
@@ -131,6 +134,18 @@ public class DailyPrepareState : State
     private float modsX = ModsX;
     private float modsY = ModsY;
     private float modsPitch = ModsPitch;
+    private float counterX = CounterX;
+    private float counterY = CounterY;
+    private float todayX = TodayX;
+    private float todayY = TodayY;
+    private float heartX = HeartX;
+    private float heartY = HeartY;
+    private float statsX = StatsX;
+    private float statsY = StatsY;
+    private float statsW = StatsW;
+    private float statsH = StatsH;
+    private float ghostX = GhostX;
+    private float ghostY = GhostY;
     private float countdownScale = CountdownScale;
     private float titleScale = TitleScale;
     private float nameScale = NameScale;
@@ -140,8 +155,11 @@ public class DailyPrepareState : State
     private float counterScale = CounterScale;
     private float todayScale = TodayScale;
     private float ghostScale = GhostScale;
-    private float iconScale = IconScale;
-    private float heartScale = HeartScale;
+    private float ghostTextScale = GhostTextScale;
+    private float iconScaleX = IconScaleX;
+    private float iconScaleY = IconScaleY;
+    private float heartScaleX = HeartScaleX;
+    private float heartScaleY = HeartScaleY;
     private float countdownAlign = CountdownAlign;
     private float titleAlign = TitleAlign;
     private float nameAlign = NameAlign;
@@ -158,18 +176,6 @@ public class DailyPrepareState : State
     private float modsColor = ModsColor;
     private float counterColor = CounterColor;
     private float todayColor = TodayColor;
-    private float counterX = CounterX;
-    private float counterY = CounterY;
-    private float todayX = TodayX;
-    private float todayY = TodayY;
-    private float heartX = HeartX;
-    private float heartY = HeartY;
-    private float statsX = StatsX;
-    private float statsY = StatsY;
-    private float statsW = StatsW;
-    private float statsH = StatsH;
-    private float ghostX = GhostX;
-    private float ghostY = GhostY;
     private float startBtnX = StartBtnX;
     private float startBtnY = StartBtnY;
     private float startBtnW = StartBtnW;
@@ -214,6 +220,8 @@ public class DailyPrepareState : State
     private UiLayoutEditor.Item edStats;
 
     private UiLayoutEditor.Item edGhost;
+
+    private UiLayoutEditor.Item edGhostText;
 
     private UiLayoutEditor.Item edStart;
 
@@ -274,43 +282,76 @@ public class DailyPrepareState : State
         edPanelDY = edLayout.Add("PanelDY", 0f, panelDY, () => new Vector2(menuRect.Center.X, menuRect.Top + 6f), null, false, true);
         edCountdown = edLayout.Add("Countdown", countdownX, countdownY, () => new Vector2(menuRect.Center.X + S(countdownX), menuRect.Top + S(countdownY)));
         edCountdown.HasScale = true;
+        edCountdown.TextScale = countdownScale;
         edCountdown.HasAlign = true;
         edCountdown.Align = countdownAlign;
         edCountdown.HasColor = true;
         edCountdown.ColorRgb = countdownColor;
-        edCountdown.TextScale = countdownScale;
         edTitle = edLayout.Add("Title", titleX, titleY, () => new Vector2(menuRect.Center.X + S(titleX), menuRect.Top + S(titleY)));
         edTitle.HasScale = true;
         edTitle.TextScale = titleScale;
+        edTitle.HasAlign = true;
+        edTitle.Align = titleAlign;
+        edTitle.HasColor = true;
+        edTitle.ColorRgb = titleColor;
         edIcon = edLayout.Add("Icon", iconX, iconY, () => new Vector2(menuRect.Center.X + S(iconX), menuRect.Top + S(iconY)));
-        edIcon.HasScale = true;
-        edIcon.TextScale = iconScale;
+        edIcon.HasScaleXY = true;
+        edIcon.ScaleX = iconScaleX;
+        edIcon.ScaleY = iconScaleY;
         edName = edLayout.Add("Name", nameX, nameY, () => new Vector2(menuRect.Center.X + S(nameX), menuRect.Top + S(nameY)));
         edName.HasScale = true;
         edName.TextScale = nameScale;
+        edName.HasAlign = true;
+        edName.Align = nameAlign;
+        edName.HasColor = true;
+        edName.ColorRgb = nameColor;
         edCode = edLayout.Add("Code", codeX, codeY, () => new Vector2(menuRect.Center.X + S(codeX), menuRect.Top + S(codeY)));
         edCode.HasScale = true;
         edCode.TextScale = codeScale;
+        edCode.HasAlign = true;
+        edCode.Align = codeAlign;
+        edCode.HasColor = true;
+        edCode.ColorRgb = codeColor;
         edModsLabel = edLayout.Add("ModsLabel", modsLabelX, modsLabelY, () => new Vector2(menuRect.Center.X + S(modsLabelX), menuRect.Top + S(modsLabelY)));
         edModsLabel.HasScale = true;
         edModsLabel.TextScale = modsLabelScale;
+        edModsLabel.HasAlign = true;
+        edModsLabel.Align = modsLabelAlign;
+        edModsLabel.HasColor = true;
+        edModsLabel.ColorRgb = modsLabelColor;
         edMods = edLayout.Add("Mods", modsX, modsY, () => new Vector2(menuRect.Center.X + S(modsX), menuRect.Top + S(modsY)));
         edMods.HasScale = true;
         edMods.TextScale = modsScale;
+        edMods.HasAlign = true;
+        edMods.Align = modsAlign;
+        edMods.HasColor = true;
+        edMods.ColorRgb = modsColor;
         edModsPitch = edLayout.Add("ModsPitch", 0f, modsPitch, () => new Vector2(menuRect.Center.X, menuRect.Top + S(modsY + modsPitch)), null, false, true);
         edCounter = edLayout.Add("Counter", counterX, counterY, () => new Vector2(menuRect.Center.X + S(counterX), menuRect.Top + S(counterY)));
         edCounter.HasScale = true;
         edCounter.TextScale = counterScale;
+        edCounter.HasAlign = true;
+        edCounter.Align = counterAlign;
+        edCounter.HasColor = true;
+        edCounter.ColorRgb = counterColor;
         edToday = edLayout.Add("Today", todayX, todayY, () => new Vector2(menuRect.Center.X + S(todayX), menuRect.Top + S(todayY)));
         edToday.HasScale = true;
         edToday.TextScale = todayScale;
+        edToday.HasAlign = true;
+        edToday.Align = todayAlign;
+        edToday.HasColor = true;
+        edToday.ColorRgb = todayColor;
         edHeart = edLayout.Add("Heart", heartX, heartY, () => new Vector2(menuRect.Center.X + S(heartX), menuRect.Top + S(heartY)));
-        edHeart.HasScale = true;
-        edHeart.TextScale = heartScale;
+        edHeart.HasScaleXY = true;
+        edHeart.ScaleX = heartScaleX;
+        edHeart.ScaleY = heartScaleY;
         edStats = edLayout.Add("Stats", statsX, statsY, () => new Vector2(menuRect.Left + S(statsX), menuRect.Top + S(statsY)), null, false, false, false, true, statsW, statsH);
         edGhost = edLayout.Add("Ghost", ghostX, ghostY, () => new Vector2(menuRect.Left + S(ghostX), menuRect.Top + S(ghostY)));
         edGhost.HasScale = true;
         edGhost.TextScale = ghostScale;
+        edGhostText = edLayout.Add("GhostText", 0f, ghostTextScale, () => new Vector2(menuRect.Left + S(ghostX), menuRect.Top + S(ghostY + 16f)));
+        edGhostText.HasScale = true;
+        edGhostText.TextScale = ghostTextScale;
         edStart = edLayout.Add("StartBtn", startBtnX, startBtnY, () => touchMenu[Button.Start].Rectangle.Center, null, false, false, false, true, startBtnW, startBtnH);
         edShare = edLayout.Add("ShareBtn", shareBtnX, shareBtnY, () => touchMenu[Button.Share].Rectangle.Center, null, false, false, false, true, shareBtnW, shareBtnH);
         edBack = edLayout.Add("BackBtn", backBtnX, backBtnY, () => touchMenu[Button.Back].Rectangle.Center, null, false, false, false, true, backBtnW, backBtnH);
@@ -358,8 +399,11 @@ public class DailyPrepareState : State
         counterScale = edCounter.TextScale;
         todayScale = edToday.TextScale;
         ghostScale = edGhost.TextScale;
-        iconScale = edIcon.TextScale;
-        heartScale = edHeart.TextScale;
+        ghostTextScale = edGhostText.TextScale;
+        iconScaleX = edIcon.ScaleX;
+        iconScaleY = edIcon.ScaleY;
+        heartScaleX = edHeart.ScaleX;
+        heartScaleY = edHeart.ScaleY;
         countdownAlign = edCountdown.Align;
         titleAlign = edTitle.Align;
         nameAlign = edName.Align;
@@ -451,11 +495,6 @@ public class DailyPrepareState : State
         };
     }
 
-    private Color Col(float rgb)
-    {
-        return default(Color).FromRgb((int)rgb);
-    }
-
     private TextProfile LeftProfile(float scale)
     {
         return new TextProfile
@@ -482,6 +521,11 @@ public class DailyPrepareState : State
             Font = Font.Thin,
             Scale = scale * panelScale
         };
+    }
+
+    private Color Col(float rgb)
+    {
+        return default(Color).FromRgb((int)rgb);
     }
 
     private Vector2 SwingPoint(Vector2 p, float swingSin, float swingCos)
@@ -518,12 +562,14 @@ public class DailyPrepareState : State
         int totalMinutes = (int)(secondsLeft / 60.0);
         int hoursLeft = totalMinutes / 60;
         int minsLeft = totalMinutes % 60;
-        string countdown = "resets in " + ((hoursLeft > 0) ? (hoursLeft + "h " + minsLeft.ToString("00") + "m") : (minsLeft + "m"));
-        base.core.Renderer["fg", 9000, false].DrawTextS(countdown, new Vector2(cx + S(countdownX), topT + S(countdownY)), MakeProfile(countdownScale, countdownAlign).Alter(Col(countdownColor)));
+        bool urgent = totalMinutes < 60;
+        Color countdownTint = (urgent ? default(Color).FromRgb(16732240) * (0.7f + 0.3f * Component._sin((float)base.ticks * 0.2f)) : Col(countdownColor));
+        string countdown = "resets in " + ((hoursLeft > 0) ? (hoursLeft + "h " + minsLeft.ToString("00") + "m") : (minsLeft + "m")) + (urgent ? "!" : "");
+        base.core.Renderer["fg", 9000, false].DrawTextS(countdown, new Vector2(cx + S(countdownX), topT + S(countdownY)), MakeProfile(countdownScale, countdownAlign).Alter(countdownTint));
         base.core.Renderer["fg", 9000, false].DrawTextS("DAILY RUN", new Vector2(cx + S(titleX), topT + S(titleY)), MakeProfile(titleScale, titleAlign, bold: true).Alter(Col(titleColor)));
         bool iconDown = touchMenu[Button.IconTap].IsDown;
         Sprite iconSprite = (base.core.OptionsData.DailyIconAnimated ? charAnim.GetCurrentFrame() : _(desc.Icon));
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(iconSprite, new Vector2(cx + S(iconX), topT + S(iconY)), null, Vector2.One * (iconDown ? 1.08f : 1f) * panelScale * iconScale, 0f, SpriteFlip.None, SpriteOrigin.Center);
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(iconSprite, new Vector2(cx + S(iconX), topT + S(iconY)), null, new Vector2(panelScale * iconScaleX, panelScale * iconScaleY) * (iconDown ? 1.08f : 1f), 0f, SpriteFlip.None, SpriteOrigin.Center);
         base.core.Renderer["fg", 9000, false].DrawTextS(__(desc.Name), new Vector2(cx + S(nameX), topT + S(nameY)), MakeProfile(nameScale, nameAlign).Alter(Col(nameColor)));
         bool haveResult = base.core.ProfileData.DailyLastDistance > 0;
         bool showingResult = showResult && haveResult;
@@ -545,7 +591,7 @@ public class DailyPrepareState : State
         base.core.Renderer["fg", 9000, false].DrawTextS("attempts: " + DailyRun.AttemptsToday, new Vector2(cx + S(counterX), topT + S(counterY)), MakeProfile(counterScale, counterAlign).Alter(Col(counterColor)));
         string todayText = (heartLit ? "played today!" : "not played yet");
         base.core.Renderer["fg", 9000, false].DrawTextS(todayText, new Vector2(cx + S(todayX), topT + S(todayY)), MakeProfile(todayScale, todayAlign).Alter(Col(todayColor)));
-        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(cx + S(heartX), topT + S(heartY)), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), Vector2.One * heartPulse * panelScale * heartScale, 0f, SpriteFlip.None, SpriteOrigin.Center);
+        base.core.Renderer["fg", 9000, false].DrawSpriteS(_(SpriteName.bat_heart), new Vector2(cx + S(heartX), topT + S(heartY)), (heartLit ? Color.White : default(Color).FromRgb(6910328)) * (heartLit ? 1f : 0.7f), new Vector2(panelScale * heartScaleX * heartPulse, panelScale * heartScaleY * heartPulse), 0f, SpriteFlip.None, SpriteOrigin.Center);
         string streakDate = base.core.ProfileData.DailyStreakDate;
         int streakShown = ((streakDate == DailyRun.TodayKey() || streakDate == DailyRun.TodayKeyMinus(1)) ? base.core.ProfileData.DailyStreak : 0);
         float statsScale = statsH * 0.035f;
@@ -560,8 +606,8 @@ public class DailyPrepareState : State
             float bob = Component._sin((float)base.ticks * 0.05f) * 2f;
             float gx = menuRect.Left + S(ghostX);
             base.core.Renderer["fg", 9000, false].DrawSpriteS(_(CharDescription.Get[(Character)base.core.ProfileData.DailyBestCharacter].SkullSprite), new Vector2(gx, topT + S(ghostY) + bob), Color.White * 0.45f, Vector2.One * 0.7f * panelScale * ghostScale, 0f, SpriteFlip.None, SpriteOrigin.Center);
-            base.core.Renderer["fg", 9000, false].DrawTextS("yesterday", new Vector2(gx, topT + S(ghostY) + S(16f) + bob), MakeProfile(ghostScale, 0f).Alter(default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS(base.core.ProfileData.DailyBestDistance + "m", new Vector2(gx, topT + S(ghostY) + S(26f) + bob), MakeProfile(ghostScale, 0f).Alter(TextProfile.OrangeMiddle));
+            base.core.Renderer["fg", 9000, false].DrawTextS("yesterday", new Vector2(gx, topT + S(ghostY) + S(16f) + bob), MakeProfile(ghostTextScale, 0f).Alter(default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS(base.core.ProfileData.DailyBestDistance + "m", new Vector2(gx, topT + S(ghostY) + S(26f) + bob), MakeProfile(ghostTextScale, 0f).Alter(TextProfile.OrangeMiddle));
         }
         touchMenu.Draw();
         if (EditorEnabled)

@@ -28,10 +28,13 @@ public class UiLayoutEditor : Component
         public bool Locked;
         public bool HasScale;
         public float TextScale = 1f;
+        public bool HasScaleXY;
+        public float ScaleX = 1f;
+        public float ScaleY = 1f;
         // align (0=center, 1=left, 2=right)
         public bool HasAlign;
         public float Align;
-        // color (packed rgb int, stored as float so the existing dump machinery prints it) live per-item like scale does
+        // color (packed rgb int stored as float so it is printed)
         public bool HasColor;
         public float ColorRgb;
     }
@@ -166,20 +169,20 @@ public class UiLayoutEditor : Component
     {
         if (i == 18)
         {
-            return new RectangleF(4f, 181f, 60f, 24f);
+            return new RectangleF(1f, 179f, 40f, 18f);
         }
         if (i == 19)
         {
-            return new RectangleF(base.core.Renderer.ScreenWidth - 64f, 181f, 60f, 24f);
+            return new RectangleF(base.core.Renderer.ScreenWidth - 41f, 179f, 40f, 18f);
         }
         if (i == 20)
         {
-            return new RectangleF(base.core.Renderer.ScreenWidth - 64f, 209f, 60f, 24f);
+            return new RectangleF(base.core.Renderer.ScreenWidth - 41f, 201f, 40f, 18f);
         }
         int col = i / 9;
         int row = i % 9;
-        float x = ((col == 0) ? 4f : (base.core.Renderer.ScreenWidth - 32f));
-        return new RectangleF(x, 6f + (float)row * 19f, 28f, 16f);
+        float x = ((col == 0) ? 1f : (base.core.Renderer.ScreenWidth - 25f));
+        return new RectangleF(x, 6f + (float)row * 19f, 24f, 16f);
     }
 
     private int SlotAt(Vector2 p)
@@ -437,6 +440,17 @@ public class UiLayoutEditor : Component
                 it.H = Math.Max(8f, it.H + amount * 20f);
             }
         }
+        else if (it.HasScaleXY)
+        {
+            if (width)
+            {
+                it.ScaleX = Math.Max(0.3f, Math.Min(2f, it.ScaleX + amount * 0.5f));
+            }
+            else
+            {
+                it.ScaleY = Math.Max(0.3f, Math.Min(2f, it.ScaleY + amount * 0.5f));
+            }
+        }
         else if (it.HasScale)
         {
             it.TextScale = Math.Max(0.3f, Math.Min(2f, it.TextScale + amount * 0.5f));
@@ -543,9 +557,10 @@ public class UiLayoutEditor : Component
                 sb.Append("private const float ").Append(it.Name).Append("W = ").Append(Fmt(it.W)).Append('\n');
                 sb.Append("private const float ").Append(it.Name).Append("H = ").Append(Fmt(it.H)).Append('\n');
             }
-            if (it.HasScale)
+            if (it.HasScaleXY)
             {
-                sb.Append("private const float ").Append(it.Name).Append("Scale = ").Append(FmtScale(it.TextScale)).Append('\n');
+                sb.Append("private const float ").Append(it.Name).Append("ScaleX = ").Append(FmtScale(it.ScaleX)).Append('\n');
+                sb.Append("private const float ").Append(it.Name).Append("ScaleY = ").Append(FmtScale(it.ScaleY)).Append('\n');
             }
             if (it.HasAlign)
             {
@@ -574,13 +589,13 @@ public class UiLayoutEditor : Component
     {
         return new TextProfile
         {
-            Width = 27,
+            Width = 24,
             Height = 15,
             BoxAlignment = Alignment2D.Middle,
             TextAlignment = Alignment2D.Middle,
             Decoration = TextDecoration.None,
             Font = Font.Thin,
-            Scale = 0.45f
+            Scale = 0.4f
         };
     }
 
