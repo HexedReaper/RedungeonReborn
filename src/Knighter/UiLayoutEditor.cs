@@ -28,6 +28,12 @@ public class UiLayoutEditor : Component
         public bool Locked;
         public bool HasScale;
         public float TextScale = 1f;
+        // align (0=center, 1=left, 2=right)
+        public bool HasAlign;
+        public float Align;
+        // color (packed rgb int, stored as float so the existing dump machinery prints it) live per-item like scale does
+        public bool HasColor;
+        public float ColorRgb;
     }
 
     private const int Depth = 10500;
@@ -40,8 +46,7 @@ public class UiLayoutEditor : Component
 
     private readonly List<Item> items = new List<Item>();
 
-    private static readonly string[] slots = { "Y+1", "Y-1", "Y+5", "Y-5", "X+1", "X-1", "W+.1", "W-.1", "H+.1", "H-.1", "sel+", "sel-", "LOCK", "DESEL", "DUMP", "EXIT" };
-
+    private static readonly string[] slots = { "Y+1", "Y-1", "Y+5", "Y-5", "X+1", "X-1", "X+5", "X-5", "LOCK", "W+.1", "W-.1", "H+.1", "H-.1", "ALIGN", "COL", "HUE", "sel+", "sel-", "DESEL", "DUMP", "EXIT" };
     // host sets this so drag deltas convert screen px -> panel-space px (1/panelScale)
     public float DragScale = 1f;
 
@@ -159,9 +164,22 @@ public class UiLayoutEditor : Component
 
     private RectangleF SlotRect(int i)
     {
-        int col = i / 8;
-        int row = i % 8;
-        return new RectangleF(base.core.Renderer.ScreenWidth - 58f + (float)col * 30f, 6f + (float)row * 18f, 27f, 15f);
+        if (i == 18)
+        {
+            return new RectangleF(4f, 181f, 60f, 24f);
+        }
+        if (i == 19)
+        {
+            return new RectangleF(base.core.Renderer.ScreenWidth - 64f, 181f, 60f, 24f);
+        }
+        if (i == 20)
+        {
+            return new RectangleF(base.core.Renderer.ScreenWidth - 64f, 209f, 60f, 24f);
+        }
+        int col = i / 9;
+        int row = i % 9;
+        float x = ((col == 0) ? 4f : (base.core.Renderer.ScreenWidth - 32f));
+        return new RectangleF(x, 6f + (float)row * 19f, 28f, 16f);
     }
 
     private int SlotAt(Vector2 p)
@@ -310,38 +328,69 @@ public class UiLayoutEditor : Component
             Nudge(-1f, 0f);
             break;
         case 6:
-            Adjust(true, 0.1f);
+            Nudge(5f, 0f);
             break;
         case 7:
-            Adjust(true, -0.1f);
+            Nudge(-5f, 0f);
             break;
         case 8:
-            Adjust(false, 0.1f);
-            break;
-        case 9:
-            Adjust(false, -0.1f);
-            break;
-        case 10:
-            CycleSel(1);
-            break;
-        case 11:
-            CycleSel(-1);
-            break;
-        case 12:
             if (Sel >= 0)
             {
                 items[Sel].Locked = !items[Sel].Locked;
                 SendMessage(new PlaySoundMessage(items[Sel].Locked ? SoundName.knight_step_2 : SoundName.unlock_lock));
             }
             break;
+        case 9:
+            Adjust(true, 0.1f);
+            break;
+        case 10:
+            Adjust(true, -0.1f);
+            break;
+        case 11:
+            Adjust(false, 0.1f);
+            break;
+        case 12:
+            Adjust(false, -0.1f);
+            break;
         case 13:
+            if (Sel >= 0 && items[Sel].HasAlign)
+            {
+                items[Sel].Align = (items[Sel].Align + 1f) % 3f;
+                SendMessage(new PlaySoundMessage(SoundName.paper_touch));
+            }
+            break;
+        case 14:
+            if (Sel >= 0 && items[Sel].HasColor)
+            {
+                int idx = Array.IndexOf(Palette, (int)items[Sel].ColorRgb);
+                items[Sel].ColorRgb = Palette[(idx + 1) % Palette.Length];
+                SendMessage(new PlaySoundMessage(SoundName.coin));
+            }
+            break;
+        case 15:
+            if (Sel >= 0 && items[Sel].HasColor)
+            {
+                Color c = Col(items[Sel].ColorRgb);
+                RgbToHsv(c.R / 255f, c.G / 255f, c.B / 255f, out float h, out float s, out float v);
+                Color rotated = HsvToColor(h + 36f, s, v);
+                items[Sel].ColorRgb = (rotated.R << 16) | (rotated.G << 8) | rotated.B;
+                SendMessage(new PlaySoundMessage(SoundName.coin));
+            }
+            break;
+        case 16:
+            CycleSel(1);
+            break;
+        case 17:
+            CycleSel(-1);
+            break;
+        case 18:
             Sel = -1;
             SendMessage(new PlaySoundMessage(SoundName.paper_touch));
             break;
-        case 14:
+        case 19:
             Dump();
             break;
-        case 15:
+        case 20:
             SetEdit(false);
             break;
         }
@@ -403,6 +452,68 @@ public class UiLayoutEditor : Component
         return Math.Max(ScaleMin, Math.Min(ScaleMax, v));
     }
 
+
+    private static readonly int[] Palette = { 16777215, 16732240, 15967806, 11216961, 14040624, 5481258, 5463138, 9810914, 5199247, 4076369, 6910328, 9462096 };
+
+    private Color Col(float rgb)
+    {
+        return default(Color).FromRgb((int)rgb);
+    }
+
+    private static void RgbToHsv(float r, float g, float b, out float h, out float s, out float v)
+    {
+        float max = Math.Max(r, Math.Max(g, b));
+        float min = Math.Min(r, Math.Min(g, b));
+        v = max;
+        float d = max - min;
+        s = ((max <= 0f) ? 0f : (d / max));
+        if (d <= 0f)
+        {
+            h = 0f;
+            return;
+        }
+        if (max == r)
+        {
+            h = (g - b) / d % 6f;
+        }
+        else if (max == g)
+        {
+            h = (b - r) / d + 2f;
+        }
+        else
+        {
+            h = (r - g) / d + 4f;
+        }
+        h *= 60f;
+        if (h < 0f)
+        {
+            h += 360f;
+        }
+    }
+
+    private static Color HsvToColor(float h, float s, float v)
+    {
+        h = ((h % 360f + 360f) % 360f) / 60f;
+        int i = (int)h;
+        float f = h - (float)i;
+        float p = v * (1f - s);
+        float q = v * (1f - s * f);
+        float t = v * (1f - s * (1f - f));
+        float r = 0f;
+        float g = 0f;
+        float b = 0f;
+        switch (i % 6)
+        {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        default: r = v; g = p; b = q; break;
+        }
+        return new Color(r, g, b);
+    }
+
     private void Dump()
     {
         StringBuilder sb = new StringBuilder();
@@ -435,6 +546,14 @@ public class UiLayoutEditor : Component
             if (it.HasScale)
             {
                 sb.Append("private const float ").Append(it.Name).Append("Scale = ").Append(FmtScale(it.TextScale)).Append('\n');
+            }
+            if (it.HasAlign)
+            {
+                sb.Append("private const float ").Append(it.Name).Append("Align = ").Append(FmtScale(it.Align)).Append('\n');
+            }
+            if (it.HasColor)
+            {
+                sb.Append("private const float ").Append(it.Name).Append("Color = ").Append(FmtScale(it.ColorRgb)).Append('\n');
             }
         }
         Console.WriteLine(sb.ToString());
@@ -483,11 +602,11 @@ public class UiLayoutEditor : Component
     {
         Sprite btn = _(SpriteName.button);
         float sw = base.core.Renderer.ScreenWidth * 0.5f;
-        Vector2 fit = new Vector2(25f / (float)btn.Width, 13f / (float)btn.Height);
         for (int i = 0; i < slots.Length; i++)
         {
             RectangleF r = SlotRect(i);
             bool down = downSlot == i;
+            Vector2 fit = new Vector2((r.Width - 2f) / (float)btn.Width, (r.Height - 2f) / (float)btn.Height);
             base.core.Renderer["fg", Depth, false].DrawSpriteS(btn, new Vector2(r.Left + 1f, r.Top + 1f), (down ? default(Color).FromRgb(11216961) : Color.White) * 0.9f, fit);
             base.core.Renderer["fg", Depth, false].DrawTextS(slots[i], new Vector2(r.Center.X, r.Center.Y), SlotProfile().Alter(down ? TextProfile.OrangeMiddle : default(Color).FromRgb(16777215)));
         }
@@ -512,6 +631,14 @@ public class UiLayoutEditor : Component
             if (it.HasScale)
             {
                 info += " text=" + FmtScale(it.TextScale);
+            }
+            if (it.HasAlign)
+            {
+                info += " align=" + ((it.Align < 0.5f) ? "C" : ((it.Align < 1.5f) ? "L" : "R"));
+            }
+            if (it.HasColor)
+            {
+                info += " rgb=" + (int)it.ColorRgb;
             }
         }
         base.core.Renderer["fg", Depth, false].DrawTextS(info, new Vector2(sw, 26f), HeadProfile(0.55f).Alter(default(Color).FromRgb(11216961)));
