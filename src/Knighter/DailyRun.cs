@@ -59,6 +59,11 @@ public static class DailyRun
         return DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
+    public static string TodayKeyMinus(int days)
+    {
+        return DateTime.UtcNow.AddDays(-days).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
     public static int TodaysSeed()
     {
         string key = "redungeon-daily-" + TodayKey();
@@ -150,7 +155,12 @@ public static class DailyRun
         {
             return "vanilla";
         }
-        return string.Join(" · ", list);
+        string text = "";
+        for (int i = 0; i < list.Count; i++)
+        {
+            text = ((i > 0) ? (text + " · ") : text) + list[i];
+        }
+        return text;
     }
 
     public static int Next(int channel, int index, int from, int to)

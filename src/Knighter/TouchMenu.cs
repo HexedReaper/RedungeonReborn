@@ -495,11 +495,11 @@ public class TouchMenu<T> : Component where T : struct, IConvertible
 				}
 				else
 				{
-					float y = value2.Rectangle.Top + (value2.Rectangle.Height - (float)value2.Sprite.Height) / 2f;
-					Sprite sprite3 = (value2.Disabled ? value2.StretchDisabledSprite : (flag ? value2.StretchPressedSprite : value2.StretchSprite));
-					base.core.Renderer[layer, depth, false].DrawSpriteS(sprite2, new Vector2(value2.Rectangle.Left, y) + vector, value2.ButtonTint);
-					base.core.Renderer[layer, depth, false].DrawSpriteS(sprite3, new Vector2(value2.Rectangle.Left + (float)sprite2.Width, y) + vector, value2.ButtonTint, new Vector2(value2.Rectangle.Width - (float)(sprite2.Width * 2) + 1f, 1f));
-					base.core.Renderer[layer, depth, false].DrawSpriteS(sprite2, new Vector2(value2.Rectangle.Right - (float)sprite2.Width, y) + vector, value2.ButtonTint, null, 0f, SpriteFlip.Horizontal);
+					float hScale = value2.Rectangle.Height / (float)value2.Sprite.Height;
+                    Sprite sprite3 = (value2.Disabled ? value2.StretchDisabledSprite : (flag ? value2.StretchPressedSprite : value2.StretchSprite));
+                    base.core.Renderer[layer, depth, false].DrawSpriteS(sprite2, new Vector2(value2.Rectangle.Left, value2.Rectangle.Top) + vector, value2.ButtonTint, new Vector2(1f, hScale));
+                    base.core.Renderer[layer, depth, false].DrawSpriteS(sprite3, new Vector2(value2.Rectangle.Left + (float)sprite2.Width, value2.Rectangle.Top) + vector, value2.ButtonTint, new Vector2(value2.Rectangle.Width - (float)(sprite2.Width * 2) + 1f, hScale));
+                    base.core.Renderer[layer, depth, false].DrawSpriteS(sprite2, new Vector2(value2.Rectangle.Right - (float)sprite2.Width, value2.Rectangle.Top) + vector, value2.ButtonTint, new Vector2(1f, hScale), 0f, SpriteFlip.Horizontal);
 				}
 			}
 			if (value2.Label != "")

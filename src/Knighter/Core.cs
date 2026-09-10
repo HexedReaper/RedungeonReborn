@@ -568,6 +568,7 @@ public sealed class Core : Component
                 }
                 ProfileData.DailyTotalPlayed++;
                 DailyRun.CountAttempt();
+				ProfileData.RegisterDailyPlay();
                 ProfileData.SaveIntoStorage();
                 DailyRun.End();
             }
