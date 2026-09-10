@@ -22,7 +22,7 @@ public class DailyPrepareState : State
 
     // ---- layout baked from on-device UiLayoutEditor dump (2026-09-10) ----
     // to re-tune: set EditorEnabled = true, hold top-left corner and dump
-    private const bool EditorEnabled = false;
+    private static readonly bool EditorEnabled = false;
     private const float PanelDY = -25f;
     private const float PanelScale = 1.1f;
     private const float CountdownX = 0f;
