@@ -51,6 +51,8 @@ public class DailyPrepareState : State
     private const float StatsH = 20f;
     private const float GhostX = 119f;
     private const float GhostY = 189f;
+    private const float GhostTextX = -4f;
+    private const float GhostTextY = -16f;
     private const float CountdownScale = 0.7f;
     private const float TitleScale = 1f;
     private const float NameScale = 0.8f;
@@ -79,7 +81,7 @@ public class DailyPrepareState : State
     private const float CodeColor = 6910328f;
     private const float ModsLabelColor = 9462096f;
     private const float ModsColor = 16732240f;
-    private const float CounterColor = 9462096f;
+    private const float CounterColor = 15967806f;
     private const float TodayColor = 6910328f;
     private const float StartBtnX = 2f;
     private const float StartBtnY = 5f;
@@ -156,6 +158,8 @@ public class DailyPrepareState : State
     private float todayScale = TodayScale;
     private float ghostScale = GhostScale;
     private float ghostTextScale = GhostTextScale;
+    private float ghostTextX = GhostTextX;
+    private float ghostTextY = GhostTextY;
     private float iconScaleX = IconScaleX;
     private float iconScaleY = IconScaleY;
     private float heartScaleX = HeartScaleX;
@@ -349,7 +353,7 @@ public class DailyPrepareState : State
         edGhost = edLayout.Add("Ghost", ghostX, ghostY, () => new Vector2(menuRect.Left + S(ghostX), menuRect.Top + S(ghostY)));
         edGhost.HasScale = true;
         edGhost.TextScale = ghostScale;
-        edGhostText = edLayout.Add("GhostText", 0f, ghostTextScale, () => new Vector2(menuRect.Left + S(ghostX), menuRect.Top + S(ghostY + 16f)));
+        edGhostText = edLayout.Add("GhostText", ghostTextX, ghostTextY, () => new Vector2(menuRect.Left + S(ghostX + ghostTextX), menuRect.Top + S(ghostY + ghostTextY)));
         edGhostText.HasScale = true;
         edGhostText.TextScale = ghostTextScale;
         edStart = edLayout.Add("StartBtn", startBtnX, startBtnY, () => touchMenu[Button.Start].Rectangle.Center, null, false, false, false, true, startBtnW, startBtnH);
@@ -400,6 +404,8 @@ public class DailyPrepareState : State
         todayScale = edToday.TextScale;
         ghostScale = edGhost.TextScale;
         ghostTextScale = edGhostText.TextScale;
+        ghostTextX = edGhostText.X;
+        ghostTextY = edGhostText.Y;
         iconScaleX = edIcon.ScaleX;
         iconScaleY = edIcon.ScaleY;
         heartScaleX = edHeart.ScaleX;
@@ -606,8 +612,8 @@ public class DailyPrepareState : State
             float bob = Component._sin((float)base.ticks * 0.05f) * 2f;
             float gx = menuRect.Left + S(ghostX);
             base.core.Renderer["fg", 9000, false].DrawSpriteS(_(CharDescription.Get[(Character)base.core.ProfileData.DailyBestCharacter].SkullSprite), new Vector2(gx, topT + S(ghostY) + bob), Color.White * 0.45f, Vector2.One * 0.7f * panelScale * ghostScale, 0f, SpriteFlip.None, SpriteOrigin.Center);
-            base.core.Renderer["fg", 9000, false].DrawTextS("yesterday", new Vector2(gx, topT + S(ghostY) + S(16f) + bob), MakeProfile(ghostTextScale, 0f).Alter(default(Color).FromRgb(6910328)));
-            base.core.Renderer["fg", 9000, false].DrawTextS(base.core.ProfileData.DailyBestDistance + "m", new Vector2(gx, topT + S(ghostY) + S(26f) + bob), MakeProfile(ghostTextScale, 0f).Alter(TextProfile.OrangeMiddle));
+            base.core.Renderer["fg", 9000, false].DrawTextS("yesterday", new Vector2(gx + S(ghostTextX), topT + S(ghostY + ghostTextY) + bob), MakeProfile(ghostTextScale, 0f).Alter(default(Color).FromRgb(6910328)));
+            base.core.Renderer["fg", 9000, false].DrawTextS(base.core.ProfileData.DailyBestDistance + "m", new Vector2(gx + S(ghostTextX), topT + S(ghostY + ghostTextY + 10f) + bob), MakeProfile(ghostTextScale, 0f).Alter(TextProfile.OrangeMiddle));
         }
         touchMenu.Draw();
         if (EditorEnabled)

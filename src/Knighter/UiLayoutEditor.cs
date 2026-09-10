@@ -525,7 +525,10 @@ public class UiLayoutEditor : Component
         case 4: r = t; g = p; b = v; break;
         default: r = v; g = p; b = q; break;
         }
-        return new Color(r, g, b);
+        int ri = Math.Max(0, Math.Min(255, (int)(r * 255f)));
+        int gi = Math.Max(0, Math.Min(255, (int)(g * 255f)));
+        int bi = Math.Max(0, Math.Min(255, (int)(b * 255f)));
+        return default(Color).FromRgb((ri << 16) | (gi << 8) | bi);
     }
 
     private void Dump()
@@ -556,6 +559,10 @@ public class UiLayoutEditor : Component
             {
                 sb.Append("private const float ").Append(it.Name).Append("W = ").Append(Fmt(it.W)).Append('\n');
                 sb.Append("private const float ").Append(it.Name).Append("H = ").Append(Fmt(it.H)).Append('\n');
+            }
+            if (it.HasScale)
+            {
+                sb.Append("private const float ").Append(it.Name).Append("Scale = ").Append(FmtScale(it.TextScale)).Append('\n');
             }
             if (it.HasScaleXY)
             {
