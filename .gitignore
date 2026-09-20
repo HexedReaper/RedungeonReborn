@@ -11,3 +11,6 @@ release/
 .vscode/
 
 *.apk
+# Copied assets and reference assemblies
+src/Assets/
+src/Libs/
