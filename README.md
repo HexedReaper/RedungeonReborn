@@ -3,7 +3,7 @@
 # Redungeon Reborn
 
 ![Android](https://img.shields.io/badge/Platform-Android_arm64-3DDC84?style=flat-square&logo=android&logoColor=white)
-![Build](https://img.shields.io/badge/Build-v1.0.0-informational?style=flat-square)
+![Build](https://img.shields.io/badge/Build-v1.0.3-informational?style=flat-square)
 ![License](https://img.shields.io/badge/License-Non--Commercial-lightgrey?style=flat-square)
 ![Monero](https://img.shields.io/badge/Donate-Monero-FF6600?style=flat-square&logo=monero&logoColor=white)
 
